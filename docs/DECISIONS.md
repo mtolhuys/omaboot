@@ -578,12 +578,23 @@ every privileged command is a child of that one engine process, so one
 prompt covers the whole run. The password never touches a file, an argument
 or the environment.
 
-**Installation is two links, not a copy.** `omaboot plugin install` links
-`plugin/` into `~/.config/omarchy/plugins/mtolhuys.omaboot` and the two
-binaries into `~/.local/bin`, then asks the shell to rescan and enable. A
-link means the shell's hot reload picks up QML edits, which is how the
-plugin is developed; a packaged install can put the directory under
-`/usr/share/omaboot/plugin` and the binary finds it there.
+**Installation is three links, not a copy.** `omaboot plugin install` links
+`plugin/` into `~/.config/omarchy/plugins/mtolhuys.omaboot` and both
+binaries, `omaboot` and `omaboot-apply`, into `~/.local/bin`, then asks the
+shell to rescan and enable. A link means the shell's hot reload picks up
+QML edits and a rebuild is live at once, which is how the plugin is
+developed; a packaged install can put the directory under
+`/usr/share/omaboot/plugin` and the binary finds it there. The helper is
+linked like the engine: `sudo` runs it by its path either way, and a copy
+in `~/.local/bin` is no better protected than a link into the checkout,
+so a copy would buy nothing and go stale at the next build. What
+`install` does with a copy it finds there is the one nuance: a copy that
+is byte for byte the built binary is kept, because replacing it changes
+nothing that runs and the message `kept ... (identical copy)` says what
+was seen; a copy that differs is removed and replaced by the link. The
+test round of 19 September 2026 read that message as a deliberate copy of
+the helper; it was a copy left by an earlier install, and the README now
+says which it is.
 
 **`omaboot` waits for the window, because a summon can be dropped.**
 `omarchy-shell shell summon` answers "ok" the moment the shell has noted

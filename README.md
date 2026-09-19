@@ -17,14 +17,18 @@ applied to real hardware yet.
 cargo build --release
 target/release/omaboot plugin install   # links the plugin into omarchy-shell and the binaries into ~/.local/bin
 omaboot                                 # opens the window
-cargo test                              # 249 tests, no root, no system calls
+cargo test --workspace                  # no root, no system calls, with or without OMARCHY_PATH set
 ```
 
-`omaboot plugin install` makes two links and two IPC calls: the repository's
+`omaboot plugin install` makes three links and two IPC calls: the repository's
 `plugin/` directory becomes `~/.config/omarchy/plugins/mtolhuys.omaboot`, the
-two binaries become `~/.local/bin/omaboot` and `~/.local/bin/omaboot-apply`,
-then the shell rescans and enables the plugin. Editing the QML is picked up by
-the shell's hot reload. `omaboot plugin uninstall` undoes it.
+two binaries are linked as `~/.local/bin/omaboot` and
+`~/.local/bin/omaboot-apply`, then the shell rescans and enables the plugin.
+Editing the QML is picked up by the shell's hot reload, and a rebuilt binary
+is live at once. A copy of a binary already sitting in `~/.local/bin` is
+kept when it is byte for byte the built one (`kept ... (identical copy)`)
+and replaced by the link when it is not, since a copy goes stale at the
+next build. `omaboot plugin uninstall` undoes it.
 
 ## The window
 
