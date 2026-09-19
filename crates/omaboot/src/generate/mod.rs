@@ -132,8 +132,8 @@ pub struct AssetSource {
 }
 
 impl AssetSource {
-    /// Resolve `$OMARCHY_PATH`, honouring the layout prefix so a test can
-    /// point at a fixture tree.
+    /// The packaged tree for this run: `<prefix>/usr/share/omarchy` under
+    /// `--root`, otherwise `$OMARCHY_PATH` (see `omarchy::omarchy_path`).
     pub fn discover(layout: &crate::paths::Layout) -> Self {
         Self::at(crate::omarchy::omarchy_path(layout))
     }
@@ -179,7 +179,12 @@ impl AssetSource {
                 packaged_dir.display()
             ),
             format!(
-                "add {name} to the theme, or set OMARCHY_PATH to an Omarchy tree that has default/plymouth"
+                "add {name} to the theme, or put an Omarchy tree with default/plymouth at {} (OMARCHY_PATH names it; under --root it is <prefix>/usr/share/omarchy)",
+                packaged_dir
+                    .parent()
+                    .and_then(|p| p.parent())
+                    .unwrap_or(packaged_dir)
+                    .display()
             ),
         ))
     }

@@ -20,12 +20,27 @@ pub const COLORS: &str = "colors.toml";
 /// The image `omarchy-plymouth-set-by-theme` installs as the boot logo.
 pub const UNLOCK: &str = "unlock.png";
 
-/// Resolve `$OMARCHY_PATH`, honouring the layout prefix so a test can point at
-/// a fixture tree.
+/// Where the Omarchy tree is for this run.
+///
+/// Under a `--root` prefix the tree is `<prefix>/usr/share/omarchy`, whatever
+/// the environment says: a sandboxed run reads nothing outside its prefix, and
+/// a test is then hermetic in a login shell that sets `OMARCHY_PATH` (Omarchy
+/// sets it for every session, and `omarchy dev link` points it at a checkout).
+/// Without a prefix, `$OMARCHY_PATH` wins over the packaged location, the way
+/// every Omarchy script reads it.
 pub fn omarchy_path(layout: &Layout) -> PathBuf {
-    match std::env::var_os("OMARCHY_PATH") {
+    omarchy_path_from(layout, std::env::var_os("OMARCHY_PATH"))
+}
+
+/// `omarchy_path` with the environment passed in, so the rule can be tested
+/// without touching the process environment.
+fn omarchy_path_from(layout: &Layout, env: Option<std::ffi::OsString>) -> PathBuf {
+    if layout.is_prefixed() {
+        return layout.system(DEFAULT_OMARCHY_PATH);
+    }
+    match env {
         Some(value) if !value.is_empty() => PathBuf::from(value),
-        _ => layout.system(DEFAULT_OMARCHY_PATH),
+        _ => PathBuf::from(DEFAULT_OMARCHY_PATH),
     }
 }
 
@@ -57,6 +72,9 @@ impl Palette {
 pub struct OmarchyThemes {
     user: PathBuf,
     packaged: PathBuf,
+    /// How the packaged location was chosen, for the sentence that says no
+    /// theme was found there.
+    prefixed: bool,
 }
 
 impl OmarchyThemes {
@@ -64,6 +82,7 @@ impl OmarchyThemes {
         Self {
             user: layout.config_base().join("omarchy/themes"),
             packaged: omarchy_path(layout).join("themes"),
+            prefixed: layout.is_prefixed(),
         }
     }
 
@@ -83,9 +102,14 @@ impl OmarchyThemes {
             what: format!("there is no Omarchy theme called {name}"),
             suggestion: if known.is_empty() {
                 format!(
-                    "no themes were found in {} or {}; set OMARCHY_PATH if the tree is elsewhere",
+                    "no themes were found in {} or {}; {}",
                     self.user.display(),
-                    self.packaged.display()
+                    self.packaged.display(),
+                    if self.prefixed {
+                        "under --root the Omarchy tree is read at <prefix>/usr/share/omarchy, so put or link one there"
+                    } else {
+                        "set OMARCHY_PATH if the tree is elsewhere"
+                    }
                 )
             } else {
                 format!("the themes on this system are: {}", known.join(", "))
@@ -233,6 +257,36 @@ foreground = "#cdd6f4"
 red = "#f38ba8"
 bright_magenta = "#f5c2e7"
 "##;
+
+    #[test]
+    fn a_prefix_wins_over_omarchy_path_in_the_environment() {
+        let (tmp, layout) = world();
+        let elsewhere = std::ffi::OsString::from("/somewhere/else/omarchy");
+        assert_eq!(
+            omarchy_path_from(&layout, Some(elsewhere)),
+            tmp.path().join("root/usr/share/omarchy"),
+            "a sandboxed run reads nothing outside its prefix"
+        );
+    }
+
+    #[test]
+    fn without_a_prefix_the_environment_wins_over_the_packaged_tree() {
+        let layout = Layout::with_dirs(None, PathBuf::from("/c"), PathBuf::from("/s"));
+        let elsewhere = std::ffi::OsString::from("/somewhere/else/omarchy");
+        assert_eq!(
+            omarchy_path_from(&layout, Some(elsewhere)),
+            PathBuf::from("/somewhere/else/omarchy")
+        );
+        assert_eq!(
+            omarchy_path_from(&layout, Some(std::ffi::OsString::new())),
+            PathBuf::from(DEFAULT_OMARCHY_PATH),
+            "an empty variable means unset"
+        );
+        assert_eq!(
+            omarchy_path_from(&layout, None),
+            PathBuf::from(DEFAULT_OMARCHY_PATH)
+        );
+    }
 
     #[test]
     fn the_palette_comes_from_the_named_keys() {

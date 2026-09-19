@@ -27,6 +27,8 @@ for tool in sddm-greeter-qt6 limine-mkinitcpio plymouth-set-default-theme; do
   printf '#!/bin/sh\nexit 0\n' > "$PREFIX/usr/bin/$tool"; chmod +x "$PREFIX/usr/bin/$tool"
 done
 printf '[Daemon]\nTheme=omarchy\n' > "$PREFIX/etc/plymouth/plymouthd.conf"
+# Under --root the engine reads the Omarchy tree at <prefix>/usr/share/omarchy.
+mkdir -p "$PREFIX/usr/share"; ln -sfn "${OMARCHY_PATH:?}" "$PREFIX/usr/share/omarchy"
 
 echo "== generating $THEME into $PREFIX"
 "$OMABOOT" apply "$THEME" --root "$PREFIX" > /dev/null

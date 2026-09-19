@@ -403,6 +403,14 @@ def build_world(work, omarchy, theme, engine_binary):
         current.unlink()
         current.symlink_to(shadow)
 
+    # The Omarchy tree itself. Under --root the engine reads it at
+    # <prefix>/usr/share/omarchy and never at $OMARCHY_PATH, so the tree the
+    # harness was given is linked in there.
+    tree = prefix / "usr/share/omarchy"
+    if tree.is_symlink() or tree.exists():
+        tree.unlink()
+    tree.symlink_to(omarchy)
+
     # The stock system: Omarchy's Plymouth and SDDM themes, as installed.
     stock_plymouth = prefix / "usr/share/plymouth/themes/omarchy"
     if not stock_plymouth.exists():

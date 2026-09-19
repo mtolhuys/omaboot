@@ -117,7 +117,9 @@ omaboot prefs key=value                          # window preferences in ~/.conf
 ```
 
 With `--root <prefix>` everything lands inside that prefix and no system
-command runs; the header says `sandbox <prefix>` while it does. That is the
+command runs; the header says `sandbox <prefix>` while it does. The Omarchy
+tree is read from `<prefix>/usr/share/omarchy` too, whatever `OMARCHY_PATH`
+says, so a sandboxed run reads nothing outside its prefix. That is the
 way to try `apply` without touching the machine. `preview` does not run
 against a prefix, it only prints what it would do.
 

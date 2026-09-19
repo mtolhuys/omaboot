@@ -53,6 +53,17 @@ the state directory keep following `HOME` and the XDG variables. A test points
 hermetic. Prefixing the user directories as well would have produced paths like
 `<prefix>/home/you/.config`, which reads like a bug in the output.
 
+**Under a prefix the Omarchy tree is `<prefix>/usr/share/omarchy`, and
+`OMARCHY_PATH` is not consulted.** Omarchy exports `OMARCHY_PATH` in every
+login session and `omarchy dev link` points it at a checkout, so the first
+version, which let the variable win, read the host's themes and logo inside
+what was meant to be a sandbox: twelve tests failed in an ordinary Omarchy
+shell and passed in `env -u OMARCHY_PATH`. A sandboxed run now reads nothing
+outside its prefix, and `cargo test --workspace` passes with the variable set
+or unset (`omarchy::tests::a_prefix_wins_over_omarchy_path_in_the_environment`).
+Without a prefix the variable still wins over `/usr/share/omarchy`, the way
+every Omarchy script reads it.
+
 **A prefixed run never executes a real system command.** `omaboot` swaps in a
 runner that reports success without spawning anything, so
 `plymouth-set-default-theme` and `mkinitcpio` cannot run against a prefix by
