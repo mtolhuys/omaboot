@@ -200,7 +200,8 @@ widgets, tokens, font and engine are the real ones; only Hyprland's rounding
 and gaps are missing. `plugin/harness/shots.sh <dir>` renders the set a
 design pass looks at (wide and narrow, system and theme, the three screens,
 the dry run, the dialogs), and `plugin/harness/exercise.sh` drives the
-editing flows through the window (a burst of edits, a per-screen logo width, an
+editing flows through the window (a burst of edits, a per-screen logo width,
+the file dialog's directory before and after a pick, an
 image drop, a wallpaper, a rename, a new theme, a delete, a dry run) and
 checks what landed in `theme.toml`; it ends by taking the engine away
 (`render.py --no-engine`) and checking that the window shows the

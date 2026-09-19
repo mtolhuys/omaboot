@@ -283,16 +283,22 @@ Item {
   // zenity falls back to the home directory.
   property string chooserDir: (Quickshell.env("HOME") || "") + "/Pictures/"
 
-  function chooseImage(role) {
-    if (chooser.running) return
-    chooser.role = role
-    chooser.chosen = ""
-    chooser.command = ["zenity", "--file-selection",
+  // The argv of the dialog for one role, on its own so the harness can read
+  // it without opening a dialog.
+  function chooserCommand(role) {
+    return ["zenity", "--file-selection",
       "--title=" + (role === "background" ? "Choose a wallpaper for the login screen"
         : (role === "shutdown-logo" ? "Choose the shutdown logo" : "Choose the logo")),
       "--filename=" + chooserDir,
       "--file-filter=Images | *.png *.PNG *.svg *.SVG *.jpg *.JPG *.jpeg *.JPEG *.webp *.WEBP",
       "--file-filter=All files | *"]
+  }
+
+  function chooseImage(role) {
+    if (chooser.running) return
+    chooser.role = role
+    chooser.chosen = ""
+    chooser.command = chooserCommand(role)
     chooser.running = true
     say("the file dialog is open in its own window")
   }

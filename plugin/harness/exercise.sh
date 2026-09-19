@@ -64,6 +64,16 @@ expect "$THEMES/matte/theme.toml" 'width = 0.3'
 expect "$THEMES/matte/theme.toml" 'width = 0.7'
 reject "$THEMES/matte/theme.toml" '[logo.login]'
 
+echo "== the file dialog opens in ~/Pictures first, then where the last image came from"
+render picker --size 1600x1000 --select matte \
+  --script 'var want = "--filename=" + Quickshell.env("HOME") + "/Pictures/"; say(chooserCommand("logo").indexOf(want) >= 0 ? "picker opens in " + want : "FAIL: the picker command lacks " + want + ": " + chooserCommand("logo").join(" "), false)' \
+  --expect-status "picker opens in --filename="
+render picker-after --size 1600x1000 --select matte \
+  --script "chooser.chosen = \"$LOGO\"; chooser.exited(0, 0)" \
+  --script "say(chooserCommand(\"background\").indexOf(\"--filename=$(dirname "$LOGO")/\") >= 0 ? \"picker now opens in $(dirname "$LOGO")/\" : \"FAIL: the picker did not follow the last image: \" + chooserCommand(\"background\").join(\" \"), false)" \
+  --expect-status "picker now opens in"
+expect "$THEMES/matte/theme.toml" 'source = "unlock.png"'
+
 echo "== a dropped logo is copied in and used"
 render drop --size 1600x1000 --select matte --script "dropFile(\"$LOGO\", \"logo\")"
 test -f "$THEMES/matte/unlock.png" || { echo "FAIL: unlock.png not copied"; exit 1; }
