@@ -37,7 +37,8 @@ can brick a machine is the wrong project.
 Omarchy moves fast. Before depending on any upstream behaviour, read the installed
 source at `$OMARCHY_PATH` (usually `/usr/share/omarchy`) and confirm. The facts in
 `docs/UPSTREAM.md` were true for `4.0.0.alpha` on the `quattro` branch on
-18 September 2026 and carry a date for that reason.
+18 September 2026, with additions verified on 19 September 2026, and carry
+a date for that reason.
 
 The same applies to external tools: detect `sddm-greeter` versus
 `sddm-greeter-qt6`, detect `limine-mkinitcpio` versus `mkinitcpio`, and check the
@@ -46,7 +47,9 @@ accepted values of `plymouthd --mode` at runtime instead of trusting a document.
 ## Testing
 
 - Pure logic (theme model, validation, generation, state machine) is unit tested
-  and requires no root and no system calls.
+  and requires no root and no system calls. `cargo test --workspace` must pass
+  with and without `OMARCHY_PATH` set: a `--root` prefix reads the Omarchy
+  tree at `<prefix>/usr/share/omarchy` and never at the variable.
 - The apply pipeline is tested against a temporary root prefix in CI.
 - Anything that can only be proven by booting is proven in the VM, with a
   screenshot committed to the test evidence directory.
@@ -54,10 +57,13 @@ accepted values of `plymouthd --mode` at runtime instead of trusting a document.
   not finished.
 - A change to the window is looked at before it is delivered:
   `plugin/harness/shots.sh <dir>` renders it offscreen with the real shell
-  widgets and engine (`docs/UI.md`, "Seeing it without a shell"), and
+  widgets and engine (`docs/UI.md`, "Seeing it without a shell"),
   `plugin/harness/exercise.sh` drives the editing flows and checks the
-  theme file. qmllint catches syntax; the harness catches layout and lost
-  edits.
+  theme file, and `plugin/harness/theme-follow.sh` proves the standalone
+  app follows a theme switch. qmllint catches syntax; the harness catches
+  layout and lost edits. The harness works in `.harness/` at the repository
+  root, never in `plugin/` (the shell watches that directory) and never in
+  the real `~/.config/omaboot` (exercise.sh checks it is untouched).
 
 ## Style
 
