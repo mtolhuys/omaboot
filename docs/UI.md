@@ -122,6 +122,13 @@ read back with `status`, so it survives the window closing.
   other Omarchy theme, then a hex field.
 - Escape closes the topmost overlay, then the window. Closing the window tells
   the shell (`shell.hide`), so `toggle` stays consistent.
+- Without the engine (nothing at `~/.local/bin/omaboot` and no `omaboot` on
+  `PATH`, which is what a fresh machine and the marketplace lab look like)
+  the window says so in the header, in the picture and in the footer, with
+  the two commands that install it, and starts no process at all. The
+  engine is looked for with one `test -x` per candidate before the first
+  call; spawning a binary that is not there would be a Quickshell warning in
+  the shell log, and a conformance run fails on any unexplained line.
 
 ## Preview: three fidelities
 
@@ -195,7 +202,9 @@ design pass looks at (wide and narrow, system and theme, the three screens,
 the dry run, the dialogs), and `plugin/harness/exercise.sh` drives the
 editing flows through the window (a burst of edits, a per-screen logo width, an
 image drop, a wallpaper, a rename, a new theme, a delete, a dry run) and
-checks what landed in `theme.toml`. `plugin/harness/theme-follow.sh` opens
+checks what landed in `theme.toml`; it ends by taking the engine away
+(`render.py --no-engine`) and checking that the window shows the
+not-installed state and spawns nothing. `plugin/harness/theme-follow.sh` opens
 the generated app (`omaboot app`) the same way, repoints the current-theme
 link under it and expects the window's colours to change. It needs PySide6, a Nerd Font that fontconfig gives
 for `monospace`, `target/release/omaboot` and `OMARCHY_PATH`. Everything

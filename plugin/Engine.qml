@@ -16,21 +16,39 @@ Item {
   id: root
 
   // Where the binary is. `omaboot plugin install` links it into
-  // ~/.local/bin; a packaged install is on PATH. `probe` picks between the
-  // two once, with `test -x`, before the first call.
+  // ~/.local/bin; a packaged install is on PATH. `probe` tries the link and
+  // then every PATH entry, one `test -x` at a time, before the first call.
+  // Nothing is ever spawned without having been found first: a Process for
+  // a binary that is not there makes Quickshell log a warning, and a
+  // marketplace conformance run fails on any unexplained log line.
   readonly property string home: Quickshell.env("HOME")
   readonly property string linked: home + "/.local/bin/omaboot"
-  property string binary: linked
+  readonly property var candidates: [linked].concat(
+    String(Quickshell.env("PATH") || "").split(":").filter(function(dir) { return dir.length > 0 })
+      .map(function(dir) { return dir + "/omaboot" }))
+  property string binary: ""
   property bool probed: false
+  // True once the probe has ended without finding the binary. Every call
+  // then fails at once with `missingMessage` and spawns nothing.
+  readonly property bool missing: probed && binary === ""
+  readonly property string missingMessage: "omaboot is not installed: nothing at " + linked
+    + " and no omaboot on PATH. Build it (cargo build --release) and run target/release/omaboot plugin install."
+  property int probing: 0
   property var queued: []
 
   signal ready()
 
   Process {
     id: probe
-    command: ["test", "-x", root.linked]
+    command: ["test", "-x", root.candidates[root.probing] || "/nonexistent"]
     onExited: (exitCode, exitStatus) => {
-      root.binary = exitCode === 0 ? root.linked : "omaboot"
+      if (exitCode === 0) {
+        root.binary = root.candidates[root.probing]
+      } else if (root.probing + 1 < root.candidates.length) {
+        root.probing += 1
+        probe.running = true
+        return
+      }
       root.probed = true
       var pending = root.queued
       root.queued = []
@@ -127,6 +145,17 @@ Item {
   function spawn(args, onLine, onDone, stdinText) {
     if (!probed) {
       queued.push([args, onLine, onDone, stdinText])
+      return null
+    }
+    if (missing) {
+      // Answer the way a failed call would, without a Process: the caller's
+      // onDone sees the sentence, and the window shows it.
+      var message = missingMessage
+      root.lastError = message
+      if (onDone) {
+        try { onDone(false, null, message, []) } catch (e) { console.warn("omaboot: onDone threw:", e) }
+      }
+      root.failed(message)
       return null
     }
     var command = [binary].concat(args).concat(["--json"])

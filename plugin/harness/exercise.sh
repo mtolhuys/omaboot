@@ -12,7 +12,12 @@ mkdir -p "$OUT"
 THEMES="$WORK/home/.config/omaboot/themes"
 LOGO=${OMARCHY_PATH:?}/themes/tokyo-night/unlock.png
 
-render() { python3 "$HERE/render.py" --work "$WORK" --out "$OUT/$1.png" "${@:2}" ${RENDER_ARGS:-} 2>&1 | grep -v "^qt: qml:" | grep -i "wrote\|error\|expected" || true; }
+render() {
+  local log code
+  log=$(python3 "$HERE/render.py" --work "$WORK" --out "$OUT/$1.png" "${@:2}" ${RENDER_ARGS:-} 2>&1); code=$?
+  echo "$log" | grep -v "^qt: qml:" | grep -i "wrote\|error\|expected\|warning" || true
+  return $code
+}
 expect() { grep -qF -- "$2" "$1" || { echo "FAIL: $1 lacks: $2"; sed -n 1,60p "$1"; exit 1; }; }
 reject() { grep -qF -- "$2" "$1" && { echo "FAIL: $1 has: $2"; sed -n 1,60p "$1"; exit 1; } || true; }
 
@@ -81,5 +86,8 @@ test ! -e "$THEMES/second" || { echo "FAIL: second not deleted"; exit 1; }
 
 echo "== a dry run reports every step"
 render dryrun --size 1600x1000 --select matte --script 'start("dryrun")' --settle 2 --expect-status ""
+
+echo "== without the engine the window says so and spawns nothing"
+render engine-missing --size 1100x760 --no-engine --timeout 3 --expect-status "omaboot is not installed"
 
 echo "all flows passed; pictures in $OUT"

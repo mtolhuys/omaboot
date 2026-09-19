@@ -272,6 +272,11 @@ Item {
   // The file dialog runs in its own process (zenity, which Omarchy ships).
   // A Qt dialog inside the shell process blocks and can take the whole shell
   // down with it, which is exactly what the first version did.
+  // The dialog opens in ~/Pictures the first time, then wherever the last
+  // image was picked from. A directory that does not exist is harmless:
+  // zenity falls back to the home directory.
+  property string chooserDir: (Quickshell.env("HOME") || "") + "/Pictures/"
+
   function chooseImage(role) {
     if (chooser.running) return
     chooser.role = role
@@ -279,6 +284,7 @@ Item {
     chooser.command = ["zenity", "--file-selection",
       "--title=" + (role === "background" ? "Choose a wallpaper for the login screen"
         : (role === "shutdown-logo" ? "Choose the shutdown logo" : "Choose the logo")),
+      "--filename=" + chooserDir,
       "--file-filter=Images | *.png *.PNG *.svg *.SVG *.jpg *.JPG *.jpeg *.JPEG *.webp *.WEBP",
       "--file-filter=All files | *"]
     chooser.running = true
@@ -294,7 +300,10 @@ Item {
       onRead: data => { var line = String(data).trim(); if (line) chooser.chosen = line }
     }
     onExited: (exitCode, exitStatus) => {
-      if (exitCode === 0 && chooser.chosen) root.dropFile(chooser.chosen, chooser.role)
+      if (exitCode === 0 && chooser.chosen) {
+        root.chooserDir = chooser.chosen.substring(0, chooser.chosen.lastIndexOf("/") + 1)
+        root.dropFile(chooser.chosen, chooser.role)
+      }
       else if (exitCode === 1 || exitCode === 5) root.say("")
       else root.say("no file dialog could be opened (zenity exited with " + exitCode + "); drop the image on the picture instead", true)
       chooser.chosen = ""
@@ -450,7 +459,7 @@ Item {
           }
           Text {
             Layout.fillWidth: true
-            text: root.info ? root.info.headline : "reading the system…"
+            text: root.info ? root.info.headline : (engine.missing ? "the omaboot engine is not installed" : "reading the system…")
             color: root.muted
             font.family: root.fontFamily
             font.pixelSize: Style.font.body
@@ -798,7 +807,8 @@ Item {
                   visible: !previewImage.visible || previewImage.status === Image.Error
                   text: previewImage.status === Image.Error
                     ? "the picture was drawn but could not be shown: " + previewImage.source
-                    : (previewFrame.current ? previewFrame.current.message : (root.info ? "drawing…" : ""))
+                    : (previewFrame.current ? previewFrame.current.message
+                      : (root.info ? "drawing…" : (engine.missing ? engine.missingMessage : "")))
                   color: previewFrame.current && previewFrame.current.message ? Color.foreground : root.muted
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.body

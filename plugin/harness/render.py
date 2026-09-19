@@ -152,6 +152,11 @@ class Process(QObject):
     # QML creates these; keep the Python side alive for as long as the
     # QObject is, or PySide drops the slot connections with the wrapper.
     instances = []
+    # Every engine command QProcess could not start. In a shell each of these
+    # is a Quickshell warning in the log, and a conformance run fails on it.
+    # The shell's own Commons ask hyprctl for its gaps and rounding, which is
+    # not the plugin's doing and is left out.
+    failed_to_start = []
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -265,6 +270,8 @@ class Process(QObject):
         if os.environ.get("HARNESS_TRACE"):
             print("error:", error, " ".join(self._command[:3]), file=sys.stderr)
         if error == QProcess.ProcessError.FailedToStart:
+            if self._command and self._command[0].rsplit("/", 1)[-1] == "omaboot":
+                Process.failed_to_start.append(" ".join(self._command))
             self._finished(127, QProcess.ExitStatus.CrashExit)
 
     def _finished(self, code, status):
@@ -487,6 +494,9 @@ def main():
     parser.add_argument("--script-pause", type=float, default=0, help="seconds to wait after each script")
     parser.add_argument("--timeout", type=float, default=30)
     parser.add_argument("--expect-status", default=None, help="fail unless the status line contains this")
+    parser.add_argument("--no-engine", action="store_true",
+                        help="take the engine away (no wrapper in the fake home, an empty PATH) and fail"
+                             " if the window tries to start a process that is not there")
     args = parser.parse_args()
 
     omarchy = Path(args.omarchy).expanduser().resolve() if args.omarchy else None
@@ -512,6 +522,12 @@ def main():
         "XDG_CONFIG_HOME": str(home / ".config"),
         "XDG_STATE_HOME": str(home / ".local/state"),
     }
+    if args.no_engine:
+        # The state a fresh machine, or the marketplace lab, shows the
+        # window in: nothing at ~/.local/bin/omaboot and nothing on PATH.
+        wrapper.unlink()
+        env["PATH"] = ":".join(d for d in os.environ.get("PATH", "").split(":")
+                               if d and not (Path(d) / "omaboot").exists())
     Process.env = env
 
     QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.Software)
@@ -613,9 +629,13 @@ def main():
         if "Quickshell" in w or "qs." in w:
             continue
         print("warning:", w, file=sys.stderr)
+    for command in Process.failed_to_start:
+        print("warning: the engine was spawned but is not there:", command, file=sys.stderr)
     if is_plugin:
         run("close()")
     qt_app.processEvents()
+    if args.no_engine and Process.failed_to_start:
+        sys.exit("the window spawned an engine that is not there; in a shell that is a logged warning")
 
 
 if __name__ == "__main__":
