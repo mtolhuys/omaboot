@@ -1,0 +1,31 @@
+[package]
+name = "omaboot"
+description = "Design and apply the Plymouth unlock, SDDM login and Plymouth shutdown screens on Omarchy"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "omaboot"
+path = "src/main.rs"
+
+[lib]
+name = "omaboot"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+image.workspace = true
+resvg.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
