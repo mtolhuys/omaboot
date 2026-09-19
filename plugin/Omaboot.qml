@@ -878,18 +878,42 @@ Item {
                 spacing: Style.spacing.sm
 
                 Text {
+                  id: caption
+                  // The one line under the picture says what fidelity this
+                  // is, then how to drop an image. When the buttons leave it
+                  // no room for both (the stacked layout, where the picture
+                  // is sized by the height), the hint goes first and the
+                  // fidelity stays; it is never cut mid-sentence.
                   Layout.fillWidth: true
-                  text: root.onSystem
+                  Layout.preferredWidth: 0
+                  readonly property string fidelity: root.onSystem
                     ? "composite of the installed files, not the real render"
+                    : "composite, not the real render"
+                  readonly property string hint: root.onSystem ? ""
                     : (root.screen === "login"
-                        ? "composite; drop a JPG or PNG here for the wallpaper"
+                        ? "drop a JPG or PNG here for the wallpaper"
                         : (root.screen === "shutdown"
-                            ? "composite; drop a PNG or SVG here for the shutdown logo"
-                            : "composite; drop a PNG or SVG here for the logo"))
+                            ? "drop a PNG or SVG here for the shutdown logo"
+                            : "drop a PNG or SVG here for the logo"))
+                  readonly property string full: hint ? "composite; " + hint : fidelity
+                  TextMetrics { id: captionMetrics; font: caption.font; text: caption.full }
+                  TextMetrics { id: fidelityMetrics; font: caption.font; text: caption.fidelity }
+                  text: captionMetrics.advanceWidth <= width ? full
+                    : (fidelityMetrics.advanceWidth <= width ? fidelity : "composite")
                   color: root.muted
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
                   elide: Text.ElideRight
+                  MouseArea {
+                    id: captionHover
+                    anchors.fill: parent
+                    hoverEnabled: caption.text !== caption.full
+                    acceptedButtons: Qt.NoButton
+                  }
+                  PanelToolTip {
+                    visible: caption.text !== caption.full && captionHover.containsMouse
+                    text: caption.hint ? caption.fidelity + "; " + caption.hint : caption.fidelity
+                  }
                 }
                 Button {
                   iconText: root.screen === "login" ? Icons.wallpaper : Icons.image

@@ -179,6 +179,13 @@ frequent (layout, reload, close, rename, delete, pick an image) are icon-only
 `PanelActionButton`s with a tooltip; actions that change the system keep
 their words next to the glyph, because a rocket alone does not say what it
 launches. Text under the picture is one line; the rest is in tooltips.
+That line says the fidelity first ("composite") and the drop hint after
+it; when the buttons leave no room for both, which the stacked layout does
+since the picture there is sized by the height, the hint goes first, then
+the rest of the sentence, and the whole of it is in the line's tooltip. It
+is never cut mid-sentence. A path in the facts keeps its start and its file
+name and loses its middle, with the full path in its tooltip; nothing
+there wraps mid-word.
 
 ## Anti-patterns, explicitly banned
 

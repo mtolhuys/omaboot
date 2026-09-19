@@ -69,12 +69,28 @@ GridLayout {
           border.color: Util.alpha(Color.foreground, 0.3)
         }
         Text {
+          id: value
           Layout.fillWidth: true
+          // A path keeps its shape: the start and the file name stay, the
+          // middle goes, and the whole of it is in the tooltip. Anything else
+          // wraps at word boundaries.
+          readonly property bool isPath: String(modelData.value).indexOf("/") === 0
           text: modelData.value
           color: Color.foreground
           font.family: root.fontFamily
           font.pixelSize: Style.font.body
-          wrapMode: Text.WrapAnywhere
+          wrapMode: isPath ? Text.NoWrap : Text.Wrap
+          elide: isPath ? Text.ElideMiddle : Text.ElideNone
+          MouseArea {
+            id: valueHover
+            anchors.fill: parent
+            hoverEnabled: value.isPath && value.truncated
+            acceptedButtons: Qt.NoButton
+          }
+          PanelToolTip {
+            visible: value.isPath && value.truncated && valueHover.containsMouse
+            text: modelData.value
+          }
         }
       }
     }
