@@ -181,13 +181,38 @@ fn themes(layout: &Layout, snapshot: &Snapshot) -> Vec<Value> {
         .collect()
 }
 
-/// The Omarchy theme the desktop is on, from the `current/theme` link.
+/// The Omarchy theme the desktop is on.
+///
+/// Omarchy has kept this in two shapes under `~/.local/state/omarchy/current`
+/// (`docs/UPSTREAM.md`): older releases linked `theme` at the theme's
+/// directory, and Omarchy 4 stages a copy, so `theme` is a real directory
+/// and the name is in `theme.name` beside it. The name is taken, in order,
+/// from `theme.name`, from the link target, and finally by matching the
+/// directory's `colors.toml` byte for byte against the themes on the system,
+/// which is the one thing a staged copy still carries.
 pub fn active_omarchy_theme(layout: &Layout) -> Option<String> {
-    let link = layout.state_base().join("omarchy/current/theme");
-    let target = fs::read_link(&link).ok()?;
-    target
-        .file_name()
-        .map(|name| name.to_string_lossy().into_owned())
+    let current = layout.state_base().join("omarchy/current");
+    if let Ok(name) = fs::read_to_string(current.join("theme.name")) {
+        let name = name.trim();
+        if !name.is_empty() && !name.contains('/') {
+            return Some(name.to_string());
+        }
+    }
+    let theme = current.join("theme");
+    if let Ok(target) = fs::read_link(&theme) {
+        return target
+            .file_name()
+            .map(|name| name.to_string_lossy().into_owned());
+    }
+    let colors = fs::read(theme.join(crate::omarchy::COLORS)).ok()?;
+    let themes = crate::omarchy::OmarchyThemes::discover(layout);
+    themes.list().into_iter().find(|name| {
+        themes
+            .dir(name)
+            .ok()
+            .and_then(|dir| fs::read(dir.join(crate::omarchy::COLORS)).ok())
+            .is_some_and(|bytes| bytes == colors)
+    })
 }
 
 /// One theme of yours, with its manifest, its fields and the images in it.
@@ -703,6 +728,76 @@ mod tests {
         assert_eq!(value["pictures"]["unlock"], false);
         assert_eq!(value["can_copy_current"], false);
         assert!(value["facts"]["login"].as_array().unwrap().len() > 2);
+    }
+
+    /// A packaged Omarchy theme in the sandbox, with the colours given.
+    fn packaged_theme(tmp: &Path, name: &str, colors: &str) -> PathBuf {
+        let dir = tmp.join("root/usr/share/omarchy/themes").join(name);
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("colors.toml"), colors).unwrap();
+        dir
+    }
+
+    #[test]
+    fn the_active_omarchy_theme_comes_from_theme_name_when_omarchy_writes_one() {
+        // Omarchy 4: current/theme is a staged copy, current/theme.name the name.
+        let (tmp, layout) = world();
+        let current = tmp.path().join("omarchy/current");
+        fs::create_dir_all(current.join("theme")).unwrap();
+        fs::write(
+            current.join("theme/colors.toml"),
+            "background = \"#000000\"\n",
+        )
+        .unwrap();
+        fs::write(current.join("theme.name"), "catppuccin\n").unwrap();
+        assert_eq!(active_omarchy_theme(&layout).as_deref(), Some("catppuccin"));
+    }
+
+    #[test]
+    fn the_active_omarchy_theme_comes_from_the_link_when_there_is_no_name_file() {
+        // Older Omarchy: current/theme is a link at the theme's directory.
+        let (tmp, layout) = world();
+        let target = packaged_theme(tmp.path(), "nord", "background = \"#2e3440\"\n");
+        let current = tmp.path().join("omarchy/current");
+        fs::create_dir_all(&current).unwrap();
+        std::os::unix::fs::symlink(&target, current.join("theme")).unwrap();
+        assert_eq!(active_omarchy_theme(&layout).as_deref(), Some("nord"));
+    }
+
+    #[test]
+    fn the_active_omarchy_theme_is_matched_by_its_colours_when_only_the_copy_is_there() {
+        // A staged copy without theme.name: the colours say which theme it is.
+        let (tmp, layout) = world();
+        packaged_theme(tmp.path(), "nord", "background = \"#2e3440\"\n");
+        packaged_theme(tmp.path(), "tokyo-night", "background = \"#1a1b26\"\n");
+        let current = tmp.path().join("omarchy/current");
+        fs::create_dir_all(current.join("theme")).unwrap();
+        fs::write(
+            current.join("theme/colors.toml"),
+            "background = \"#1a1b26\"\n",
+        )
+        .unwrap();
+        assert_eq!(
+            active_omarchy_theme(&layout).as_deref(),
+            Some("tokyo-night")
+        );
+
+        fs::write(
+            current.join("theme/colors.toml"),
+            "background = \"#123456\"\n",
+        )
+        .unwrap();
+        assert_eq!(
+            active_omarchy_theme(&layout),
+            None,
+            "colours nobody ships match nothing"
+        );
+    }
+
+    #[test]
+    fn no_current_theme_means_no_active_omarchy_theme() {
+        let (_tmp, layout) = world();
+        assert_eq!(active_omarchy_theme(&layout), None);
     }
 
     #[test]

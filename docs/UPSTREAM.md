@@ -78,6 +78,16 @@ Other relevant pieces:
   without aborting the caller. This is the supported integration point for
   following the active Omarchy theme, and it replaces the systemd path unit the
   first draft of `ARCHITECTURE.md` proposed.
+- **Verified 19 September 2026**, on the reference machine (`4.0.0.alpha`,
+  quattro) and in `bin/omarchy-theme-set` at upstream `e38c1d1` of the same
+  day: `~/.local/state/omarchy/current/theme` is a real directory, not a
+  link. `omarchy-theme-set` stages the packaged theme with the user's copy
+  on top in a `next` directory, `mv`s it over `current/theme`, and writes the
+  name to `current/theme.name`; `omarchy-theme-current` reads only that
+  file. Earlier releases linked `current/theme` at the theme's directory.
+  omaboot's `active_omarchy_theme` reads `theme.name` first, then a link
+  target, then matches the copy's `colors.toml` against the installed
+  themes, so both layouts resolve.
 - `omarchy-plymouth-switcher` drives `omarchy-menu-images`, so a picker that
   looks native is available to any caller.
 - `omarchy-plymouth-preview` composites a fake 1920x1080 PNG with ImageMagick and
