@@ -1,0 +1,26 @@
+== edits in a burst are all saved, in order
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/edits.png (1600x1000); status: 
+== the shutdown screen gets its own logo width, the unlock screen keeps its own
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/shutdown-scale.png (1600x1000); status: 
+== the file dialog opens in ~/Pictures first, then where the last image came from
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/picker.png (1600x1000); status: picker opens in --filename=/home/claude/omaboot/.harness/home/Pictures/
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/picker-after.png (1600x1000); status: picker now opens in /home/claude/omarchy-src/themes/tokyo-night/
+== a dropped logo is copied in and used
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/drop.png (1600x1000); status: added unlock.png as the logo
+== a dropped wallpaper switches the login background to it
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/wallpaper.png (1600x1000); status: added unlock.png as the login wallpaper
+== rename keeps the id and changes the name
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/rename.png (1600x1000); status: 
+== a new theme from what boots now, then deleted
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/new.png (1600x1000); status: created second from what boots now; change it, then apply it
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/delete.png (1600x1000); status: removed second; nothing on the system was touched
+== a dry run reports every step
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/dryrun.png (1600x1000); status: 
+== without the engine the window says so and spawns nothing
+wrote docs/evidence/fix-round-2026-09-20/harness-exercise/engine-missing.png (1100x760); status: omaboot is not installed: nothing at /home/claude/omaboot/.harness/home/.local/bin/omaboot and no omaboot on PATH. Build it (cargo build --release) and run target/release/omaboot plugin install.
+all flows passed; pictures in docs/evidence/fix-round-2026-09-20/harness-exercise
+the real config directory /root/.config/omaboot is untouched
+
+real	0m24.665s
+user	0m5.639s
+sys	0m1.439s

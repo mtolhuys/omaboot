@@ -1,0 +1,13 @@
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/stacked-system.png (1100x760); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/stacked-theme.png (1100x760); status: 
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/stacked-login.png (1100x760); status: 
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/columns-system.png (1600x1000); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/columns-theme.png (1600x1000); status: 
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/columns-login.png (1600x1000); status: 
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/dryrun.png (1100x760); status: 
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/new-dialog.png (1100x760); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+wrote docs/evidence/fix-round-2026-09-20/harness-shots/colour-popup.png (1600x1000); status: 
+
+real	0m14.097s
+user	0m3.845s
+sys	0m1.180s

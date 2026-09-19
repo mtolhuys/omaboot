@@ -1,0 +1,8 @@
+qt: before #121212
+qt: after #eff1f5
+wrote docs/evidence/fix-round-2026-09-20/harness-theme-follow/after.png (1240x800); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+the app followed the theme switch: #121212 -> #eff1f5; picture in docs/evidence/fix-round-2026-09-20/harness-theme-follow/after.png
+
+real	0m12.182s
+user	0m0.822s
+sys	0m0.148s
