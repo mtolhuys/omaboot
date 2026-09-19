@@ -43,6 +43,12 @@ Item {
     closingFromHost = false
   }
 
+  // Answered over IPC (`omarchy-shell shell call mtolhuys.omaboot ping ""`)
+  // once the shell has loaded the window; `omaboot` polls it after a summon
+  // to know the window is there, since a summon sent while the shell is
+  // still reloading its plugins is dropped without a word.
+  function ping() { return opened ? "open" : "closed" }
+
   function requestClose() {
     opened = false
     window.visible = false

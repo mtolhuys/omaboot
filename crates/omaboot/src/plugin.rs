@@ -195,6 +195,154 @@ fn wait_until_listed(layout: &Layout) -> Option<bool> {
     Some(false)
 }
 
+/// What the shell answers about the window.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Window {
+    /// Loaded and open: the summon landed.
+    Open,
+    /// Loaded but closed: the summon was sent before the window existed and
+    /// was dropped, or the window has been closed since.
+    Closed,
+    /// The shell has no instance of the plugin yet (it answers "unknown").
+    NotLoaded,
+    /// The shell cannot be asked: no `call` method (an older shell), or no
+    /// answer at all. Polling is then pointless and the summon has to do.
+    Unavailable,
+}
+
+/// The two IPC calls `open` needs, so the waiting can be tested without a
+/// shell.
+trait ShellIpc {
+    /// `shell summon`: what the shell said, or `None` when it could not be run.
+    fn summon(&self) -> std::result::Result<String, String>;
+    fn window(&self) -> Window;
+}
+
+struct RunningShell {
+    tool: PathBuf,
+}
+
+impl ShellIpc for RunningShell {
+    fn summon(&self) -> std::result::Result<String, String> {
+        let output = Command::new(&self.tool)
+            .args(["shell", "summon", PLUGIN_ID, "{}"])
+            .output()
+            .map_err(|error| format!("omarchy-shell could not be run: {error}"))?;
+        let reply = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if output.status.success() {
+            Ok(reply)
+        } else if reply.is_empty() {
+            Err(String::from_utf8_lossy(&output.stderr).trim().to_string())
+        } else {
+            Err(reply)
+        }
+    }
+
+    fn window(&self) -> Window {
+        let Ok(output) = Command::new(&self.tool)
+            .args(["shell", "call", PLUGIN_ID, "ping", ""])
+            .output()
+        else {
+            return Window::Unavailable;
+        };
+        if !output.status.success() {
+            return Window::Unavailable;
+        }
+        match String::from_utf8_lossy(&output.stdout).trim() {
+            "open" => Window::Open,
+            "closed" => Window::Closed,
+            "unknown" => Window::NotLoaded,
+            _ => Window::Unavailable,
+        }
+    }
+}
+
+/// Time, so the wait in `open` can be tested in no time at all.
+trait Clock {
+    fn elapsed(&self) -> std::time::Duration;
+    fn sleep(&self, duration: std::time::Duration);
+}
+
+struct WallClock(std::time::Instant);
+
+impl Clock for WallClock {
+    fn elapsed(&self) -> std::time::Duration {
+        self.0.elapsed()
+    }
+    fn sleep(&self, duration: std::time::Duration) {
+        std::thread::sleep(duration);
+    }
+}
+
+/// How long `open` waits for the window before giving up, and how often it
+/// asks. A plugin reload takes the shell a second or two; ten seconds is
+/// long enough for the reload `plugin install` starts, plus the one the file
+/// watcher adds behind it, and short enough to sit through when it fails.
+const OPEN_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(10);
+const OPEN_POLL: std::time::Duration = std::time::Duration::from_millis(200);
+/// A summon that has not produced a window after this long is sent again:
+/// the shell drops a summon that arrives while it is reloading its plugins.
+const RESUMMON_AFTER: std::time::Duration = std::time::Duration::from_secs(2);
+
+/// Summon the window and wait until the shell says it is open.
+///
+/// `omarchy-shell shell summon` answers "ok" as soon as it has noted the
+/// request, and a request noted while the shell is reloading its plugins
+/// (which `plugin install` and the file watcher both cause) is cleared with
+/// the panels and never opens anything. So after each summon the window is
+/// asked, through `shell call`, whether it is open, and the summon is sent
+/// again when nothing has appeared; after `OPEN_TIMEOUT` this gives up and
+/// says so. A shell that cannot answer `call` is trusted on its "ok".
+fn open_window(shell: &dyn ShellIpc, clock: &dyn Clock) -> Result<()> {
+    let mut last_summon = None;
+    let mut last_reply = String::new();
+    loop {
+        let elapsed = clock.elapsed();
+        if last_summon.is_some() && elapsed >= OPEN_TIMEOUT {
+            return Err(Error::Environment {
+                what: if last_reply == "ok" {
+                    format!(
+                        "the shell accepted the summon but no window appeared in {} seconds; it was most likely still reloading its plugins (it does that after `plugin install`, and again when the plugin's files change)",
+                        OPEN_TIMEOUT.as_secs()
+                    )
+                } else {
+                    format!(
+                        "the shell did not open the plugin (it said: {})",
+                        if last_reply.is_empty() {
+                            "nothing"
+                        } else {
+                            &last_reply
+                        }
+                    )
+                },
+                suggestion: "run `omaboot` again; if it still does not open, the shell's log says why: journalctl --user -u omarchy-shell, or the terminal the shell runs in".to_string(),
+            });
+        }
+        let due = match last_summon {
+            None => true,
+            Some(at) => elapsed.saturating_sub(at) >= RESUMMON_AFTER,
+        };
+        if due {
+            match shell.summon() {
+                Ok(reply) => last_reply = reply,
+                Err(reason) => {
+                    return Err(Error::Environment {
+                        what: format!("the shell did not open the plugin (it said: {reason})"),
+                        suggestion: "is the shell running? Its log says why: journalctl --user -u omarchy-shell, or the terminal the shell runs in".to_string(),
+                    });
+                }
+            }
+            last_summon = Some(elapsed);
+        }
+        match shell.window() {
+            Window::Open => return Ok(()),
+            Window::Unavailable if last_reply == "ok" => return Ok(()),
+            Window::Unavailable | Window::NotLoaded | Window::Closed => {}
+        }
+        clock.sleep(OPEN_POLL);
+    }
+}
+
 /// Summon the plugin in the running shell.
 pub fn open(layout: &Layout, out: &mut dyn Write) -> Result<()> {
     if layout.is_prefixed() {
@@ -256,29 +404,10 @@ pub fn open(layout: &Layout, out: &mut dyn Write) -> Result<()> {
         }
         _ => {}
     }
-    let output = Command::new(&tool)
-        .args(["shell", "summon", PLUGIN_ID, "{}"])
-        .output()
-        .map_err(|error| Error::Environment {
-            what: format!("omarchy-shell could not be run: {error}"),
-            suggestion: "is the shell running?".to_string(),
-        })?;
-    let reply = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    if !output.status.success() || reply.contains("unknown") {
-        return Err(Error::Environment {
-            what: format!(
-                "the shell did not open the plugin (it said: {})",
-                if reply.is_empty() {
-                    String::from_utf8_lossy(&output.stderr).trim().to_string()
-                } else {
-                    reply
-                }
-            ),
-            suggestion: "the shell's log says why: journalctl --user -u omarchy-shell, or the terminal the shell runs in"
-                .to_string(),
-        });
-    }
-    Ok(())
+    open_window(
+        &RunningShell { tool },
+        &WallClock(std::time::Instant::now()),
+    )
 }
 
 fn shell(layout: &Layout, args: &[&str], out: &mut dyn Write) -> Result<()> {
@@ -338,6 +467,132 @@ fn link(target: &Path, link: &Path, dry_run: bool) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::{Cell, RefCell};
+    use std::time::Duration;
+
+    /// A shell that answers from a script: what each summon says, and what
+    /// the window says on each ask, the last answer repeating.
+    struct ScriptedShell {
+        summons: RefCell<Vec<&'static str>>,
+        windows: RefCell<Vec<Window>>,
+        summoned: Cell<usize>,
+        asked: Cell<usize>,
+    }
+
+    impl ScriptedShell {
+        fn new(summons: &[&'static str], windows: &[Window]) -> Self {
+            Self {
+                summons: RefCell::new(summons.to_vec()),
+                windows: RefCell::new(windows.to_vec()),
+                summoned: Cell::new(0),
+                asked: Cell::new(0),
+            }
+        }
+    }
+
+    impl ShellIpc for ScriptedShell {
+        fn summon(&self) -> std::result::Result<String, String> {
+            let n = self.summoned.get();
+            self.summoned.set(n + 1);
+            let summons = self.summons.borrow();
+            let reply = summons[n.min(summons.len() - 1)];
+            match reply.strip_prefix("error:") {
+                Some(reason) => Err(reason.to_string()),
+                None => Ok(reply.to_string()),
+            }
+        }
+        fn window(&self) -> Window {
+            let n = self.asked.get();
+            self.asked.set(n + 1);
+            let windows = self.windows.borrow();
+            windows[n.min(windows.len() - 1)]
+        }
+    }
+
+    /// A clock that only moves when slept on.
+    struct FakeClock(Cell<Duration>);
+
+    impl Clock for FakeClock {
+        fn elapsed(&self) -> Duration {
+            self.0.get()
+        }
+        fn sleep(&self, duration: Duration) {
+            self.0.set(self.0.get() + duration);
+        }
+    }
+
+    fn clock() -> FakeClock {
+        FakeClock(Cell::new(Duration::ZERO))
+    }
+
+    #[test]
+    fn a_summon_that_opens_the_window_is_sent_once() {
+        let shell = ScriptedShell::new(&["ok"], &[Window::NotLoaded, Window::Open]);
+        open_window(&shell, &clock()).unwrap();
+        assert_eq!(shell.summoned.get(), 1);
+        assert_eq!(shell.asked.get(), 2);
+    }
+
+    #[test]
+    fn a_summon_the_shell_dropped_while_reloading_is_sent_again() {
+        // The first summon is accepted and never opens anything (the shell
+        // was reloading); after two seconds it goes again, and that one lands.
+        let clock = clock();
+        let not_loaded = vec![Window::NotLoaded; 12];
+        let mut windows = not_loaded;
+        windows.push(Window::Open);
+        let shell = ScriptedShell::new(&["ok"], &windows);
+        open_window(&shell, &clock).unwrap();
+        assert_eq!(shell.summoned.get(), 2);
+        assert!(clock.elapsed() >= RESUMMON_AFTER);
+        assert!(clock.elapsed() < OPEN_TIMEOUT);
+    }
+
+    #[test]
+    fn giving_up_says_the_shell_was_reloading() {
+        let clock = clock();
+        let shell = ScriptedShell::new(&["ok"], &[Window::NotLoaded]);
+        let error = open_window(&shell, &clock).unwrap_err().to_string();
+        assert!(
+            error.contains("no window appeared in 10 seconds"),
+            "{error}"
+        );
+        assert!(error.contains("reloading its plugins"), "{error}");
+        assert!(error.contains("run `omaboot` again"), "{error}");
+        assert!(clock.elapsed() >= OPEN_TIMEOUT);
+        // Sent again every RESUMMON_AFTER until the timeout.
+        assert_eq!(
+            shell.summoned.get() as u64,
+            OPEN_TIMEOUT.as_secs() / RESUMMON_AFTER.as_secs()
+        );
+    }
+
+    #[test]
+    fn a_shell_that_cannot_be_asked_is_trusted_on_its_ok() {
+        let shell = ScriptedShell::new(&["ok"], &[Window::Unavailable]);
+        open_window(&shell, &clock()).unwrap();
+        assert_eq!(shell.summoned.get(), 1);
+    }
+
+    #[test]
+    fn an_unknown_plugin_is_reported_when_nothing_appears() {
+        let clock = clock();
+        let shell = ScriptedShell::new(&["unknown"], &[Window::NotLoaded]);
+        let error = open_window(&shell, &clock).unwrap_err().to_string();
+        assert!(error.contains("it said: unknown"), "{error}");
+    }
+
+    #[test]
+    fn a_shell_that_cannot_be_run_fails_at_once() {
+        let clock = clock();
+        let shell = ScriptedShell::new(
+            &["error:omarchy-shell is not running"],
+            &[Window::NotLoaded],
+        );
+        let error = open_window(&shell, &clock).unwrap_err().to_string();
+        assert!(error.contains("omarchy-shell is not running"), "{error}");
+        assert_eq!(clock.elapsed(), Duration::ZERO);
+    }
 
     #[test]
     fn a_link_replaces_a_link_and_refuses_a_real_file() {

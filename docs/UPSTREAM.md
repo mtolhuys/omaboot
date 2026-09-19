@@ -150,6 +150,17 @@ Other relevant pieces:
   carries `logos/oma.png` and `preview-unlock.png`, which `omarchy-plymouth-set`
   publishes on refresh. omaboot reads neither; it derives a theme from
   `logo.png`, `bullet.png` and the script.
+- Verified 19 September 2026 in `shell/shell.qml` at upstream `e38c1d1`
+  (quattro): `shell rescanPlugins` runs `reloadPlugins`, which first unloads
+  every panel, clearing the open set and the pending summon payloads, and
+  then rescans; a rescan asked for while one is running is queued and runs
+  again after it, unloading again. `shell summon` answers "ok" once the
+  request is noted, so a summon during either unload is lost silently. The
+  file watcher (`Local plugin changed, reloading`) triggers the same path.
+  `shell call <id> <method> <arg>` calls a method on a loaded plugin
+  instance and answers "unknown" while there is none. The installed tree on
+  the reference machine (`4.0.0.alpha`) has not been read for `call`; if it
+  lacks it, `omaboot` falls back to trusting the summon.
 - Quattro plugins are QML entry points (`bar`, `panel`, `overlay`, `menu`,
   `service`) loaded by the shell from `~/.config/omarchy/plugins/<id>/`. Boot and
   login happen before the shell exists, so **omaboot is not a shell plugin** and

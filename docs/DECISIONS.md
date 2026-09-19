@@ -585,6 +585,22 @@ link means the shell's hot reload picks up QML edits, which is how the
 plugin is developed; a packaged install can put the directory under
 `/usr/share/omaboot/plugin` and the binary finds it there.
 
+**`omaboot` waits for the window, because a summon can be dropped.**
+`omarchy-shell shell summon` answers "ok" the moment the shell has noted
+the request, and a request noted while the shell is reloading its plugins
+is cleared together with the panels and opens nothing. The shell reloads
+after `plugin install` (the rescan and the enable), and again when its file
+watcher sees the plugin directory change, so `omaboot` straight after
+`omaboot plugin install` used to exit 0 with no window. After each summon
+`plugin::open` now asks the window itself, `omarchy-shell shell call
+mtolhuys.omaboot ping ""`, which the shell answers "unknown" until the
+plugin is loaded and the plugin answers "open" or "closed" after; a summon
+that has produced no window in two seconds is sent again, and after ten
+seconds `omaboot` gives up and says the shell was still reloading. A shell
+without `call` (older than the quattro branch of 19 September 2026) cannot
+be asked and is trusted on its "ok". The waiting is a pure function over
+two IPC calls and a clock, tested with a scripted shell.
+
 **The plugin is not built on Omakit's runtime.** Omakit's own README marks
 its runtime as unsupported scope for now, so the plugin uses the shell's
 first-party widgets directly, the way the first-party panels do. Its shape
