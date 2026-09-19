@@ -7,7 +7,7 @@
 set -euo pipefail
 HERE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO=$(cd -- "$HERE/../.." && pwd)
-WORK=${OMABOOT_HARNESS_WORK:-$HERE/.work}
+WORK=${OMABOOT_HARNESS_WORK:-$REPO/.harness}
 OUT=${1:-/tmp/omaboot-theme-follow}
 mkdir -p "$OUT"
 HOME_DIR="$WORK/home"

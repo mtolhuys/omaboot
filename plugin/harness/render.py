@@ -470,7 +470,9 @@ def main():
                         help="Omarchy tree with shell/, themes/, default/ (default: $OMARCHY_PATH)")
     parser.add_argument("--shell", default="", help="the shell QML tree (default: <omarchy>/shell)")
     parser.add_argument("--engine", default=str(REPO / "target/release/omaboot"))
-    parser.add_argument("--work", default=str(HERE / ".work"), help="where the fake home and prefix live")
+    parser.add_argument("--work", default=str(REPO / ".harness"),
+                        help="where the fake home and prefix live; outside plugin/, so the shell's"
+                             " file watcher does not reload the linked plugin on every run")
     parser.add_argument("--theme", default="matte-black", help="the Omarchy theme the desktop is on")
     parser.add_argument("--screen", choices=["unlock", "login", "shutdown"], default=None)
     parser.add_argument("--select", default=None, help='"now" or a theme id')

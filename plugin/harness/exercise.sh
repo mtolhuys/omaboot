@@ -5,7 +5,8 @@
 #   OMARCHY_PATH=/usr/share/omarchy plugin/harness/exercise.sh
 set -euo pipefail
 HERE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-WORK=${OMABOOT_HARNESS_WORK:-$HERE/.work}
+REPO=$(cd -- "$HERE/../.." && pwd)
+WORK=${OMABOOT_HARNESS_WORK:-$REPO/.harness}
 OUT=${1:-/tmp/omaboot-exercise}
 mkdir -p "$OUT"
 THEMES="$WORK/home/.config/omaboot/themes"

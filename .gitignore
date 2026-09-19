@@ -1,5 +1,4 @@
 target/
 *.log
 .direnv/
-.harness-stage/
-plugin/harness/.work/
+.harness/

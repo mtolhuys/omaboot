@@ -198,7 +198,15 @@ image drop, a wallpaper, a rename, a new theme, a delete, a dry run) and
 checks what landed in `theme.toml`. `plugin/harness/theme-follow.sh` opens
 the generated app (`omaboot app`) the same way, repoints the current-theme
 link under it and expects the window's colours to change. It needs PySide6, a Nerd Font that fontconfig gives
-for `monospace`, `target/release/omaboot` and `OMARCHY_PATH`. This is how
+for `monospace`, `target/release/omaboot` and `OMARCHY_PATH`. Everything
+the harness makes (the fake home, the sandbox prefix, the runtime
+directory, the `qs` import links) lives in `.harness/` at the repository
+root, git-ignored and outside `plugin/`: the shell watches the linked
+plugin directory, and a work directory inside it made the shell reload the
+plugin on every harness run. The wrapper the harness writes exports
+`HOME`, `XDG_CONFIG_HOME` and `XDG_STATE_HOME` into that fake home, and
+`exercise.sh` checks on the way out that the caller's own
+`~/.config/omaboot` is exactly as it found it. This is how
 the layouts above were checked before they reached a real shell; a real
 shell is still the last word, because the harness cannot see a Quickshell
 crash.
