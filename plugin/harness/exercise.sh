@@ -15,6 +15,30 @@ render() { python3 "$HERE/render.py" --work "$WORK" --out "$OUT/$1.png" "${@:2}"
 expect() { grep -qF -- "$2" "$1" || { echo "FAIL: $1 lacks: $2"; sed -n 1,60p "$1"; exit 1; }; }
 reject() { grep -qF -- "$2" "$1" && { echo "FAIL: $1 has: $2"; sed -n 1,60p "$1"; exit 1; } || true; }
 
+# The harness must never reach the caller's own omaboot directory. A
+# fingerprint of it (every path with its size and mtime) is taken before the
+# flows and compared after them; a directory that does not exist must still
+# not exist. This is the regression check for the wrapper that exported HOME
+# but not XDG_CONFIG_HOME, and so read and wrote the real ~/.config/omaboot.
+REAL_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/omaboot"
+fingerprint() {
+  if [ -e "$REAL_CONFIG" ]; then find "$REAL_CONFIG" -printf '%p %s %T@\n' | sort; else echo "absent"; fi
+}
+BEFORE=$(fingerprint)
+# Checked on the way out, so a leak is named even when it makes a flow fail
+# before the end (a seeded theme that the window then cannot find, say).
+untouched() {
+  local code=$?
+  local after; after=$(fingerprint)
+  if [ "$BEFORE" != "$after" ]; then
+    echo "FAIL: the harness reached $REAL_CONFIG"; diff <(echo "$BEFORE") <(echo "$after") || true; exit 1
+  fi
+  case "$THEMES" in "$REAL_CONFIG"/*) echo "FAIL: the harness themes directory is inside $REAL_CONFIG"; exit 1;; esac
+  [ "$code" -eq 0 ] && echo "the real config directory $REAL_CONFIG is untouched"
+  exit "$code"
+}
+trap untouched EXIT
+
 rm -rf "$THEMES/matte" "$THEMES/second"
 
 echo "== edits in a burst are all saved, in order"

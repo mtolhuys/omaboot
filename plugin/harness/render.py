@@ -425,10 +425,16 @@ def build_world(work, omarchy, theme, engine_binary):
         t.write_text("#!/bin/sh\nexit 0\n")
         t.chmod(0o755)
 
+    # The wrapper is what the harness scripts and the window's own Process
+    # calls run. The engine prefers XDG_CONFIG_HOME and XDG_STATE_HOME over
+    # HOME, and a login session exports both, so exporting HOME alone let the
+    # engine read and write the real ~/.config/omaboot from inside a harness
+    # run. Every variable the engine's Layout reads is set here.
     wrapper = home / ".local/bin/omaboot"
     wrapper.write_text(
         "#!/bin/sh\n"
-        f"export HOME={home} XDG_RUNTIME_DIR={runtime} OMARCHY_PATH={omarchy}\n"
+        f"export HOME={home} XDG_CONFIG_HOME={home / '.config'} XDG_STATE_HOME={home / '.local/state'}\n"
+        f"export XDG_RUNTIME_DIR={runtime} OMARCHY_PATH={omarchy}\n"
         f"exec {engine_binary} --root {prefix} \"$@\"\n"
     )
     wrapper.chmod(0o755)
