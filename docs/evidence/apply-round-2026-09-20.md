@@ -122,6 +122,16 @@ for the wrong reason. Screenshots in `docs/evidence/apply-round-2026-09-20/`.
   the helper asks first (`Operation::CheckHelper`) and refuses a mismatch
   with the build command; `plugin install` warns on a stale helper.
 
+## The fourth run
+
+With A1 to A3 fixed, the fourth `Apply to the system` on `matte` ticked all
+ten steps. After a reboot the owner saw the omaboot unlock screen, the
+omaboot login screen and the omaboot shutdown screen; the lock screen of the
+session is Lock Screen Explorer's, as it should be (`docs/SPEC.md`, out of
+scope). That is the first line of the v1 definition of done, on one
+machine. Not yet done from the window: revert and reset by hand, and the
+other three lines of the definition.
+
 ### What the A1 step had to become (written before the fix, followed by it)
 
 The greeter is alive after N seconds with no error on stderr, then killed,

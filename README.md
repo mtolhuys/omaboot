@@ -9,9 +9,14 @@ is part of your desktop:
 2. the SDDM **login** screen
 3. the Plymouth **shutdown** screen
 
-Status: the engine (pipeline, image pipeline, live preview, system reading)
-is built and tested; the interface is a Quattro shell plugin. Nothing has been
-applied to real hardware yet.
+The lock screen of a running session is not one of them: that one is the
+shell's (`omarchy.lock`, or Lock Screen Explorer when it is installed) and
+omaboot leaves it alone.
+
+Status: applied on real hardware for the first time on 20 September 2026,
+from the window, with all three screens seen after a reboot
+(`docs/evidence/apply-round-2026-09-20.md`). The engine is built and tested;
+the interface is a Quattro shell plugin.
 
 ```
 cargo build --release                   # both binaries: the engine and the privileged helper
