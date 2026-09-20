@@ -461,6 +461,29 @@ fn shell(layout: &Layout, args: &[&str], out: &mut dyn Write) -> Result<()> {
             suggestion: "is the shell running?".to_string(),
         })?;
     let reply = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if !output.status.success() {
+        let said = String::from_utf8_lossy(&output.stderr);
+        let said = said.trim().lines().last().unwrap_or("nothing").to_string();
+        writeln!(
+            out,
+            "failed     omarchy-shell {} ({}): {said}",
+            args.join(" "),
+            output
+                .status
+                .code()
+                .map(|code| format!("exit code {code}"))
+                .unwrap_or_else(|| "a signal".to_string())
+        )
+        .ok();
+        return Err(Error::Environment {
+            what: format!(
+                "the shell did not take `omarchy-shell {}`; it said: {said}. The links are in place",
+                args.join(" ")
+            ),
+            suggestion: "run it from the desktop session (OMARCHY_PATH set, the shell running), or run the omarchy-shell command by hand"
+                .to_string(),
+        });
+    }
     writeln!(
         out,
         "ran        omarchy-shell {}{}",
@@ -666,5 +689,47 @@ mod tests {
             "{text}"
         );
         assert!(!install_dir(&layout).exists());
+    }
+
+    #[test]
+    fn a_shell_call_that_fails_is_reported_as_failed_with_what_the_shell_said() {
+        use std::os::unix::fs::PermissionsExt;
+        let tmp = tempfile::tempdir().unwrap();
+        let root = tmp.path().join("root");
+        let layout = Layout::with_dirs(
+            Some(root.clone()),
+            tmp.path().join("config/omaboot"),
+            tmp.path().join("state"),
+        );
+        let bin = root.join("usr/bin");
+        fs::create_dir_all(&bin).unwrap();
+        let fake = bin.join("omarchy-shell");
+        fs::write(
+            &fake,
+            "#!/bin/sh\necho 'OMARCHY_PATH is not set' >&2\nexit 1\n",
+        )
+        .unwrap();
+        fs::set_permissions(&fake, fs::Permissions::from_mode(0o755)).unwrap();
+
+        let mut out = Vec::new();
+        let error = shell(&layout, &["shell", "rescanPlugins"], &mut out)
+            .unwrap_err()
+            .to_string();
+        let text = String::from_utf8(out).unwrap();
+        assert!(
+            text.contains("failed     omarchy-shell shell rescanPlugins (exit code 1): OMARCHY_PATH is not set"),
+            "{text}"
+        );
+        assert!(error.contains("OMARCHY_PATH is not set"), "{error}");
+        assert!(error.contains("The links are in place"), "{error}");
+
+        fs::write(&fake, "#!/bin/sh\necho ok\n").unwrap();
+        let mut out = Vec::new();
+        shell(&layout, &["shell", "rescanPlugins"], &mut out).unwrap();
+        assert!(
+            String::from_utf8(out)
+                .unwrap()
+                .contains("ran        omarchy-shell shell rescanPlugins  (ok)")
+        );
     }
 }

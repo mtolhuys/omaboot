@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::apply::{ApplyRequest, Observer, Pipeline, StepId};
+use crate::apply::{ApplyReport, ApplyRequest, Observer, Pipeline, StepId};
 use crate::error::{Error, Result};
 use crate::exec::{RealRunner, Runner, Tools};
 use crate::generate::AssetSource;
@@ -554,16 +554,8 @@ pub fn run(cli: Cli, out: &mut dyn Write) -> Result<()> {
             }
             let report = pipeline.apply(&request)?;
             write!(out, "{}", report.render()).ok();
-            if !report.dry_run {
-                writeln!(
-                    out,
-                    "\nReboot to see it. `omaboot revert` puts everything back.\n\
-                     If a screen ever fails, recover from a TTY with:\n  \
-                     sudo plymouth-set-default-theme omarchy\n  \
-                     sudo rm /etc/sddm.conf.d/zz-omaboot.conf\n  \
-                     sudo mkinitcpio -P"
-                )
-                .ok();
+            if let Some(closing) = closing_lines(&report) {
+                writeln!(out, "\n{closing}").ok();
             }
             Ok(())
         }
@@ -707,6 +699,39 @@ fn list(layout: &Layout, out: &mut dyn Write) -> Result<()> {
         writeln!(out, "{marker} {name}  {detail}").ok();
     }
     Ok(())
+}
+
+/// What to say after an apply that was performed: the reboot line only
+/// when the switch ran, since a partial run (`--step`) changes nothing
+/// about what boots.
+fn closing_lines(report: &ApplyReport) -> Option<String> {
+    if report.dry_run {
+        return None;
+    }
+    let switched = report
+        .steps
+        .iter()
+        .any(|step| step.id == Some(StepId::Switch) && !step.skipped);
+    if switched {
+        return Some(
+            "Reboot to see it. `omaboot revert` puts everything back.\n\
+             If a screen ever fails, recover from a TTY with:\n  \
+             sudo plymouth-set-default-theme omarchy\n  \
+             sudo rm /etc/sddm.conf.d/zz-omaboot.conf\n  \
+             sudo mkinitcpio -P"
+                .to_string(),
+        );
+    }
+    let ran: Vec<&str> = report
+        .steps
+        .iter()
+        .filter(|step| !step.skipped)
+        .filter_map(|step| step.id.map(StepId::slug))
+        .collect();
+    Some(format!(
+        "Only {} ran; nothing was switched, what boots is unchanged.",
+        ran.join(", ")
+    ))
 }
 
 fn status(layout: &Layout, out: &mut dyn Write) -> Result<()> {
@@ -924,6 +949,35 @@ mod tests {
     fn no_subcommand_means_the_terminal_interface() {
         let cli = Cli::try_parse_from(["omaboot"]).unwrap();
         assert!(cli.command.is_none());
+    }
+
+    #[test]
+    fn a_partial_apply_does_not_promise_a_new_boot_screen() {
+        use crate::apply::{ApplyReport, StepReport};
+        let mut partial = ApplyReport::new("t", false);
+        partial.push(StepReport::new(StepId::Validate, vec![]));
+        partial.push(StepReport::new(StepId::Generate, vec![]));
+        partial.push(StepReport::new(StepId::Stage, vec![]));
+        partial.push(StepReport::new(StepId::SmokeTest, vec![]));
+        partial.push(StepReport::skipped(StepId::Switch));
+        let text = closing_lines(&partial).unwrap();
+        assert!(!text.contains("Reboot"), "{text}");
+        assert_eq!(
+            text,
+            "Only validate, generate, stage, smoke-test ran; nothing was switched, what boots is unchanged."
+        );
+
+        let mut full = ApplyReport::new("t", false);
+        full.push(StepReport::new(StepId::Switch, vec![]));
+        assert!(
+            closing_lines(&full)
+                .unwrap()
+                .starts_with("Reboot to see it")
+        );
+
+        let mut dry = ApplyReport::new("t", true);
+        dry.push(StepReport::new(StepId::Switch, vec![]));
+        assert_eq!(closing_lines(&dry), None);
     }
 
     #[test]

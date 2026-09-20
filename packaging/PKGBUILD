@@ -31,6 +31,9 @@ optdepends=(
 )
 makedepends=('cargo' 'git')
 provides=('omaboot')
+# The release profile strips the binaries itself (Cargo.toml), so makepkg's
+# debug package would be empty.
+options=('!debug')
 conflicts=('omaboot')
 source=("git+${url}.git")
 sha256sums=('SKIP')
@@ -77,6 +80,7 @@ package() {
   cp -r plugin/. "$pkgdir/usr/share/omaboot/plugin/"
   rm -rf "$pkgdir/usr/share/omaboot/plugin/harness"
 
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
   for doc in docs/*.md; do
     install -Dm644 "$doc" "$pkgdir/usr/share/doc/$pkgname/$(basename "$doc")"

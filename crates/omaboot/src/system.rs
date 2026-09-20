@@ -119,6 +119,10 @@ pub struct Snapshot {
     pub applied: Option<AppliedState>,
     /// The saved theme the record names, when it is still on disk.
     pub applied_theme: Option<Theme>,
+    /// The rollback point, when one is recorded. Written before the switch
+    /// and removed by revert and reset, so one without an applied record
+    /// means an apply was interrupted between the switch and the verify.
+    pub rollback: Option<state::RollbackPoint>,
     /// The `--root` prefix, stripped from paths when they are shown: the
     /// header already says the run is sandboxed, and the facts read better
     /// as the system paths they stand for.
@@ -133,6 +137,7 @@ impl Snapshot {
         let applied_theme = applied
             .as_ref()
             .and_then(|applied| Theme::read(layout.theme_dir(&applied.theme)).ok());
+        let rollback = state::read_rollback(layout).ok().flatten();
 
         let plymouth = read_plymouth(layout);
         let login = read_login(layout);
@@ -142,6 +147,7 @@ impl Snapshot {
             login,
             applied,
             applied_theme,
+            rollback,
             root: layout.root().map(Path::to_path_buf),
         }
     }
@@ -203,6 +209,19 @@ impl Snapshot {
                     .as_deref()
                     .unwrap_or("the one plymouthd.conf names"),
                 over.way_out
+            ));
+        }
+        if self.applied.is_none()
+            && let Some(point) = &self.rollback
+        {
+            out.push(format!(
+                "an apply of {} was interrupted after the switch ({}): the rollback point is recorded but nothing was verified; omaboot revert puts plymouth {} back, or apply again to finish",
+                point.theme,
+                state::describe_age(point.recorded_at_unix, state::now_unix()),
+                point
+                    .previous_plymouth_theme
+                    .as_deref()
+                    .unwrap_or("omarchy")
             ));
         }
         if let Some(applied) = &self.applied {
@@ -665,17 +684,19 @@ fn identify_omarchy_styling(layout: &Layout, installed_logo: &Path) -> String {
     "unknown".to_string()
 }
 
-/// The background colour from a Plymouth script: the three floats of
-/// `Window.SetBackgroundTopColor(r, g, b)`.
+/// The background colour from a Plymouth script: the three arguments of
+/// `Window.SetBackgroundTopColor(r, g, b)`, each a float (Omarchy's script)
+/// or the name of a global the script assigned a float to earlier
+/// (omaboot's own script says `global.background_red = 0.102;` and passes
+/// the names).
 pub fn parse_background(script: &str) -> Option<Rgb> {
     let start = script.find("Window.SetBackgroundTopColor(")?;
     let rest = &script[start + "Window.SetBackgroundTopColor(".len()..];
     let end = rest.find(')')?;
     let parts: Vec<f64> = rest[..end]
         .split(',')
-        .map(|part| part.trim().parse::<f64>())
-        .collect::<std::result::Result<_, _>>()
-        .ok()?;
+        .map(|part| script_number(script, part.trim()))
+        .collect::<Option<_>>()?;
     if parts.len() != 3 || parts.iter().any(|v| !(0.0..=1.0).contains(v)) {
         return None;
     }
@@ -685,6 +706,34 @@ pub fn parse_background(script: &str) -> Option<Rgb> {
         g: byte(parts[1]),
         b: byte(parts[2]),
     })
+}
+
+/// A literal float, or the value a script assigns to a name (`name = 0.5;`),
+/// the last assignment winning.
+fn script_number(script: &str, token: &str) -> Option<f64> {
+    if let Ok(value) = token.parse::<f64>() {
+        return Some(value);
+    }
+    if token.is_empty()
+        || !token
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '.')
+    {
+        return None;
+    }
+    let mut value = None;
+    for line in script.lines() {
+        let line = line.trim();
+        if let Some((name, rest)) = line.split_once('=')
+            && name.trim() == token
+        {
+            let number = rest.trim().trim_end_matches(';').trim();
+            if let Ok(parsed) = number.parse::<f64>() {
+                value = Some(parsed);
+            }
+        }
+    }
+    value
 }
 
 /// The colours of an SDDM theme.conf `[General]` section, by the names
@@ -842,6 +891,10 @@ mod tests {
             parse_background("Window.SetBackgroundTopColor(2, 0, 0)"),
             None
         );
+        // omaboot's own script passes globals it assigned above the call.
+        let generated = "global.background_red = 0.102;\nglobal.background_green = 0.106;\nglobal.background_blue = 0.149;\n\
+                         Window.SetBackgroundTopColor(global.background_red, global.background_green, global.background_blue);\n";
+        assert_eq!(parse_background(generated).unwrap().hex(), "#1a1b26");
         assert_eq!(
             parse_background("Window.SetBackgroundTopColor(a, b, c)"),
             None
@@ -965,6 +1018,39 @@ mod tests {
             warnings[0]
         );
         assert!(warnings[0].contains("setBoot stock"), "{}", warnings[0]);
+    }
+
+    #[test]
+    fn a_rollback_point_without_an_applied_record_is_an_interrupted_apply() {
+        let (tmp, layout) = world();
+        let omarchy = fixture::omarchy_tree(&tmp.path().join("root/usr/share/omarchy"));
+        stock(&layout, &omarchy);
+        fs::create_dir_all(layout.state_dir()).unwrap();
+        let point = state::RollbackPoint {
+            version: state::STATE_VERSION,
+            recorded_at_unix: state::now_unix(),
+            previous_plymouth_theme: Some("omarchy".to_string()),
+            sddm_dropin_existed: false,
+            previous_sddm_dropin: None,
+            theme: "matte".to_string(),
+            theme_hash: "x".to_string(),
+        };
+        fs::write(layout.rollback_file(), state::serialize_rollback(&point)).unwrap();
+
+        let snapshot = Snapshot::read(&layout);
+        assert!(snapshot.applied.is_none());
+        let warnings = snapshot.warnings();
+        assert_eq!(warnings.len(), 1, "{warnings:?}");
+        assert!(
+            warnings[0].starts_with("an apply of matte was interrupted after the switch"),
+            "{}",
+            warnings[0]
+        );
+        assert!(
+            warnings[0].contains("omaboot revert puts plymouth omarchy back"),
+            "{}",
+            warnings[0]
+        );
     }
 
     #[test]

@@ -125,7 +125,10 @@ boot screen).
 - Expected: a closing line that says what ran, or nothing.
 - Cause: the closing message is printed on any performed apply, whatever
   `--step` selected.
-- Reproduce: the command above. Not fixed in this round.
+- Reproduce: the command above.
+- Fixed after the round (see "After the round" below): `cli::closing_lines`
+  prints the reboot line only when the switch step ran, and otherwise
+  "Only <steps> ran; nothing was switched, what boots is unchanged".
 
 ## 3. The LUKS VM round
 
@@ -234,7 +237,10 @@ ISO's and there is no newer release to update to.
   With `OMARCHY_PATH=/usr/share/omarchy` the second call answers `(ok)`.
 - Expected: a failed IPC call reported as failed, with what the shell said.
 - Cause: `plugin::shell` prints "ran" with stdout and ignores the exit
-  status and stderr. Not fixed in this round.
+  status and stderr.
+- Fixed after the round: `plugin::shell` prints `failed     omarchy-shell
+  ... (exit code N): <last stderr line>` and `plugin install` ends with an
+  error saying the links are in place and the shell did not take the call.
 
 ### V3. After an interrupted apply, `status` says "nothing is applied" and nothing about the interruption
 
@@ -248,7 +254,12 @@ ISO's and there is no newer release to update to.
   state.
 - Cause: `applied.toml` is written by the verify step, and the warnings
   are keyed on the applied record; a rollback record without an applied
-  record is not read as anything. Not fixed in this round.
+  record is not read as anything.
+- Fixed after the round: the snapshot reads the rollback point, and a
+  rollback point without an applied record is a warning in `status` and
+  the window: "an apply of <theme> was interrupted after the switch
+  (<age>) ... omaboot revert puts plymouth <previous> back, or apply again
+  to finish".
 
 ### V4. `status` reports the omaboot Plymouth theme's background as unknown
 
@@ -258,7 +269,10 @@ ISO's and there is no newer release to update to.
 - Expected: `#000000`.
 - Cause: the system module reads the background from
   `Window.SetBackgroundTopColor` in the installed script; the generated
-  `omaboot.script` states it differently. Not fixed in this round.
+  `omaboot.script` states it differently (`global.background_red = 0.102;`
+  and the names passed to the call).
+- Fixed after the round: `parse_background` resolves a name to the last
+  float the script assigned it.
 
 ## 4. Packaging
 
@@ -276,8 +290,11 @@ ISO's and there is no newer release to update to.
   `LICENSE` file, so nothing lands under `/usr/share/licenses/omaboot-git`
   as the MIT licence requires there; and `strip = true` in the release
   profile leaves makepkg's own strip and its debug package nothing to do
-  (`gdb-add-index: No index was created` in the log). Neither was changed
-  in this round; the first is the owner's file to write.
+  (`gdb-add-index: No index was created` in the log). Both done after the
+  round: `LICENSE` (MIT, 2026, Maarten Tolhuijs) is in the repository and
+  the PKGBUILD installs it under `/usr/share/licenses/$pkgname`, and
+  `options=('!debug')` says why there is no debug package. Not rebuilt with
+  makepkg since; the change is two lines of `package()` and one option.
 
 ## 5. Leftovers
 
@@ -297,3 +314,14 @@ ISO's and there is no newer release to update to.
   The ten-second give-up needs a shell that stays unanswering for ten
   seconds, which this guest's does not. Not attempted on the reference
   machine, where it would restart the owner's desktop.
+
+## After the round
+
+The four findings recorded above as not fixed (B2, V2, V3, V4) and the two
+packaging notes were fixed on 20 September 2026 in one commit, each with a
+test: `cli::tests::a_partial_apply_does_not_promise_a_new_boot_screen`,
+`plugin::tests::a_shell_call_that_fails_is_reported_as_failed_with_what_the_shell_said`
+(a scripted `omarchy-shell` in a prefix), `system::tests::a_rollback_point_without_an_applied_record_is_an_interrupted_apply`,
+and the generated-script case in `system::tests` for `parse_background`.
+V1 is the lab's, not omaboot's, and stays as recorded. Not re-run since:
+the harness and qmllint (no QML changed), makepkg (see above).
