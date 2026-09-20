@@ -1,0 +1,16 @@
+== edits in a burst are all saved, in order
+wrote /tmp/omaboot-exercise/edits.png (3200x2000); status: 
+== the shutdown screen gets its own logo width, the unlock screen keeps its own
+wrote /tmp/omaboot-exercise/shutdown-scale.png (3200x2000); status: 
+== a dropped logo is copied in and used
+wrote /tmp/omaboot-exercise/drop.png (3200x2000); status: added unlock.png as the logo
+== a dropped wallpaper switches the login background to it
+wrote /tmp/omaboot-exercise/wallpaper.png (3200x2000); status: added unlock.png as the login wallpaper
+== rename keeps the id and changes the name
+wrote /tmp/omaboot-exercise/rename.png (3200x2000); status: 
+== a new theme from what boots now, then deleted
+wrote /tmp/omaboot-exercise/new.png (3200x2000); status: created second from what boots now; change it, then apply it
+wrote /tmp/omaboot-exercise/delete.png (3200x2000); status: removed second; nothing on the system was touched
+== a dry run reports every step
+wrote /tmp/omaboot-exercise/dryrun.png (3200x2000); status: 
+all flows passed; pictures in /tmp/omaboot-exercise

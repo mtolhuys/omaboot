@@ -1,0 +1,93 @@
+# bundle: /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713/omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin (copied to docs/evidence/fix-round-2026-09-20/omakit-lab/)
+$ grep -c 'Process failed to start' shell-log-filtered.txt log.txt
+/home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713/omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin/log.txt:0
+/home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713/omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin/shell-log-filtered.txt:0
+$ grep -c 'Local plugin changed, reloading: mtolhuys.omaboot' shell-log-filtered.txt
+19
+$ grep -n 'reloading: mtolhuys.omaboot' shell-log.txt | cut -c1-120
+15:Sep 20 16:18:50 omarchy-test omarchy-shell[5393]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+39:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+40:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+41:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+42:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+43:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+44:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+45:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+46:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+47:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+48:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+49:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+50:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+51:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+52:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+53:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+54:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+55:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+56:Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+$ grep -n 'Configuration Loaded' shell-log.txt
+8:Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:   INFO: Configuration Loaded
+32:Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:   INFO: Configuration Loaded
+$ jq -r '[.id,.result]|@tsv' checks.jsonl
+lab-validate	pass
+log-baseline	pass
+lab-install	pass
+lab-first-load.panel	unsupported
+lab-bar-render	not-applicable
+lab-click	not-applicable
+lab-escape	not-applicable
+lab-popout-switch	not-applicable
+theme-matte-black	pass
+theme-catppuccin-latte	pass
+lab-themes	pass
+theme-tokyo-night	pass
+lab-disable	pass
+lab-reenable	pass
+lab-restart.loaded	pass
+lab-restart.no-failure	pass
+lab-reload	unsupported
+lab-remove	pass
+lab-no-leak.removal	pass
+lab-log-gate	pass
+$ git ls-tree -r HEAD --name-only plugin | wc -l   # files in the plugin tree; directories: plugin, plugin/harness
+16
+$ sed -n 103p omarchy-omakit-pin/bin/omarchy-plugin-remove
+  rm -rf "$target"
+$ sed -n 663,679p omarchy-omakit-pin/shell/services/PluginRegistry.qml
+  property Process localPluginWatcher: Process {
+    command: [
+      "inotifywait",
+      "-m",
+      "-r",
+      "-q",
+      "-e",
+      "close_write,create,delete,move",
+      "--format",
+      "%w%f",
+      registry.pluginsDir
+    ]
+    stdout: SplitParser {
+      onRead: function(path) {
+        var pluginId = registry.localPluginIdForPath(path)
+        if (pluginId) registry.localPluginChanged(pluginId)
+      }
+$ sed -n 728,740p omarchy-omakit-pin/shell/services/PluginRegistry.qml   # hidden and .git paths are ignored, so a removed clone counts 16 files + 2 directories
+  function localPluginIdForPath(filePath) {
+    var base = pluginsDir.replace(/\/$/, "") + "/"
+    var path = String(filePath || "").trim()
+    if (path.indexOf(base) !== 0) return ""
+
+    var relative = path.slice(base.length)
+    // Hidden entries are not plugins: clone staging dirs, remove backups.
+    if (relative.indexOf(".") === 0) return ""
+    if (relative.indexOf("/.git/") !== -1 || relative.endsWith("/.git")) return ""
+
+    var slash = relative.indexOf("/")
+    return slash === -1 ? relative : relative.slice(0, slash)
+  }
+$ sed -n 118,120p;146p omarchy-omakit-pin/bin/omarchy-plugin-add   # install is one move, hence one line
+stage="$PLUGINS_DIR/.add.tmp.$$"
+rm -rf "$stage"
+if ! git clone -- "$url" "$stage"; then
+mv "$stage" "$target"
+$ grep -c 'reloading: mtolhuys.omaboot' docs/evidence/test-round-2026-09-19/omakit-lab/shell-log-filtered.txt   # the test round
+19

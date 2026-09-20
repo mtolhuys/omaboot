@@ -1,0 +1,23 @@
+# started 2026-09-20T16:16:36+02:00
+$ target/release/omaboot plugin uninstall
+removed /home/mtolhuijs/.config/omarchy/plugins/mtolhuys.omaboot
+ran        omarchy-shell shell setPluginEnabled mtolhuys.omaboot false  (ok)
+ran        omarchy-shell shell rescanPlugins
+exit: 0
+$ target/release/omaboot plugin install && omaboot
+linked     /home/mtolhuijs/.config/omarchy/plugins/mtolhuys.omaboot -> /home/mtolhuijs/Projects/omarchy/omaboot/plugin
+linked     /home/mtolhuijs/.local/bin/omaboot -> /home/mtolhuijs/Projects/omarchy/omaboot/target/release/omaboot
+kept       /home/mtolhuijs/.local/bin/omaboot-apply (identical copy)
+ran        omarchy-shell shell rescanPlugins
+ran        omarchy-shell shell setPluginEnabled mtolhuys.omaboot true  (ok)
+
+open it with `omaboot`, or from the shell: omarchy-shell shell summon mtolhuys.omaboot '{}'
+exit: 0
+/usr/bin/bash: line 4: bc: command not found
+seconds: 
+$ omarchy-shell shell call mtolhuys.omaboot ping ""
+open
+exit: 0
+$ hyprctl clients -j | jq (omaboot windows)
+{"class":"org.quickshell","title":"omaboot","size":[796,966],"pid":2527388}
+exit: 0

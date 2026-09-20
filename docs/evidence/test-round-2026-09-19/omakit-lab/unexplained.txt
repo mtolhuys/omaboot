@@ -1,0 +1,1 @@
+  WARN: Process failed to start, likely because the binary could not be found. Command: QList("omaboot", "status", "--json")

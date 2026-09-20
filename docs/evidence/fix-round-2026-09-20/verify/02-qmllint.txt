@@ -1,0 +1,2 @@
+$ qmllint plugin/ColourPopup.qml plugin/Engine.qml plugin/Facts.qml plugin/Mark.qml plugin/Modal.qml plugin/Omaboot.qml plugin/Properties.qml plugin/RunView.qml
+exit: 0

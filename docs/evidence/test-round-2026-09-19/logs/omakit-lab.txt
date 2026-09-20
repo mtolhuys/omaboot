@@ -1,0 +1,41 @@
+[1;35m==> Reusing existing base image: /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/base.qcow2[0m
+[1;35m==> Booting acceptance VM from base image overlay[0m
+[1;35m==> Syncing /home/mtolhuijs/Projects/omarchy/omarchy-omakit-pin into the guest[0m
+[1;35m==> Linking the disposable guest session to the synced Omarchy checkout[0m
+[sudo] password for omarchy: Pointed Omarchy at /home/omarchy/.local/share/omarchy
+sudo now resolves omarchy-* from /home/omarchy/.local/share/omarchy/bin
+
+ok - linked graphical session stops
+[1;35m==> Disposable guest is running entirely from the synced checkout[0m
+ok - notification service is ready
+ok - startup notifications are dismissed
+[1;35m==> Running host-driven acceptance: /home/mtolhuijs/Projects/omarchy/omakit/tests/lab/conform.sh[0m
+[1;35m==> Conformance: /home/mtolhuijs/Projects/omarchy/omaboot (plugin plugin) -> conform-home-mtolhuijs-projects-omarchy-omaboot-plugin[0m
+ok - lab-validate (pass) pinned omarchy-plugin-validate accepts the manifest (kinds: panel)
+ok - log-baseline (pass) shell restarted without the subject at 2026-09-19 23:07:15; warning classes until the install count as host baseline
+Cloning into '/home/omarchy/.config/omarchy/plugins/.add.tmp.6399'...
+done.
+ok - lab-install (pass) omarchy-plugin-add --enable from the local repository at the subject commit
+ok - lab-first-load.panel (unsupported) summon (host IPC) produced no failure line and no new layer; the suite cannot see whether a panel that shows nothing on open loaded
+ok - lab-bar-render (not-applicable) kinds: panel
+ok - lab-click (not-applicable) kinds: panel
+ok - lab-escape (not-applicable) kinds: panel
+ok - lab-popout-switch (not-applicable) kinds: panel
+ok - theme-matte-black (pass) theme.name is matte-black
+ok - theme-catppuccin-latte (pass) theme.name is catppuccin-latte
+ok - lab-themes (pass) stills in matte-black (dark) and catppuccin-latte (light)
+ok - lab-disable (pass) disable cleared the enabled bit and kept the files
+ok - lab-reenable (pass) re-enable set the enabled bit
+ok - lab-restart.loaded (pass) after a full shell restart the plugin is enabled again
+ok - lab-restart.no-failure (pass) no load-failure line for mtolhuys.omaboot after the restart
+ok - lab-reload (unsupported) same-path reload does not replace the loaded runtime at Omarchy pin b5589fa (docs/UPSTREAM_CONTRACT.md contract 11); a generic check cannot observe a replaced runtime without plugin cooperation
+ok - lab-remove (pass) removal deleted the files, the layout entry and the listing
+ok - lab-no-leak.removal (pass) no subject process survives between before-removal and after-removal (host-owned new:   awk -v package=omarchy $1 == package { print; exit };  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-update-available;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-update-available;  /bin/sh /usr/bin/fakeroot -- pacman -Sy --disable-sandbox-filesystem --dbpath /tmp/checkup-db-1000/ --logfile /dev/null;  [find] <defunct>;  [hyprctl] <defunct>;  [omarchy-audio-o] <defunct>;  [omarchy-dns] <defunct>;  [omarchy-monitor] <defunct>;  [omarchy-network] <defunct>;  [omarchy-network] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-voxtype] <defunct>;  [omarchy-voxtype] <defunct>;  [pgrep] <defunct>;  [pgrep] <defunct>;  /usr/bin/bash /usr/bin/checkupdates --nocolor;  /usr/bin/curl -fsS --max-time 10 https://wttr.in/?format=j1;  /usr/bin/curl -fsS --max-time 4 https://wttr.in/?format=%l;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-claude;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-codex;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-fireworks;  /usr/lib/xkbcommon/xkbcli-list --load-exotic;)
+not ok - lab-log-gate: 1 unexplained log lines (see unexplained.txt)
+  WARN: Process failed to start, likely because the binary could not be found. Command: QList("omaboot", "status", "--json")
+ok - evidence bundle validates: /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260919-230551/omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin/evidence.json
+not ok - scenario conform-home-mtolhuijs-projects-omarchy-omaboot-plugin FAILED; evidence /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260919-230551/omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin
+[1;35m==> Acceptance suite FAILED. Artifacts: /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260919-230551[0m
+[1;35m==> Stopping test VM[0m
+[1;35m==> Discarded the stopped VM overlay; run evidence remains in /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260919-230551[0m
+[1;35m==> Visual review: 4 screenshots in /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260919-230551[0m

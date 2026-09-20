@@ -1,0 +1,8 @@
+# same PATH note as 02-shots.txt
+$ plugin/harness/theme-follow.sh /tmp/omaboot-follow
+qt: before #121212
+qt: after #eff1f5
+wrote /tmp/omaboot-follow/after.png (2480x1600); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+the app followed the theme switch: #121212 -> #eff1f5; picture in /tmp/omaboot-follow/after.png
+exit: 0
+seconds: 13

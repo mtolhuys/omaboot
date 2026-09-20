@@ -1,0 +1,8 @@
+$ grep -n 'function call\|function summon' $OMARCHY_PATH/shell/shell.qml   # OMARCHY_PATH=/home/mtolhuijs/Projects/omarchy/core
+440:  function summon(pluginId, payloadJson) {
+567:  function callIfLoaded(pluginId, method, arg) {
+1090:    function summon(id: string, payloadJson: string): string {
+1115:    function call(id: string, method: string, arg: string): string {
+exit: 0
+$ git -C $OMARCHY_PATH rev-parse --short HEAD
+e5b0dc22

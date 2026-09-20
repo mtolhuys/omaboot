@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "kind": "lab",
+  "scenario": "conform-home-mtolhuijs-projects-omarchy-omaboot-plugin",
+  "subject": {
+    "commit": "2acffaa1dfb60a8373d8f71884a7e07a494e8695",
+    "dirtyWorktree": true,
+    "pluginId": "mtolhuys.omaboot",
+    "pluginPath": "plugin"
+  },
+  "generator": {
+    "omakitCommit": "fc016643b9966481b938819e4899bc8affe5c463",
+    "dirtyWorktree": false
+  },
+  "framework": {
+    "version": "",
+    "treeDigest": ""
+  },
+  "environment": {
+    "omarchyPin": "b5589faaf80c6f87c07d4560fca37c4a81722f28",
+    "labImage": "omarchy-4.0.3",
+    "labRun": "20260919-230551",
+    "quickshell": "0.3.1-1",
+    "qt6Base": "6.11.2-3"
+  },
+  "result": "fail",
+  "checks": [
+    {
+      "id": "lab-validate",
+      "result": "pass",
+      "input": "none",
+      "detail": "pinned omarchy-plugin-validate accepts the manifest (kinds: panel)",
+      "artifacts": []
+    },
+    {
+      "id": "log-baseline",
+      "result": "pass",
+      "input": "none",
+      "detail": "shell restarted without the subject at 2026-09-19 23:07:15; warning classes until the install count as host baseline",
+      "artifacts": []
+    },
+    {
+      "id": "lab-install",
+      "result": "pass",
+      "input": "none",
+      "detail": "omarchy-plugin-add --enable from the local repository at the subject commit",
+      "artifacts": []
+    },
+    {
+      "id": "lab-first-load.panel",
+      "result": "unsupported",
+      "input": "none",
+      "detail": "summon (host IPC) produced no failure line and no new layer; the suite cannot see whether a panel that shows nothing on open loaded",
+      "artifacts": []
+    },
+    {
+      "id": "lab-bar-render",
+      "result": "not-applicable",
+      "input": "none",
+      "detail": "kinds: panel",
+      "artifacts": []
+    },
+    {
+      "id": "lab-click",
+      "result": "not-applicable",
+      "input": "none",
+      "detail": "kinds: panel",
+      "artifacts": []
+    },
+    {
+      "id": "lab-escape",
+      "result": "not-applicable",
+      "input": "none",
+      "detail": "kinds: panel",
+      "artifacts": []
+    },
+    {
+      "id": "lab-popout-switch",
+      "result": "not-applicable",
+      "input": "none",
+      "detail": "kinds: panel",
+      "artifacts": []
+    },
+    {
+      "id": "theme-matte-black",
+      "result": "pass",
+      "input": "none",
+      "detail": "theme.name is matte-black",
+      "artifacts": []
+    },
+    {
+      "id": "theme-catppuccin-latte",
+      "result": "pass",
+      "input": "none",
+      "detail": "theme.name is catppuccin-latte",
+      "artifacts": []
+    },
+    {
+      "id": "lab-themes",
+      "result": "pass",
+      "input": "none",
+      "detail": "stills in matte-black (dark) and catppuccin-latte (light)",
+      "artifacts": [
+        "conform-theme-matte-black-bar.png",
+        "conform-theme-catppuccin-latte-bar.png"
+      ]
+    },
+    {
+      "id": "theme-tokyo-night",
+      "result": "pass",
+      "input": "none",
+      "detail": "theme.name is tokyo-night",
+      "artifacts": []
+    },
+    {
+      "id": "lab-disable",
+      "result": "pass",
+      "input": "none",
+      "detail": "disable cleared the enabled bit and kept the files",
+      "artifacts": []
+    },
+    {
+      "id": "lab-reenable",
+      "result": "pass",
+      "input": "none",
+      "detail": "re-enable set the enabled bit",
+      "artifacts": []
+    },
+    {
+      "id": "lab-restart.loaded",
+      "result": "pass",
+      "input": "none",
+      "detail": "after a full shell restart the plugin is enabled again",
+      "artifacts": []
+    },
+    {
+      "id": "lab-restart.no-failure",
+      "result": "pass",
+      "input": "ipc-observe",
+      "detail": "no load-failure line for mtolhuys.omaboot after the restart",
+      "artifacts": []
+    },
+    {
+      "id": "lab-reload",
+      "result": "unsupported",
+      "input": "none",
+      "detail": "same-path reload does not replace the loaded runtime at Omarchy pin b5589fa (docs/UPSTREAM_CONTRACT.md contract 11); a generic check cannot observe a replaced runtime without plugin cooperation",
+      "artifacts": []
+    },
+    {
+      "id": "lab-remove",
+      "result": "pass",
+      "input": "none",
+      "detail": "removal deleted the files, the layout entry and the listing",
+      "artifacts": []
+    },
+    {
+      "id": "lab-no-leak.removal",
+      "result": "pass",
+      "input": "ipc-observe",
+      "detail": "no subject process survives between before-removal and after-removal (host-owned new:   awk -v package=omarchy $1 == package { print; exit };  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-update-available;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-update-available;  /bin/sh /usr/bin/fakeroot -- pacman -Sy --disable-sandbox-filesystem --dbpath /tmp/checkup-db-1000/ --logfile /dev/null;  [find] <defunct>;  [hyprctl] <defunct>;  [omarchy-audio-o] <defunct>;  [omarchy-dns] <defunct>;  [omarchy-monitor] <defunct>;  [omarchy-network] <defunct>;  [omarchy-network] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-voxtype] <defunct>;  [omarchy-voxtype] <defunct>;  [pgrep] <defunct>;  [pgrep] <defunct>;  /usr/bin/bash /usr/bin/checkupdates --nocolor;  /usr/bin/curl -fsS --max-time 10 https://wttr.in/?format=j1;  /usr/bin/curl -fsS --max-time 4 https://wttr.in/?format=%l;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-claude;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-codex;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-fireworks;  /usr/lib/xkbcommon/xkbcli-list --load-exotic;)",
+      "artifacts": []
+    },
+    {
+      "id": "lab-log-gate",
+      "result": "fail",
+      "input": "ipc-observe",
+      "detail": "1 unexplained log lines (see unexplained.txt)",
+      "artifacts": []
+    }
+  ],
+  "logGate": {
+    "result": "fail",
+    "tolerated": [
+      {
+        "pattern": "host-baseline",
+        "reason": "warning class also produced by a shell restart before the subject was installed (shell-log-baseline.txt)",
+        "count": 8
+      },
+      {
+        "pattern": "Local plugin changed, reloading: ",
+        "reason": "one inotify event per file written by omarchy-plugin-add or -update (PluginRegistry localPluginWatcher), debounced into one reload; an informational line matched only because it names the subject",
+        "count": 19
+      },
+      {
+        "pattern": "QML IpcHandler at file:///home/omarchy/\\.config/omarchy/plugins/[^/]+/[^ ]+\\[[0-9]+:[0-9]+\\]: Handler was registered but will not be used",
+        "reason": "host-owned: the bar instantiates every widget twice when it rebuilds after a shell.json layout change; every first-party bar widget logs the same line in the same rebuild (docs/UPSTREAM_CONTRACT.md observation 12)",
+        "count": 0
+      },
+      {
+        "pattern": "@plugins/bar/Bar\\.qml\\[[0-9]+:-1\\]: (Error: Cannot assign \\[undefined\\] to QObject\\*|TypeError: Cannot read property 'pluginBarApiFor' of undefined) \\(exception occurred during delayed function evaluation\\)",
+        "reason": "host defect candidate: Bar.qml injectProps() runs through Qt.callLater after the slot's plugin API object was released during a bar rebuild with a third-party widget mounted (docs/UPSTREAM_CONTRACT.md observation 12)",
+        "count": 0
+      },
+      {
+        "pattern": "WARN scene: QML IpcHandler at .*: Handler was registered but will not be used because another handler is registered for target omarchy\\.",
+        "reason": "host-owned: first-party Panel IpcHandlers re-register when shell.reloadPlugins() rebuilds panels after any third-party install, update or removal",
+        "count": 0
+      },
+      {
+        "pattern": "WARN quickshell\\.io\\.fileview: got operation finished from dropped operation",
+        "reason": "host-owned: first-party FileView objects are destroyed and recreated by shell.reloadPlugins() while an asynchronous read is in flight; observed only inside the reload window after an install, in runs whose subject had no FileView activity at that moment",
+        "count": 0
+      },
+      {
+        "pattern": "WARN: Qt\\.atob\\(string\\): This method is deprecated",
+        "reason": "host-owned: shell.qml applyTheme() decodes the theme payload with Qt.atob on every theme switch (pin b5589fa lines 1584-1585)",
+        "count": 9
+      }
+    ],
+    "unexplained": [
+      "  WARN: Process failed to start, likely because the binary could not be found. Command: QList(\"omaboot\", \"status\", \"--json\")"
+    ]
+  },
+  "processCheck": {
+    "result": "pass",
+    "detail": ""
+  },
+  "artifacts": [
+    {
+      "path": "conform-00-before-install.png",
+      "sha256": "275694f042a2c392b27d72f38c2b01db21a3d668bf254fdaeaf85384a3a9b0ba"
+    },
+    {
+      "path": "conform-theme-matte-black-bar.png",
+      "sha256": "449b00235d586cacfaa21bbb6e2f4daf408e8a83b0759e21ccc8be2553d388be"
+    },
+    {
+      "path": "conform-theme-catppuccin-latte-bar.png",
+      "sha256": "9f3c45eb1ee07f6e3270aee3cbee3d207fa98884f50a53989c1225fc8f9ce022"
+    }
+  ]
+}

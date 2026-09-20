@@ -1,0 +1,9 @@
+wrote /tmp/omaboot-shots/stacked-system.png (2200x1520); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+wrote /tmp/omaboot-shots/stacked-theme.png (2200x1520); status: 
+wrote /tmp/omaboot-shots/stacked-login.png (2200x1520); status: 
+wrote /tmp/omaboot-shots/columns-system.png (3200x2000); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+wrote /tmp/omaboot-shots/columns-theme.png (3200x2000); status: 
+wrote /tmp/omaboot-shots/columns-login.png (3200x2000); status: 
+wrote /tmp/omaboot-shots/dryrun.png (2200x1520); status: 
+wrote /tmp/omaboot-shots/new-dialog.png (2200x1520); status: showing what boots now: boot and shutdown: omarchy (default) · login: omarchy
+wrote /tmp/omaboot-shots/colour-popup.png (3200x2000); status: 

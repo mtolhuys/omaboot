@@ -1,0 +1,38 @@
+$ journalctl --user --since 16:16:30 --no-pager | grep -i 'omaboot\|plugin'
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43b2440f00) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43aaa9fa40) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43aaaa1100) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43aac7cb40) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43aad08920) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43ab2c68c0) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43ab796ca0) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43a809f1c0) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43a81a21a0) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43a8525b60) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43a8e79dc0) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:   WARN scene: @Ui/WidgetButton.qml[41:-1]: TypeError: Property 'hideTooltip' of object PluginBarBridge_QMLTYPE_67(0x7f43a903e0a0) is not a function
+Sep 20 16:16:36 omarchy omarchy-shell[2527388]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[176:-1]: TypeError: Cannot read property '0' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[175:-1]: TypeError: Cannot read property '0' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[189:-1]: TypeError: Cannot read property '1' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[188:-1]: TypeError: Cannot read property '1' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[202:-1]: TypeError: Cannot read property '2' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[201:-1]: TypeError: Cannot read property '2' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[215:-1]: TypeError: Cannot read property '3' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[214:-1]: TypeError: Cannot read property '3' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-10/v0902/KeyboardSurface.qml[167:-1]: TypeError: Cannot read property 'keys' of undefined
+Sep 20 16:16:37 omarchy omarchy-shell[2527388]:   WARN scene: QML Flow at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-8/src/BarWidget.qml[838:13]: Cannot specify anchors for items inside Flow. Flow will not function.
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2629:25]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/custom--lock-catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2690:25]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/custom--catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[3026:13]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/stock-catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2147:23]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/river-catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2147:23]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/eyes-catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2147:23]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/storm-catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2147:23]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/terminal-catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2147:23]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/theme-catppuccin-dark.png?v=0
+Sep 20 16:16:38 omarchy omarchy-shell[2527388]:   WARN scene: QML QQuickImage at file:///run/user/1000/omarchy/plugin-runtime/generation-3/plugin-15/Explorer.qml[2147:23]: Cannot open: file:///home/mtolhuijs/.local/state/omarchy/lock-explorer-boot-previews/stock-catppuccin-dark.png?v=0
+Sep 20 16:16:40 omarchy omarchy-shell[2527388]:  DEBUG qml: plugin-pulse: armed collect timer 300000 ms ( 5 min)
+exit: 0
+$ journalctl --user --since 16:16:30 --no-pager | grep -ci 'warn.*omaboot\|omaboot.*warn'
+0

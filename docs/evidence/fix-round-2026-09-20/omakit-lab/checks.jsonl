@@ -1,0 +1,20 @@
+{"id":"lab-validate","result":"pass","input":"none","detail":"pinned omarchy-plugin-validate accepts the manifest (kinds: panel)","artifacts":[]}
+{"id":"log-baseline","result":"pass","input":"none","detail":"shell restarted without the subject at 2026-09-20 16:18:38; warning classes until the install count as host baseline","artifacts":[]}
+{"id":"lab-install","result":"pass","input":"none","detail":"omarchy-plugin-add --enable from the local repository at the subject commit","artifacts":[]}
+{"id":"lab-first-load.panel","result":"unsupported","input":"none","detail":"summon (host IPC) produced no failure line and no new layer; the suite cannot see whether a panel that shows nothing on open loaded","artifacts":[]}
+{"id":"lab-bar-render","result":"not-applicable","input":"none","detail":"kinds: panel","artifacts":[]}
+{"id":"lab-click","result":"not-applicable","input":"none","detail":"kinds: panel","artifacts":[]}
+{"id":"lab-escape","result":"not-applicable","input":"none","detail":"kinds: panel","artifacts":[]}
+{"id":"lab-popout-switch","result":"not-applicable","input":"none","detail":"kinds: panel","artifacts":[]}
+{"id":"theme-matte-black","result":"pass","input":"none","detail":"theme.name is matte-black","artifacts":[]}
+{"id":"theme-catppuccin-latte","result":"pass","input":"none","detail":"theme.name is catppuccin-latte","artifacts":[]}
+{"id":"lab-themes","result":"pass","input":"none","detail":"stills in matte-black (dark) and catppuccin-latte (light)","artifacts":["conform-theme-matte-black-bar.png","conform-theme-catppuccin-latte-bar.png"]}
+{"id":"theme-tokyo-night","result":"pass","input":"none","detail":"theme.name is tokyo-night","artifacts":[]}
+{"id":"lab-disable","result":"pass","input":"none","detail":"disable cleared the enabled bit and kept the files","artifacts":[]}
+{"id":"lab-reenable","result":"pass","input":"none","detail":"re-enable set the enabled bit","artifacts":[]}
+{"id":"lab-restart.loaded","result":"pass","input":"none","detail":"after a full shell restart the plugin is enabled again","artifacts":[]}
+{"id":"lab-restart.no-failure","result":"pass","input":"ipc-observe","detail":"no load-failure line for mtolhuys.omaboot after the restart","artifacts":[]}
+{"id":"lab-reload","result":"unsupported","input":"none","detail":"same-path reload does not replace the loaded runtime at Omarchy pin b5589fa (docs/UPSTREAM_CONTRACT.md contract 11); a generic check cannot observe a replaced runtime without plugin cooperation","artifacts":[]}
+{"id":"lab-remove","result":"pass","input":"none","detail":"removal deleted the files, the layout entry and the listing","artifacts":[]}
+{"id":"lab-no-leak.removal","result":"pass","input":"ipc-observe","detail":"no subject process survives between before-removal and after-removal (host-owned new:   [find] <defunct>;  [hyprctl] <defunct>;  [hyprctl] <defunct>;  [omarchy-audio-o] <defunct>;  [omarchy-dns] <defunct>;  [omarchy-monitor] <defunct>;  [omarchy-network] <defunct>;  [omarchy-network] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-voxtype] <defunct>;  [omarchy-voxtype] <defunct>;  [pgrep] <defunct>;  [pgrep] <defunct>;  [powerprofilesct] <defunct>;  [readlink] <defunct>;  /usr/lib/xkbcommon/xkbcli-list --load-exotic;)","artifacts":[]}
+{"id":"lab-log-gate","result":"pass","input":"ipc-observe","detail":"36 matching log lines: 8 host baseline, 28 allowlisted with reasons","artifacts":[]}

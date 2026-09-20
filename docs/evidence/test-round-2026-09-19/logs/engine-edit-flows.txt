@@ -1,0 +1,126 @@
+
+### omaboot new roundtest --from-current
+created /home/mtolhuijs/.config/omaboot/themes/roundtest
+copied /usr/share/plymouth/themes/omarchy/logo.png to logo.png, and took its colours
+run `omaboot apply roundtest --dry-run` to see what it would do
+exit=0
+[meta]
+name = "roundtest"
+author = ""
+version = "0.1.0"
+
+[colors]
+background = "#1a1b26"
+foreground = "#c0caf5"
+accent = "#7aa2f7"
+error = "#f7768e"
+
+[logo]
+source = "logo.png"
+width = 0.42
+position = "center"
+offset = [
+    0,
+    0,
+]
+
+[unlock]
+prompt = "bullets"
+progress = "bar"
+message = ""
+
+[shutdown]
+logo = "inherit"
+message = ""
+progress = "none"
+
+[login]
+layout = "centered"
+clock = false
+show_session_picker = false
+background = "color"
+logo.png
+theme.toml
+
+### omaboot set roundtest colors.background=#112233
+saved /home/mtolhuijs/.config/omaboot/themes/roundtest
+exit=0
+7c7
+< background = "#1a1b26"
+---
+> background = "#112233"
+logo.png
+theme.toml
+
+### omaboot set roundtest logo.width=0.5
+saved /home/mtolhuijs/.config/omaboot/themes/roundtest
+exit=0
+14c14
+< width = 0.42
+---
+> width = 0.5
+logo.png
+theme.toml
+
+### omaboot set roundtest logo.shutdown.width=0.3
+saved /home/mtolhuijs/.config/omaboot/themes/roundtest
+exit=0
+20a21,23
+> [logo.shutdown]
+> width = 0.3
+> 
+logo.png
+theme.toml
+
+### omaboot set roundtest logo.position=top
+saved /home/mtolhuijs/.config/omaboot/themes/roundtest
+exit=0
+15c15
+< position = "center"
+---
+> position = "top"
+logo.png
+theme.toml
+
+### omaboot set roundtest login.clock=true login.show_session_picker=true
+saved /home/mtolhuijs/.config/omaboot/themes/roundtest
+exit=0
+36,37c36,37
+< clock = false
+< show_session_picker = false
+---
+> clock = true
+> show_session_picker = true
+logo.png
+theme.toml
+
+### omaboot add-image roundtest /home/mtolhuijs/Pictures/omarchy-logo-solitude.png --as logo
+added /home/mtolhuijs/Pictures/omarchy-logo-solitude.png to roundtest
+exit=0
+13c13
+< source = "logo.png"
+---
+> source = "omarchy-logo-solitude.png"
+logo.png
+omarchy-logo-solitude.png
+theme.toml
+
+### omaboot rename roundtest Round Test
+renamed roundtest to Round Test
+exit=0
+2c2
+< name = "roundtest"
+---
+> name = "Round Test"
+logo.png
+omarchy-logo-solitude.png
+theme.toml
+
+### omaboot apply roundtest --dry-run (see dry-run-real-machine.txt)
+exit=0
+theme.toml unchanged by dry run
+
+### omaboot delete roundtest
+removed /home/mtolhuijs/.config/omaboot/themes/roundtest; nothing on the system was touched
+exit=0
+matte

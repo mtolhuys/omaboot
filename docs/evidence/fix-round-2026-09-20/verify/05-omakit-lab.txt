@@ -1,0 +1,42 @@
+$ OMAKIT_PLUGIN_LAB=~/Projects/omarchy/plugin-lab ~/Projects/omarchy/omakit/bin/omakit lab conform ~/Projects/omarchy/omaboot#plugin
+==> Reusing existing base image: /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/base.qcow2
+==> Booting acceptance VM from base image overlay
+==> Syncing /home/mtolhuijs/Projects/omarchy/omarchy-omakit-pin into the guest
+==> Linking the disposable guest session to the synced Omarchy checkout
+[sudo] password for omarchy: Pointed Omarchy at /home/omarchy/.local/share/omarchy
+sudo now resolves omarchy-* from /home/omarchy/.local/share/omarchy/bin
+
+ok - linked graphical session stops
+==> Disposable guest is running entirely from the synced checkout
+ok - notification service is ready
+ok - startup notifications are dismissed
+==> Running host-driven acceptance: /home/mtolhuijs/Projects/omarchy/omakit/tests/lab/conform.sh
+==> Conformance: /home/mtolhuijs/Projects/omarchy/omaboot (plugin plugin) -> conform-home-mtolhuijs-projects-omarchy-omaboot-plugin
+ok - lab-validate (pass) pinned omarchy-plugin-validate accepts the manifest (kinds: panel)
+ok - log-baseline (pass) shell restarted without the subject at 2026-09-20 16:18:38; warning classes until the install count as host baseline
+Cloning into '/home/omarchy/.config/omarchy/plugins/.add.tmp.6269'...
+done.
+ok - lab-install (pass) omarchy-plugin-add --enable from the local repository at the subject commit
+ok - lab-first-load.panel (unsupported) summon (host IPC) produced no failure line and no new layer; the suite cannot see whether a panel that shows nothing on open loaded
+ok - lab-bar-render (not-applicable) kinds: panel
+ok - lab-click (not-applicable) kinds: panel
+ok - lab-escape (not-applicable) kinds: panel
+ok - lab-popout-switch (not-applicable) kinds: panel
+ok - theme-matte-black (pass) theme.name is matte-black
+ok - theme-catppuccin-latte (pass) theme.name is catppuccin-latte
+ok - lab-themes (pass) stills in matte-black (dark) and catppuccin-latte (light)
+ok - lab-disable (pass) disable cleared the enabled bit and kept the files
+ok - lab-reenable (pass) re-enable set the enabled bit
+ok - lab-restart.loaded (pass) after a full shell restart the plugin is enabled again
+ok - lab-restart.no-failure (pass) no load-failure line for mtolhuys.omaboot after the restart
+ok - lab-reload (unsupported) same-path reload does not replace the loaded runtime at Omarchy pin b5589fa (docs/UPSTREAM_CONTRACT.md contract 11); a generic check cannot observe a replaced runtime without plugin cooperation
+ok - lab-remove (pass) removal deleted the files, the layout entry and the listing
+ok - lab-no-leak.removal (pass) no subject process survives between before-removal and after-removal (host-owned new:   [find] <defunct>;  [hyprctl] <defunct>;  [hyprctl] <defunct>;  [omarchy-audio-o] <defunct>;  [omarchy-dns] <defunct>;  [omarchy-monitor] <defunct>;  [omarchy-network] <defunct>;  [omarchy-network] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-voxtype] <defunct>;  [omarchy-voxtype] <defunct>;  [pgrep] <defunct>;  [pgrep] <defunct>;  [powerprofilesct] <defunct>;  [readlink] <defunct>;  /usr/lib/xkbcommon/xkbcli-list --load-exotic;)
+ok - lab-log-gate (pass) 36 matching log lines: 8 host baseline, 28 allowlisted with reasons
+ok - evidence bundle validates: /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713/omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin/evidence.json
+ok - scenario conform-home-mtolhuijs-projects-omarchy-omaboot-plugin PASSED; evidence /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713/omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin
+==> Acceptance suite passed. Artifacts: /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713
+==> Stopping test VM
+==> Discarded the stopped VM overlay; run evidence remains in /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713
+==> Visual review: 4 screenshots in /home/mtolhuijs/Projects/omarchy/omarchy-iso/test-runs/omarchy-4.0.3/runs/20260920-161713
+exit: 0

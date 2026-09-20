@@ -1,0 +1,481 @@
+{
+    "active_omarchy_theme": null,
+    "applied": null,
+    "can_copy_current": true,
+    "facts": {
+        "login": [
+            {
+                "label": "theme",
+                "value": "omarchy-onscreen-keyboard"
+            },
+            {
+                "label": "decided by",
+                "value": "/etc/sddm.conf.d/99-z-omarchy-onscreen-keyboard.conf"
+            },
+            {
+                "label": "owner",
+                "value": "not from Omarchy and not from omaboot"
+            },
+            {
+                "label": "files",
+                "value": "/usr/share/sddm/themes/omarchy-onscreen-keyboard"
+            },
+            {
+                "label": "background",
+                "value": "#1a1b26"
+            },
+            {
+                "label": "text",
+                "value": "#a9b1d6"
+            },
+            {
+                "label": "accent",
+                "value": "#7aa2f7"
+            },
+            {
+                "label": "error",
+                "value": "#f7768e"
+            }
+        ],
+        "shutdown": [
+            {
+                "label": "theme",
+                "value": "omarchy"
+            },
+            {
+                "label": "set in",
+                "value": "/etc/plymouth/plymouthd.conf"
+            },
+            {
+                "label": "owner",
+                "value": "Omarchy's own theme"
+            },
+            {
+                "label": "styled by",
+                "value": "Omarchy theme default"
+            },
+            {
+                "label": "files",
+                "value": "/usr/share/plymouth/themes/omarchy"
+            },
+            {
+                "label": "background",
+                "value": "#1a1b26"
+            },
+            {
+                "label": "text",
+                "value": "#c0caf5"
+            },
+            {
+                "label": "logo",
+                "value": "/usr/share/plymouth/themes/omarchy/logo.png"
+            }
+        ],
+        "unlock": [
+            {
+                "label": "theme",
+                "value": "omarchy"
+            },
+            {
+                "label": "set in",
+                "value": "/etc/plymouth/plymouthd.conf"
+            },
+            {
+                "label": "owner",
+                "value": "Omarchy's own theme"
+            },
+            {
+                "label": "styled by",
+                "value": "Omarchy theme default"
+            },
+            {
+                "label": "files",
+                "value": "/usr/share/plymouth/themes/omarchy"
+            },
+            {
+                "label": "background",
+                "value": "#1a1b26"
+            },
+            {
+                "label": "text",
+                "value": "#c0caf5"
+            },
+            {
+                "label": "logo",
+                "value": "/usr/share/plymouth/themes/omarchy/logo.png"
+            }
+        ]
+    },
+    "headline": "boot and shutdown: omarchy (default) \u00b7 login: omarchy-onscreen-keyboard",
+    "login": {
+        "accent": "#7aa2f7",
+        "background": "#1a1b26",
+        "by_omaboot": false,
+        "decided_by": "/etc/sddm.conf.d/99-z-omarchy-onscreen-keyboard.conf",
+        "dir": "/usr/share/sddm/themes/omarchy-onscreen-keyboard",
+        "error": "#f7768e",
+        "foreground": "#a9b1d6",
+        "owner": "other",
+        "theme": "omarchy-onscreen-keyboard"
+    },
+    "omarchy_themes": [
+        {
+            "name": "aether",
+            "palette": {
+                "accent": "#8daab3",
+                "background": "#041011",
+                "error": "#987e65",
+                "foreground": "#d4cab1"
+            }
+        },
+        {
+            "name": "aetheria",
+            "palette": {
+                "accent": "#BE3F50",
+                "background": "#0e091d",
+                "error": "#f7768e",
+                "foreground": "#14B9B5"
+            }
+        },
+        {
+            "name": "batou",
+            "palette": {
+                "accent": "#605d5b",
+                "background": "#121212",
+                "error": "#f7768e",
+                "foreground": "#a4a4a4"
+            }
+        },
+        {
+            "name": "blackturq",
+            "palette": {
+                "accent": "#ADF0E9",
+                "background": "#0a0a0a",
+                "error": "#f7768e",
+                "foreground": "#c8dcdc"
+            }
+        },
+        {
+            "name": "catppuccin",
+            "palette": {
+                "accent": "#89b4fa",
+                "background": "#1e1e2e",
+                "error": "#f38ba8",
+                "foreground": "#cdd6f4"
+            }
+        },
+        {
+            "name": "catppuccin-dark",
+            "palette": {
+                "accent": "#89b4fa",
+                "background": "#010101",
+                "error": "#f7768e",
+                "foreground": "#cdd6f4"
+            }
+        },
+        {
+            "name": "catppuccin-latte",
+            "palette": {
+                "accent": "#1e66f5",
+                "background": "#eff1f5",
+                "error": "#d20f39",
+                "foreground": "#4c4f69"
+            }
+        },
+        {
+            "name": "ember-n-ash",
+            "palette": {
+                "accent": "#6c5b4c",
+                "background": "#1a1a1a",
+                "error": "#f7768e",
+                "foreground": "#e5d6c6"
+            }
+        },
+        {
+            "name": "ethereal",
+            "palette": {
+                "accent": "#7d82d9",
+                "background": "#060B1E",
+                "error": "#ED5B5A",
+                "foreground": "#ffcead"
+            }
+        },
+        {
+            "name": "everforest",
+            "palette": {
+                "accent": "#7fbbb3",
+                "background": "#2d353b",
+                "error": "#e67e80",
+                "foreground": "#d3c6aa"
+            }
+        },
+        {
+            "name": "fireside",
+            "palette": {
+                "accent": "#b8b8b6",
+                "background": "#0a1220",
+                "error": "#e06b58",
+                "foreground": "#f0f2f5"
+            }
+        },
+        {
+            "name": "flexoki-dark",
+            "palette": {
+                "accent": "#4385BE",
+                "background": "#100F0F",
+                "error": "#f7768e",
+                "foreground": "#CECDC3"
+            }
+        },
+        {
+            "name": "flexoki-light",
+            "palette": {
+                "accent": "#205EA6",
+                "background": "#FFFCF0",
+                "error": "#D14D41",
+                "foreground": "#100F0F"
+            }
+        },
+        {
+            "name": "gruvbox",
+            "palette": {
+                "accent": "#7daea3",
+                "background": "#282828",
+                "error": "#ea6962",
+                "foreground": "#d4be98"
+            }
+        },
+        {
+            "name": "hackerman",
+            "palette": {
+                "accent": "#82FB9C",
+                "background": "#0B0C16",
+                "error": "#50f872",
+                "foreground": "#ddf7ff"
+            }
+        },
+        {
+            "name": "kanagawa",
+            "palette": {
+                "accent": "#dcd7ba",
+                "background": "#1f1f28",
+                "error": "#c34043",
+                "foreground": "#dcd7ba"
+            }
+        },
+        {
+            "name": "last-horizon",
+            "palette": {
+                "accent": "#b59790",
+                "background": "#0c0b0c",
+                "error": "#c38b7b",
+                "foreground": "#FAFCFB"
+            }
+        },
+        {
+            "name": "lumon",
+            "palette": {
+                "accent": "#8bc9eb",
+                "background": "#16242d",
+                "error": "#4d86b0",
+                "foreground": "#d6e2ee"
+            }
+        },
+        {
+            "name": "lupine",
+            "palette": {
+                "accent": "#3264eb",
+                "background": "#fafafa",
+                "error": "#c900c4",
+                "foreground": "#212121"
+            }
+        },
+        {
+            "name": "manga",
+            "palette": null
+        },
+        {
+            "name": "matte-black",
+            "palette": {
+                "accent": "#e68e0d",
+                "background": "#121212",
+                "error": "#D35F5F",
+                "foreground": "#bebebe"
+            }
+        },
+        {
+            "name": "miasma",
+            "palette": {
+                "accent": "#78824b",
+                "background": "#222222",
+                "error": "#685742",
+                "foreground": "#c2c2b0"
+            }
+        },
+        {
+            "name": "midnight",
+            "palette": {
+                "accent": "#407e70",
+                "background": "#000000",
+                "error": "#D35F5F",
+                "foreground": "#EFEFEF"
+            }
+        },
+        {
+            "name": "nes",
+            "palette": {
+                "accent": "#9a9d9a",
+                "background": "#101010",
+                "error": "#d93f37",
+                "foreground": "#cecfc9"
+            }
+        },
+        {
+            "name": "nord",
+            "palette": {
+                "accent": "#81a1c1",
+                "background": "#2e3440",
+                "error": "#bf616a",
+                "foreground": "#d8dee9"
+            }
+        },
+        {
+            "name": "one-dark-pro",
+            "palette": {
+                "accent": "#61afef",
+                "background": "#282c34",
+                "error": "#e06c75",
+                "foreground": "#abb2bf"
+            }
+        },
+        {
+            "name": "osaka-jade",
+            "palette": {
+                "accent": "#509475",
+                "background": "#111c18",
+                "error": "#FF5345",
+                "foreground": "#C1C497"
+            }
+        },
+        {
+            "name": "retro-82",
+            "palette": {
+                "accent": "#faa968",
+                "background": "#05182e",
+                "error": "#f85525",
+                "foreground": "#f6dcac"
+            }
+        },
+        {
+            "name": "ristretto",
+            "palette": {
+                "accent": "#f38d70",
+                "background": "#2c2525",
+                "error": "#fd6883",
+                "foreground": "#e6d9db"
+            }
+        },
+        {
+            "name": "rose-pine",
+            "palette": {
+                "accent": "#56949f",
+                "background": "#faf4ed",
+                "error": "#b4637a",
+                "foreground": "#575279"
+            }
+        },
+        {
+            "name": "solitude",
+            "palette": {
+                "accent": "#798186",
+                "background": "#101315",
+                "error": "#565d60",
+                "foreground": "#cacccc"
+            }
+        },
+        {
+            "name": "space-monkey",
+            "palette": {
+                "accent": "#bd4924",
+                "background": "#1c0e00",
+                "error": "#fd6883",
+                "foreground": "#e7aa5a"
+            }
+        },
+        {
+            "name": "tokyo-night",
+            "palette": {
+                "accent": "#7aa2f7",
+                "background": "#1a1b26",
+                "error": "#f7768e",
+                "foreground": "#a9b1d6"
+            }
+        },
+        {
+            "name": "vantablack",
+            "palette": {
+                "accent": "#8d8d8d",
+                "background": "#000000",
+                "error": "#a4a4a4",
+                "foreground": "#ffffff"
+            }
+        },
+        {
+            "name": "velvetnight",
+            "palette": {
+                "accent": "#9099a5",
+                "background": "#0A101F",
+                "error": "#f7768e",
+                "foreground": "#ffffff"
+            }
+        },
+        {
+            "name": "white",
+            "palette": {
+                "accent": "#6e6e6e",
+                "background": "#ffffff",
+                "error": "#2a2a2a",
+                "foreground": "#000000"
+            }
+        }
+    ],
+    "pictures": {
+        "login": false,
+        "shutdown": true,
+        "unlock": true
+    },
+    "plymouth": {
+        "background": "#1a1b26",
+        "conf": "/etc/plymouth/plymouthd.conf",
+        "dir": "/usr/share/plymouth/themes/omarchy",
+        "foreground": "#c0caf5",
+        "logo": "/usr/share/plymouth/themes/omarchy/logo.png",
+        "owner": "omarchy",
+        "styled_by": "default",
+        "theme": "omarchy"
+    },
+    "prefs": {
+        "layout": "columns"
+    },
+    "rollback": null,
+    "sandbox": null,
+    "themes": [
+        {
+            "boots": false,
+            "dir": "/home/mtolhuijs/.config/omaboot/themes/matte",
+            "id": "matte",
+            "name": "Maarten I",
+            "problem": null,
+            "valid": true
+        }
+    ],
+    "themes_dir": "/home/mtolhuijs/.config/omaboot/themes",
+    "tools": {
+        "greeter": "sddm-greeter-qt6",
+        "helper": "/home/mtolhuijs/.local/bin/omaboot-apply",
+        "initramfs": "/usr/bin/limine-mkinitcpio",
+        "plymouth_set_default": "/usr/bin/plymouth-set-default-theme"
+    },
+    "version": "0.1.0",
+    "warnings": []
+}

@@ -1,0 +1,35 @@
+scenario=conform-home-mtolhuijs-projects-omarchy-omaboot-plugin
+candidate_commit=fc016643b9966481b938819e4899bc8affe5c463
+worktree_dirty_at_run=no
+omarchy_pin=b5589faaf80c6f87c07d4560fca37c4a81722f28
+guest_start=2026-09-20 16:18:37
+subject=omaboot plugin=plugin commit=433f1c27f49622d0c80eed299304374e37b8cc0b dirty=yes kinds=panel id=mtolhuys.omaboot
+interactive_source=yes
+check lab-validate=pass [none] pinned omarchy-plugin-validate accepts the manifest (kinds: panel)
+check log-baseline=pass [none] shell restarted without the subject at 2026-09-20 16:18:38; warning classes until the install count as host baseline
+process_snapshot baseline: 3 descendants
+artifact conform-00-before-install.png sha256=b7c3c96d6db46880f39c7dc2184350c6f2eb38133af464781b3abeef79250bb8
+check lab-install=pass [none] omarchy-plugin-add --enable from the local repository at the subject commit
+check lab-first-load.panel=unsupported [none] summon (host IPC) produced no failure line and no new layer; the suite cannot see whether a panel that shows nothing on open loaded
+check lab-bar-render=not-applicable [none] kinds: panel
+check lab-click=not-applicable [none] kinds: panel
+check lab-escape=not-applicable [none] kinds: panel
+check lab-popout-switch=not-applicable [none] kinds: panel
+check theme-matte-black=pass [none] theme.name is matte-black
+artifact conform-theme-matte-black-bar.png sha256=ea317891ddbec8ec5f8c555247cc90cf8f3db157b16ed990d8f773b6bed81887
+check theme-catppuccin-latte=pass [none] theme.name is catppuccin-latte
+artifact conform-theme-catppuccin-latte-bar.png sha256=e14fdb257de9bfff2b31c1d3744e68516749c34318f7fd6180ca5d58bdd056f8
+check lab-themes=pass [none] stills in matte-black (dark) and catppuccin-latte (light)
+check theme-tokyo-night=pass [none] theme.name is tokyo-night
+check lab-disable=pass [none] disable cleared the enabled bit and kept the files
+check lab-reenable=pass [none] re-enable set the enabled bit
+check lab-restart.loaded=pass [none] after a full shell restart the plugin is enabled again
+check lab-restart.no-failure=pass [ipc-observe] no load-failure line for mtolhuys.omaboot after the restart
+check lab-reload=unsupported [none] same-path reload does not replace the loaded runtime at Omarchy pin b5589fa (docs/UPSTREAM_CONTRACT.md contract 11); a generic check cannot observe a replaced runtime without plugin cooperation
+process_snapshot before-removal: 4 descendants
+check lab-remove=pass [none] removal deleted the files, the layout entry and the listing
+process_snapshot after-removal: 18 descendants
+check lab-no-leak.removal=pass [ipc-observe] no subject process survives between before-removal and after-removal (host-owned new:   [find] <defunct>;  [hyprctl] <defunct>;  [hyprctl] <defunct>;  [omarchy-audio-o] <defunct>;  [omarchy-dns] <defunct>;  [omarchy-monitor] <defunct>;  [omarchy-network] <defunct>;  [omarchy-network] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-voxtype] <defunct>;  [omarchy-voxtype] <defunct>;  [pgrep] <defunct>;  [pgrep] <defunct>;  [powerprofilesct] <defunct>;  [readlink] <defunct>;  /usr/lib/xkbcommon/xkbcli-list --load-exotic;)
+log_baseline_classes=3 window=2026-09-20 16:18:38..2026-09-20 16:18:50
+check lab-log-gate=pass [ipc-observe] 36 matching log lines: 8 host baseline, 28 allowlisted with reasons
+bundle=omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin/evidence.json result=pass

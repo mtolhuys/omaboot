@@ -1,0 +1,9 @@
+$ cat ~/.local/state/omarchy/current/theme.name
+catppuccin-dark
+
+exit: 0
+$ ls -ld ~/.local/state/omarchy/current/theme
+drwxr-xr-x 1 mtolhuijs mtolhuijs 534 Sep 20 13:25 /home/mtolhuijs/.local/state/omarchy/current/theme
+$ target/release/omaboot status --json | jq .active_omarchy_theme
+"catppuccin-dark"
+exit: 0 0

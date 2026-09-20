@@ -1,0 +1,35 @@
+scenario=conform-home-mtolhuijs-projects-omarchy-omaboot-plugin
+candidate_commit=fc016643b9966481b938819e4899bc8affe5c463
+worktree_dirty_at_run=no
+omarchy_pin=b5589faaf80c6f87c07d4560fca37c4a81722f28
+guest_start=2026-09-19 23:07:14
+subject=omaboot plugin=plugin commit=2acffaa1dfb60a8373d8f71884a7e07a494e8695 dirty=yes kinds=panel id=mtolhuys.omaboot
+interactive_source=yes
+check lab-validate=pass [none] pinned omarchy-plugin-validate accepts the manifest (kinds: panel)
+check log-baseline=pass [none] shell restarted without the subject at 2026-09-19 23:07:15; warning classes until the install count as host baseline
+process_snapshot baseline: 3 descendants
+artifact conform-00-before-install.png sha256=275694f042a2c392b27d72f38c2b01db21a3d668bf254fdaeaf85384a3a9b0ba
+check lab-install=pass [none] omarchy-plugin-add --enable from the local repository at the subject commit
+check lab-first-load.panel=unsupported [none] summon (host IPC) produced no failure line and no new layer; the suite cannot see whether a panel that shows nothing on open loaded
+check lab-bar-render=not-applicable [none] kinds: panel
+check lab-click=not-applicable [none] kinds: panel
+check lab-escape=not-applicable [none] kinds: panel
+check lab-popout-switch=not-applicable [none] kinds: panel
+check theme-matte-black=pass [none] theme.name is matte-black
+artifact conform-theme-matte-black-bar.png sha256=449b00235d586cacfaa21bbb6e2f4daf408e8a83b0759e21ccc8be2553d388be
+check theme-catppuccin-latte=pass [none] theme.name is catppuccin-latte
+artifact conform-theme-catppuccin-latte-bar.png sha256=9f3c45eb1ee07f6e3270aee3cbee3d207fa98884f50a53989c1225fc8f9ce022
+check lab-themes=pass [none] stills in matte-black (dark) and catppuccin-latte (light)
+check theme-tokyo-night=pass [none] theme.name is tokyo-night
+check lab-disable=pass [none] disable cleared the enabled bit and kept the files
+check lab-reenable=pass [none] re-enable set the enabled bit
+check lab-restart.loaded=pass [none] after a full shell restart the plugin is enabled again
+check lab-restart.no-failure=pass [ipc-observe] no load-failure line for mtolhuys.omaboot after the restart
+check lab-reload=unsupported [none] same-path reload does not replace the loaded runtime at Omarchy pin b5589fa (docs/UPSTREAM_CONTRACT.md contract 11); a generic check cannot observe a replaced runtime without plugin cooperation
+process_snapshot before-removal: 4 descendants
+check lab-remove=pass [none] removal deleted the files, the layout entry and the listing
+process_snapshot after-removal: 29 descendants
+check lab-no-leak.removal=pass [ipc-observe] no subject process survives between before-removal and after-removal (host-owned new:   awk -v package=omarchy $1 == package { print; exit };  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-update;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-update-available;  /bin/bash /home/omarchy/.local/share/omarchy/bin/omarchy-update-available;  /bin/sh /usr/bin/fakeroot -- pacman -Sy --disable-sandbox-filesystem --dbpath /tmp/checkup-db-1000/ --logfile /dev/null;  [find] <defunct>;  [hyprctl] <defunct>;  [omarchy-audio-o] <defunct>;  [omarchy-dns] <defunct>;  [omarchy-monitor] <defunct>;  [omarchy-network] <defunct>;  [omarchy-network] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-reminde] <defunct>;  [omarchy-voxtype] <defunct>;  [omarchy-voxtype] <defunct>;  [pgrep] <defunct>;  [pgrep] <defunct>;  /usr/bin/bash /usr/bin/checkupdates --nocolor;  /usr/bin/curl -fsS --max-time 10 https://wttr.in/?format=j1;  /usr/bin/curl -fsS --max-time 4 https://wttr.in/?format=%l;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-claude;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-codex;  /usr/bin/python3 /home/omarchy/.local/share/omarchy/bin/omarchy-agent-usage-fireworks;  /usr/lib/xkbcommon/xkbcli-list --load-exotic;)
+log_baseline_classes=3 window=2026-09-19 23:07:15..2026-09-19 23:07:26
+check lab-log-gate=fail [ipc-observe] 1 unexplained log lines (see unexplained.txt)
+bundle=omakit-conform-home-mtolhuijs-projects-omarchy-omaboot-plugin/evidence.json result=fail

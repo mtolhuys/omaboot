@@ -1,0 +1,97 @@
+omaboot: theme roundtest (would perform)
+         theme hash fad9381f58e85843
+
+- Validate theme
+    check    /home/mtolhuijs/.config/omaboot/themes/roundtest/theme.toml parses, every key is known
+    check    logo /home/mtolhuijs/.config/omaboot/themes/roundtest/omarchy-logo-solitude.png is a regular file, not a symlink, within the size limit
+    check    colours background=#112233 foreground=#c0caf5 accent=#7aa2f7 error=#f7768e
+- Generate assets
+    check    /usr/share/plymouth/themes/omaboot/omaboot.plymouth <- generated (305 bytes)
+    check    /usr/share/plymouth/themes/omaboot/omaboot.script <- generated (12193 bytes)
+    check    /usr/share/plymouth/themes/omaboot/logo.png <- copy of /home/mtolhuijs/.config/omaboot/themes/roundtest/omarchy-logo-solitude.png (456857 bytes)
+    check    /usr/share/plymouth/themes/omaboot/bullet.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/bullet.png recoloured to #c0caf5 (293 bytes)
+    check    /usr/share/plymouth/themes/omaboot/entry.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/entry.png recoloured to #c0caf5 (543 bytes)
+    check    /usr/share/plymouth/themes/omaboot/lock.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/lock.png recoloured to #c0caf5 (1531 bytes)
+    check    /usr/share/plymouth/themes/omaboot/progress_bar.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/progress_bar.png recoloured to #c0caf5 (204 bytes)
+    check    /usr/share/plymouth/themes/omaboot/progress_box.png <- copy of /home/mtolhuijs/Projects/omarchy/core/default/plymouth/progress_box.png (314 bytes)
+    check    /usr/share/sddm/themes/omaboot/Main.qml <- generated (3609 bytes)
+    check    /usr/share/sddm/themes/omaboot/theme.conf <- generated (22 bytes)
+    check    /usr/share/sddm/themes/omaboot/metadata.desktop <- generated (144 bytes)
+    check    /usr/share/sddm/themes/omaboot/logo.png <- copy of /home/mtolhuijs/.config/omaboot/themes/roundtest/omarchy-logo-solitude.png (456857 bytes)
+    check    /usr/share/sddm/themes/omaboot/bullet.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/bullet.png recoloured to #c0caf5 (293 bytes)
+    check    /usr/share/sddm/themes/omaboot/entry.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/entry.png recoloured to #c0caf5 (543 bytes)
+    check    /usr/share/sddm/themes/omaboot/lock.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/lock.png recoloured to #c0caf5 (1531 bytes)
+    check    /usr/share/sddm/themes/omaboot/entry-failed.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/entry-failed.png recoloured to #f7768e (543 bytes)
+    check    /usr/share/sddm/themes/omaboot/lock-failed.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/lock-failed.png recoloured to #f7768e (1525 bytes)
+- Stage theme
+    rm -r    /home/mtolhuijs/.local/state/omaboot/stage
+    mkdir    /home/mtolhuijs/.local/state/omaboot/stage/plymouth
+    mkdir    /home/mtolhuijs/.local/state/omaboot/stage/sddm
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/omaboot.plymouth (305 bytes, sha256 fb78d0122031, generated)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/omaboot.script (12193 bytes, sha256 da882c6af3d2, generated)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/logo.png (456857 bytes, sha256 42b2ca24064e, copy of /home/mtolhuijs/.config/omaboot/themes/roundtest/omarchy-logo-solitude.png)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/bullet.png (293 bytes, sha256 2af52467c3b4, /home/mtolhuijs/Projects/omarchy/core/default/plymouth/bullet.png recoloured to #c0caf5)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/entry.png (543 bytes, sha256 a7cac78a00c8, /home/mtolhuijs/Projects/omarchy/core/default/plymouth/entry.png recoloured to #c0caf5)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/lock.png (1531 bytes, sha256 02a6127d038c, /home/mtolhuijs/Projects/omarchy/core/default/plymouth/lock.png recoloured to #c0caf5)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/progress_bar.png (204 bytes, sha256 e734c08093c1, /home/mtolhuijs/Projects/omarchy/core/default/plymouth/progress_bar.png recoloured to #c0caf5)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/plymouth/progress_box.png (314 bytes, sha256 71ff80943fc3, copy of /home/mtolhuijs/Projects/omarchy/core/default/plymouth/progress_box.png)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/Main.qml (3609 bytes, sha256 ac52372b8731, generated)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/theme.conf (22 bytes, sha256 fd9d011d0312, generated)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/metadata.desktop (144 bytes, sha256 ce084d8086bb, generated)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/logo.png (456857 bytes, sha256 42b2ca24064e, copy of /home/mtolhuijs/.config/omaboot/themes/roundtest/omarchy-logo-solitude.png)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/bullet.png (293 bytes, sha256 2af52467c3b4, /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/bullet.png recoloured to #c0caf5)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/entry.png (543 bytes, sha256 a7cac78a00c8, /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/entry.png recoloured to #c0caf5)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/lock.png (1531 bytes, sha256 02a6127d038c, /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/lock.png recoloured to #c0caf5)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/entry-failed.png (543 bytes, sha256 a7173af84360, /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/entry-failed.png recoloured to #f7768e)
+    write    /home/mtolhuijs/.local/state/omaboot/stage/sddm/lock-failed.png (1525 bytes, sha256 4f8dcd785fc4, /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/lock-failed.png recoloured to #f7768e)
+- Smoke test greeter
+    run      QT_QPA_PLATFORM=offscreen /usr/bin/sddm-greeter-qt6 --test-mode --theme /home/mtolhuijs/.local/state/omaboot/stage/sddm    # the greeter smoke test, which decides whether this theme is ever shown at login
+- Authorise
+    run      sudo -v    # one authorisation for the whole operation, rather than one per file
+- Install into the omaboot directories
+    run      sudo /home/mtolhuijs/.local/bin/omaboot-apply install --staged /home/mtolhuijs/.local/state/omaboot/stage    # the privileged helper, which publishes each file atomically
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/omaboot.plymouth
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/omaboot.script
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/logo.png
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/bullet.png
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/entry.png
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/lock.png
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/progress_bar.png
+    check    the helper will publish /usr/share/plymouth/themes/omaboot/progress_box.png
+    check    the helper will publish /usr/share/sddm/themes/omaboot/Main.qml
+    check    the helper will publish /usr/share/sddm/themes/omaboot/theme.conf
+    check    the helper will publish /usr/share/sddm/themes/omaboot/metadata.desktop
+    check    the helper will publish /usr/share/sddm/themes/omaboot/logo.png
+    check    the helper will publish /usr/share/sddm/themes/omaboot/bullet.png
+    check    the helper will publish /usr/share/sddm/themes/omaboot/entry.png
+    check    the helper will publish /usr/share/sddm/themes/omaboot/lock.png
+    check    the helper will publish /usr/share/sddm/themes/omaboot/entry-failed.png
+    check    the helper will publish /usr/share/sddm/themes/omaboot/lock-failed.png
+- Record rollback point
+    write    /home/mtolhuijs/.local/state/omaboot/rollback.toml (206 bytes, sha256 e1bbeae6d4f1, rollback point, written before anything switches)
+- Switch
+    run      sudo /usr/bin/plymouth-set-default-theme omaboot
+    run      sudo /home/mtolhuijs/.local/bin/omaboot-apply switch --on    # writing /etc/sddm.conf.d/zz-omaboot.conf
+- Rebuild initramfs
+    run      sudo /usr/bin/limine-mkinitcpio    # rebuilding the initramfs so the theme is present at boot
+- Verify
+    verify   /usr/share/plymouth/themes/omaboot/omaboot.plymouth (305 bytes, sha256 fb78d0122031)
+    verify   /usr/share/plymouth/themes/omaboot/omaboot.script (12193 bytes, sha256 da882c6af3d2)
+    verify   /usr/share/plymouth/themes/omaboot/logo.png (456857 bytes, sha256 42b2ca24064e)
+    verify   /usr/share/plymouth/themes/omaboot/bullet.png (293 bytes, sha256 2af52467c3b4)
+    verify   /usr/share/plymouth/themes/omaboot/entry.png (543 bytes, sha256 a7cac78a00c8)
+    verify   /usr/share/plymouth/themes/omaboot/lock.png (1531 bytes, sha256 02a6127d038c)
+    verify   /usr/share/plymouth/themes/omaboot/progress_bar.png (204 bytes, sha256 e734c08093c1)
+    verify   /usr/share/plymouth/themes/omaboot/progress_box.png (314 bytes, sha256 71ff80943fc3)
+    verify   /usr/share/sddm/themes/omaboot/Main.qml (3609 bytes, sha256 ac52372b8731)
+    verify   /usr/share/sddm/themes/omaboot/theme.conf (22 bytes, sha256 fd9d011d0312)
+    verify   /usr/share/sddm/themes/omaboot/metadata.desktop (144 bytes, sha256 ce084d8086bb)
+    verify   /usr/share/sddm/themes/omaboot/logo.png (456857 bytes, sha256 42b2ca24064e)
+    verify   /usr/share/sddm/themes/omaboot/bullet.png (293 bytes, sha256 2af52467c3b4)
+    verify   /usr/share/sddm/themes/omaboot/entry.png (543 bytes, sha256 a7cac78a00c8)
+    verify   /usr/share/sddm/themes/omaboot/lock.png (1531 bytes, sha256 02a6127d038c)
+    verify   /usr/share/sddm/themes/omaboot/entry-failed.png (543 bytes, sha256 a7173af84360)
+    verify   /usr/share/sddm/themes/omaboot/lock-failed.png (1525 bytes, sha256 4f8dcd785fc4)
+    verify   /etc/sddm.conf.d/zz-omaboot.conf (24 bytes, sha256 b1b029380b61)
+    verify   /etc/sddm.conf and /etc/sddm.conf.d/*.conf resolve [Theme] Current= to omaboot
+    write    /home/mtolhuijs/.local/state/omaboot/applied.toml (2761 bytes, sha256 a04697764767, applied state)

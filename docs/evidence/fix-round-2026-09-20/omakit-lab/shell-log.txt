@@ -1,0 +1,56 @@
+Sep 20 16:18:39 omarchy-test omarchy-shell[3730]:   INFO: Exiting due to IPC request.
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:   INFO: Launching config: "/home/omarchy/.local/share/omarchy/shell/shell.qml"
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:   INFO: Shell ID: "4d3be17c5102200b5c7600bd8075096e" Path ID "4d3be17c5102200b5c7600bd8075096e"
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:   INFO: Saving logs to "/run/user/1000/quickshell/by-id/t543f2olt/log.qslog"
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]: MESA-EGL: warning: egl: failed to create dri2 screen
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]: MESA-EGL: warning: egl: failed to create dri2 screen
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:  DEBUG qml: omarchy-shell paths omarchyPath=/home/omarchy/.local/share/omarchy shellDir=/home/omarchy/.local/share/omarchy/shell firstPartyPluginsDir=/home/omarchy/.local/share/omarchy/shell/plugins defaultsPath=/home/omarchy/.local/share/omarchy/config/omarchy/shell.json userConfigPath=/home/omarchy/.config/omarchy/shell.json
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:   INFO: Configuration Loaded
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:   WARN qt.qpa.services: Failed to register with host portal QDBusError("org.freedesktop.portal.Error.Failed", "Could not register app ID: Connection already associated with an application ID")
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:  DEBUG qml: omarchy idle 2026-09-20T14:18:39.839Z service-ready
+Sep 20 16:18:39 omarchy-test omarchy-shell[5393]:   WARN quickshell.dbus.objectmanager: Failed to create DBusObjectManagerInterface for "org.bluez" "/" : QDBusError("", "")
+Sep 20 16:18:40 omarchy-test omarchy-shell[5393]:  DEBUG qml: omarchy polkit agent registered
+Sep 20 16:18:40 omarchy-test omarchy-shell[5393]:  DEBUG qml: omarchy idle 2026-09-20T14:18:40.229Z stay-awake: disabled state-file
+Sep 20 16:18:40 omarchy-test omarchy-shell[5393]:  DEBUG qml: omarchy idle 2026-09-20T14:18:40.275Z idle-monitor: active
+Sep 20 16:18:50 omarchy-test omarchy-shell[5393]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:00 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:00 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:01 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:07 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:07 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:07 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:14 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:14 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:14 omarchy-test omarchy-shell[5393]:   WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+Sep 20 16:19:21 omarchy-test omarchy-shell[5393]:   INFO: Exiting due to IPC request.
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:   INFO: Launching config: "/home/omarchy/.local/share/omarchy/shell/shell.qml"
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:   INFO: Shell ID: "4d3be17c5102200b5c7600bd8075096e" Path ID "4d3be17c5102200b5c7600bd8075096e"
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:   INFO: Saving logs to "/run/user/1000/quickshell/by-id/0e89g2olt/log.qslog"
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]: MESA-EGL: warning: egl: failed to create dri2 screen
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]: MESA-EGL: warning: egl: failed to create dri2 screen
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:  DEBUG qml: omarchy-shell paths omarchyPath=/home/omarchy/.local/share/omarchy shellDir=/home/omarchy/.local/share/omarchy/shell firstPartyPluginsDir=/home/omarchy/.local/share/omarchy/shell/plugins defaultsPath=/home/omarchy/.local/share/omarchy/config/omarchy/shell.json userConfigPath=/home/omarchy/.config/omarchy/shell.json
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:   INFO: Configuration Loaded
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:   WARN qt.qpa.services: Failed to register with host portal QDBusError("org.freedesktop.portal.Error.Failed", "Could not register app ID: Connection already associated with an application ID")
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:  DEBUG qml: omarchy idle 2026-09-20T14:19:21.877Z service-ready
+Sep 20 16:19:21 omarchy-test omarchy-shell[10872]:   WARN quickshell.dbus.objectmanager: Failed to create DBusObjectManagerInterface for "org.bluez" "/" : QDBusError("", "")
+Sep 20 16:19:22 omarchy-test omarchy-shell[10872]:  DEBUG qml: omarchy polkit agent registered
+Sep 20 16:19:22 omarchy-test omarchy-shell[10872]:  DEBUG qml: omarchy idle 2026-09-20T14:19:22.250Z stay-awake: disabled state-file
+Sep 20 16:19:22 omarchy-test omarchy-shell[10872]:  DEBUG qml: omarchy idle 2026-09-20T14:19:22.306Z idle-monitor: active
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+Sep 20 16:19:26 omarchy-test omarchy-shell[10872]:  DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot

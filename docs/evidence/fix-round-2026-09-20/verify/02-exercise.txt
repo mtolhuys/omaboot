@@ -1,0 +1,26 @@
+# same PATH note as 02-shots.txt
+$ plugin/harness/exercise.sh /tmp/omaboot-exercise
+== edits in a burst are all saved, in order
+wrote /tmp/omaboot-exercise/edits.png (3200x2000); status: 
+== the shutdown screen gets its own logo width, the unlock screen keeps its own
+wrote /tmp/omaboot-exercise/shutdown-scale.png (3200x2000); status: 
+== the file dialog opens in ~/Pictures first, then where the last image came from
+wrote /tmp/omaboot-exercise/picker.png (3200x2000); status: picker opens in --filename=/home/mtolhuijs/Projects/omarchy/omaboot/.harness/home/Pictures/
+wrote /tmp/omaboot-exercise/picker-after.png (3200x2000); status: picker now opens in /home/mtolhuijs/Projects/omarchy/core/themes/tokyo-night/
+== a dropped logo is copied in and used
+wrote /tmp/omaboot-exercise/drop.png (3200x2000); status: added unlock.png as the logo
+== a dropped wallpaper switches the login background to it
+wrote /tmp/omaboot-exercise/wallpaper.png (3200x2000); status: added unlock.png as the login wallpaper
+== rename keeps the id and changes the name
+wrote /tmp/omaboot-exercise/rename.png (3200x2000); status: 
+== a new theme from what boots now, then deleted
+wrote /tmp/omaboot-exercise/new.png (3200x2000); status: created second from what boots now; change it, then apply it
+wrote /tmp/omaboot-exercise/delete.png (3200x2000); status: removed second; nothing on the system was touched
+== a dry run reports every step
+wrote /tmp/omaboot-exercise/dryrun.png (3200x2000); status: 
+== without the engine the window says so and spawns nothing
+wrote /tmp/omaboot-exercise/engine-missing.png (2200x1520); status: omaboot is not installed: nothing at /home/mtolhuijs/Projects/omarchy/omaboot/.harness/home/.local/bin/omaboot and no omaboot on PATH. Build it (cargo build --release) and run target/release/omaboot plugin install.
+all flows passed; pictures in /tmp/omaboot-exercise
+the real config directory /home/mtolhuijs/.config/omaboot is untouched
+exit: 0
+seconds: 26

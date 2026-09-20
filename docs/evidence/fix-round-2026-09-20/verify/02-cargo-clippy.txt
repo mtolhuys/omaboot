@@ -1,0 +1,5 @@
+$ cargo clippy --workspace --all-targets -- -D warnings
+    Checking omaboot-apply v0.1.0 (/home/mtolhuijs/Projects/omarchy/omaboot/crates/omaboot-apply)
+    Checking omaboot v0.1.0 (/home/mtolhuijs/Projects/omarchy/omaboot/crates/omaboot)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.63s
+exit: 0

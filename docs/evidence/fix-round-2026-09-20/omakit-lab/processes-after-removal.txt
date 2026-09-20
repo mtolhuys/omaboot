@@ -1,0 +1,18 @@
+  11124   10872 /usr/bin/inotifywait -m -r -q -e close_write,create,delete,move --format %w%f /home/omarchy/.config/omarchy/plugins
+  12205   10872 [readlink] <defunct>
+  12208   10872 [powerprofilesct] <defunct>
+  12212   10872 [hyprctl] <defunct>
+  12224   10872 [find] <defunct>
+  12228   10872 [omarchy-voxtype] <defunct>
+  12229   10872 [omarchy-reminde] <defunct>
+  12232   10872 [omarchy-voxtype] <defunct>
+  12235   10872 [omarchy-reminde] <defunct>
+  12241   10872 [pgrep] <defunct>
+  12247   10872 [pgrep] <defunct>
+  12249   10872 /usr/lib/xkbcommon/xkbcli-list --load-exotic
+  12250   10872 [hyprctl] <defunct>
+  12253   10872 [omarchy-audio-o] <defunct>
+  12265   10872 [omarchy-monitor] <defunct>
+  12278   10872 [omarchy-network] <defunct>
+  12279   10872 [omarchy-dns] <defunct>
+  12280   10872 [omarchy-network] <defunct>

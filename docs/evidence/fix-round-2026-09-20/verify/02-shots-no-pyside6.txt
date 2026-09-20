@@ -1,0 +1,14 @@
+# reproduces the first attempt of step 2, before the scratch venv: the system python3 has no PySide6
+$ PATH=/usr/bin plugin/harness/shots.sh /tmp/omaboot-shots-nopyside
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+ModuleNotFoundError: No module named 'PySide6'
+exit: 0
+$ ls /tmp/omaboot-shots-nopyside | wc -l
+0

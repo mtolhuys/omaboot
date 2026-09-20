@@ -1,0 +1,36 @@
+MESA-EGL: warning: egl: failed to create dri2 screen
+MESA-EGL: warning: egl: failed to create dri2 screen
+  WARN qt.qpa.services: Failed to register with host portal QDBusError("org.freedesktop.portal.Error.Failed", "Could not register app ID: Connection already associated with an application ID")
+  WARN quickshell.dbus.objectmanager: Failed to create DBusObjectManagerInterface for "org.bluez" "/" : QDBusError("", "")
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+  WARN: Qt.atob(string): This method is deprecated. Its output differs from the common Web API. Use the overloads that take array-likes.
+MESA-EGL: warning: egl: failed to create dri2 screen
+MESA-EGL: warning: egl: failed to create dri2 screen
+  WARN qt.qpa.services: Failed to register with host portal QDBusError("org.freedesktop.portal.Error.Failed", "Could not register app ID: Connection already associated with an application ID")
+  WARN quickshell.dbus.objectmanager: Failed to create DBusObjectManagerInterface for "org.bluez" "/" : QDBusError("", "")
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot
+ DEBUG qml: Local plugin changed, reloading: mtolhuys.omaboot

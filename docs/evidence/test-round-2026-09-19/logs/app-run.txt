@@ -1,0 +1,5 @@
+[32m  INFO[0m: Launching config: "/home/mtolhuijs/.config/omaboot/app/shell.qml"
+[32m  INFO[0m: Shell ID: "89c2ef7a066f0c702f46333d9ab7ed8a" Path ID "89c2ef7a066f0c702f46333d9ab7ed8a"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/5p6f2h9qmlt/log.qslog"
+[32m  INFO[0m: Configuration Loaded
+[33m  WARN[97m qt.qpa.services[0m: Failed to register with host portal QDBusError("org.freedesktop.portal.Error.Failed", "Could not register app ID: Connection already associated with an application ID")

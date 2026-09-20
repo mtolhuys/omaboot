@@ -1,0 +1,4 @@
+  11124   10872 /usr/bin/inotifywait -m -r -q -e close_write,create,delete,move --format %w%f /home/omarchy/.config/omarchy/plugins
+  11527   10872 wl-paste --type text --watch /home/omarchy/.local/share/omarchy/shell/plugins/clipboard/capture.sh text
+  11528   10872 wl-paste --type image/png --watch /home/omarchy/.local/share/omarchy/shell/plugins/clipboard/capture.sh image/png
+  11749   10872 /bin/python3 /usr/bin/powerprofilesctl get

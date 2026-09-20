@@ -1,0 +1,10 @@
+$ ls -d plugin/harness/.work .harness-stage
+ls: cannot access 'plugin/harness/.work': No such file or directory
+ls: cannot access '.harness-stage': No such file or directory
+exit: 2
+$ rm -rf plugin/harness/.work .harness-stage
+exit: 0
+$ ls -d plugin/harness/.work .harness-stage
+ls: cannot access 'plugin/harness/.work': No such file or directory
+ls: cannot access '.harness-stage': No such file or directory
+exit: 2
