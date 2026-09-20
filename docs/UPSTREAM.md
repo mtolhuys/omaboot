@@ -158,13 +158,41 @@ Other relevant pieces:
   request is noted, so a summon during either unload is lost silently. The
   file watcher (`Local plugin changed, reloading`) triggers the same path.
   `shell call <id> <method> <arg>` calls a method on a loaded plugin
-  instance and answers "unknown" while there is none. The installed tree on
-  the reference machine (`4.0.0.alpha`) has not been read for `call`; if it
-  lacks it, `omaboot` falls back to trusting the summon.
+  instance and answers "unknown" while there is none. Verified 20 September
+  2026 on the reference machine: the running shell (the `core` checkout at
+  `e5b0dc22`) has `call` (`shell/shell.qml:1115`) and answered `open` from
+  the plugin's `ping()` with the window up. A shell without it makes
+  `omaboot` fall back to trusting the summon.
+- Verified 20 September 2026 in `shell/services/PluginRegistry.qml` at the
+  plugin lab's Omarchy pin `b5589fa` (quattro): the local plugin watcher is
+  `inotifywait -m -r -e close_write,create,delete,move` on
+  `~/.config/omarchy/plugins`, and every event whose path is not hidden and
+  not under `.git` emits `localPluginChanged` for that plugin id, one reload
+  per event, with no coalescing. `omarchy-plugin-add` clones into a hidden
+  staging directory and moves it into place in one `mv` (one event, one
+  reload); `omarchy-plugin-remove` runs `rm -rf` on the plugin directory (one
+  event per file and per directory). A lab conform run therefore logs
+  1 + files + directories lines of `Local plugin changed, reloading: <id>`,
+  the plugin directory itself counted: 19 for omaboot, 16 files in
+  `plugin/` and `plugin/harness`, whatever the plugin does. On the host the
+  same watcher fires for anything written into the linked `plugin/`
+  directory, which is why the harness works in `.harness/` at the
+  repository root.
 - Quattro plugins are QML entry points (`bar`, `panel`, `overlay`, `menu`,
   `service`) loaded by the shell from `~/.config/omarchy/plugins/<id>/`. Boot and
   login happen before the shell exists, so **omaboot is not a shell plugin** and
   should not pretend to be one.
+
+## Proposed upstream
+
+Not sent. The reload watcher in `PluginRegistry.qml` could coalesce the
+events of one plugin id into a single reload a few hundred milliseconds after
+the last one, and skip the reload altogether when the plugin's directory no
+longer exists at that moment, since a removal is already handled by the
+listing. Both together turn the 1 + files + directories lines above into two
+(install, remove) and make "one reload per change" true for local plugins
+edited by hand, which is what the watcher is for. The change is upstream's to
+make; nothing in omaboot can affect the count.
 
 ## The risk
 
