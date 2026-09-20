@@ -579,13 +579,18 @@ unprivileged steps that must stay between them. Folding those into one
 helper transaction would widen the helper's interface, which is the thing it
 is designed not to have. So the plugin asks for the password in its own
 dialog, hands it to the engine on stdin (`--password-stdin`), and the engine
-turns it into a sudo ticket with `sudo -S -k -v` and drops the string. Every
+turns it into a sudo ticket with `sudo -S -v` and drops the string. Every
 later privileged command runs as `sudo -n`, so a missing ticket is an error
 in one line rather than a process waiting forever for a prompt nobody can
 see. Without a terminal, sudo keys the ticket on the parent process, and
 every privileged command is a child of that one engine process, so one
 prompt covers the whole run. The password never touches a file, an argument
-or the environment.
+or the environment. The first draft used `sudo -S -k -v`, and the first
+real apply (20 September 2026, A2) stopped at step 5 with "a password is
+required": with `-v`, `-k` makes sudo check the password and record
+nothing, per sudo(8). The engine now also asks `sudo -n -v` right after
+taking the ticket, so a sudoers policy that keeps no ticket is reported at
+the dialog rather than five steps later.
 
 **Installation is three links, not a copy.** `omaboot plugin install` links
 `plugin/` into `~/.config/omarchy/plugins/mtolhuys.omaboot` and both

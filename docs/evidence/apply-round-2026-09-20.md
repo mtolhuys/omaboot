@@ -51,7 +51,35 @@ for the wrong reason. Screenshots in `docs/evidence/apply-round-2026-09-20/`.
   the healthy-path verification; the broken-theme path needs the command in
   that note once.
 
-### What the step had to become (written before the fix, followed by it)
+### A2. Step 5, "Authorise", fails with "a password is required" after the password was accepted
+
+- What: the second real `Apply to the system` on `matte`, with the smoke
+  test fixed (A1); the password dialog answered.
+- Saw: steps 1 to 4 ticked (the new smoke test passed in about ten
+  seconds), then "Authorise" failed: `sudo -n -v exited with exit code 1:
+  sudo: a password is required. Suggested next step: one authorisation for
+  the whole operation, rather than one per file did not succeed; read the
+  message above and fix the cause, then run the step again`
+  (`authorise-no-ticket.png`). Nothing was installed.
+- Expected: the ticket taken from the password at the start of the run
+  covers `sudo -n -v` and every privileged command after it.
+- Cause: `auth::acquire` ran `sudo -S -k -v -p ""`. The password was
+  accepted (otherwise the run would have stopped before step 1), but with
+  `-v`, `-k` makes sudo ignore and not update the cached credentials
+  (sudo(8), `--reset-timestamp`: "will prompt for a password ... and will
+  not update the user's cached credentials"). So no ticket was ever
+  recorded, and the first `sudo -n` found none. The path had never run for
+  real either: under `--root` no sudo runs, and the tests script the runner.
+- Reproduce: `printf '%s\n' "$password" | sudo -S -k -v -p ''; sudo -n -v`
+  in a shell without a tty (`setsid` or from a Quickshell Process): the
+  second command fails with "a password is required". Without `-k` it
+  succeeds.
+- Fixed: `TICKET_ARGS` is `-S -v -p ""`, with a test that it carries no
+  `-k`; and `acquire` asks `sudo -n -v` right after, so a sudoers policy
+  that keeps no ticket (`timestamp_timeout=0`) is reported at the password
+  dialog with the setting to look at, instead of at step 5.
+
+### What the A1 step had to become (written before the fix, followed by it)
 
 The greeter is alive after N seconds with no error on stderr, then killed,
 is the pass; an exit before N seconds, whatever the code, is the fail; the
