@@ -1,0 +1,14 @@
+High-DPI autoscaling not Enabled
+Reading from "/usr/local/share/wayland-sessions/omarchy.desktop"
+Reading from "/usr/local/share/wayland-sessions/hyprland-uwsm.desktop"
+Reading from "/usr/share/wayland-sessions/hyprland-uwsm.desktop"
+Reading from "/usr/local/share/wayland-sessions/hyprland.desktop"
+Reading from "/usr/share/wayland-sessions/hyprland.desktop"
+Loading theme configuration from "/tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/healthy/theme.conf"
+Socket error:  "QLocalSocket::connectToServer: Invalid name"
+Loading file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/healthy/Main.qml...
+Adding view for "" QRect(0,0 800x800)
+Signal received: SIGTERM
+QObject::startTimer: current thread's event dispatcher has already been destroyed
+QBasicTimer::start: current thread's event dispatcher has already been destroyed
+QObject::startTimer: current thread's event dispatcher has already been destroyed

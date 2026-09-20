@@ -1,0 +1,26 @@
+High-DPI autoscaling not Enabled
+Reading from "/usr/local/share/wayland-sessions/omarchy.desktop"
+Reading from "/usr/local/share/wayland-sessions/hyprland-uwsm.desktop"
+Reading from "/usr/share/wayland-sessions/hyprland-uwsm.desktop"
+Reading from "/usr/local/share/wayland-sessions/hyprland.desktop"
+Reading from "/usr/share/wayland-sessions/hyprland.desktop"
+Loading theme configuration from "/tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/theme.conf"
+Socket error:  "QLocalSocket::connectToServer: Invalid name"
+Loading file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/Main.qml...
+file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/Main.qml:12:44: Expected a qualified name id 
+       readonly property color foregroundColor: "#bebebe"  {{ broken on purpose 
+                                                ^
+file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/Main.qml:12:44: Expected a qualified name id 
+       readonly property color foregroundColor: "#bebebe"  {{ broken on purpose 
+                                                ^
+Fallback to embedded theme
+qt.qml.propertyCache.append: Member enabled of the object ImageButton_QMLTYPE_17 overrides a member of the base object. Consider renaming it or adding final or override specifier
+file:///usr/lib/qt6/qml/SddmComponents/LayoutBox.qml:35:5: QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }
+file:///usr/lib/qt6/qml/SddmComponents/ComboBox.qml:105:9: QML Image: Cannot open: file:///usr/lib/qt6/qml/SddmComponents/angle-down.png
+file:///usr/lib/qt6/qml/SddmComponents/ComboBox.qml:105:9: QML Image: Cannot open: file:///usr/lib/qt6/qml/SddmComponents/angle-down.png
+qrc:/theme/Main.qml:41:5: QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }
+Adding view for "" QRect(0,0 800x800)
+Signal received: SIGTERM
+QObject::startTimer: current thread's event dispatcher has already been destroyed
+QBasicTimer::start: current thread's event dispatcher has already been destroyed
+QObject::startTimer: current thread's event dispatcher has already been destroyed

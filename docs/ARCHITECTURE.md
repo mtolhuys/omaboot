@@ -89,8 +89,11 @@ between any two steps.
    is inverted from a normal command: the greeter has to still be running
    when the settling time is up (`greeter::SETTLE`, 10 seconds), it is then
    stopped, and its stderr must carry no complaint about the theme (a QML
-   error naming a file under the staged directory, SDDM's fallback to its
-   embedded theme, or any `(EE)` line). An exit before the time is up,
+   message positioned in a file under the staged directory, SDDM's fallback
+   to its embedded theme, or any `(EE)` line). The greeter is run with
+   `QT_FORCE_STDERR_LOGGING=1`, because SDDM 0.21.0 logs through Qt's
+   handler and that goes to journald, not stderr, when no console is
+   attached (`docs/UPSTREAM.md`). An exit before the time is up,
    whatever the code, or a complaint, aborts here with what the greeter
    said. This is the single most valuable check in the pipeline: SDDM
    greeter crash loops are a known Omarchy failure mode

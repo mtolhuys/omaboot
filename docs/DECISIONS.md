@@ -421,7 +421,14 @@ wrote is read: a complaint about the theme fails the step, silence passes
 it, and an exit before the time is up fails it whatever the exit code. The
 verdict travels with the lines that show it. No code path skips the step,
 as `CLAUDE.md` requires; the preview and the smoke test build their command
-in the same function so the two cannot disagree again.
+in the same function so the two cannot disagree again. That function sets
+`QT_FORCE_STDERR_LOGGING=1` since the closing round of the same day
+(`docs/evidence/closing-round-2026-09-20.md`, B1): on the installed SDDM
+0.21.0 the greeter's log goes to journald unless stderr is a console, and
+a scan of an empty pipe passed a theme with a syntax error. Reading the
+journal instead was the alternative and was not taken: the variable is
+Qt's documented switch, it makes the greeter's words travel with the
+verdict in the same process, and it needs no journal access.
 
 ## The privileged helper
 

@@ -1,0 +1,26 @@
+Sep 20 19:42:36.989967 omarchy sddm-greeter-qt6[183122]: High-DPI autoscaling not Enabled
+Sep 20 19:42:37.032501 omarchy sddm-greeter-qt6[183122]: Reading from "/usr/local/share/wayland-sessions/omarchy.desktop"
+Sep 20 19:42:37.032728 omarchy sddm-greeter-qt6[183122]: Reading from "/usr/local/share/wayland-sessions/hyprland-uwsm.desktop"
+Sep 20 19:42:37.032733 omarchy sddm-greeter-qt6[183122]: Reading from "/usr/share/wayland-sessions/hyprland-uwsm.desktop"
+Sep 20 19:42:37.032837 omarchy sddm-greeter-qt6[183122]: Reading from "/usr/local/share/wayland-sessions/hyprland.desktop"
+Sep 20 19:42:37.032841 omarchy sddm-greeter-qt6[183122]: Reading from "/usr/share/wayland-sessions/hyprland.desktop"
+Sep 20 19:42:37.032996 omarchy sddm-greeter-qt6[183122]: Loading theme configuration from "/tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/theme.conf"
+Sep 20 19:42:37.033850 omarchy sddm-greeter-qt6[183122]: Socket error:  "QLocalSocket::connectToServer: Invalid name"
+Sep 20 19:42:37.035129 omarchy sddm-greeter-qt6[183122]: Loading file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/Main.qml...
+Sep 20 19:42:37.036042 omarchy sddm-greeter-qt6[183122]: file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/Main.qml:12:44: Expected a qualified name id 
+                                                                readonly property color foregroundColor: "#bebebe"  {{ broken on purpose 
+                                                                                                         ^
+Sep 20 19:42:37.036058 omarchy sddm-greeter-qt6[183122]: file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/broken/Main.qml:12:44: Expected a qualified name id 
+                                                                readonly property color foregroundColor: "#bebebe"  {{ broken on purpose 
+                                                                                                         ^
+Sep 20 19:42:37.036062 omarchy sddm-greeter-qt6[183122]: Fallback to embedded theme
+Sep 20 19:42:37.039448 omarchy sddm-greeter-qt6[183122]: Member enabled of the object ImageButton_QMLTYPE_0 overrides a member of the base object. Consider renaming it or adding final or override specifier
+Sep 20 19:42:37.068827 omarchy sddm-greeter-qt6[183122]: file:///usr/lib/qt6/qml/SddmComponents/LayoutBox.qml:35:5: QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }
+Sep 20 19:42:37.068871 omarchy sddm-greeter-qt6[183122]: file:///usr/lib/qt6/qml/SddmComponents/ComboBox.qml:105:9: QML Image: Cannot open: file:///usr/lib/qt6/qml/SddmComponents/angle-down.png
+Sep 20 19:42:37.074292 omarchy sddm-greeter-qt6[183122]: file:///usr/lib/qt6/qml/SddmComponents/ComboBox.qml:105:9: QML Image: Cannot open: file:///usr/lib/qt6/qml/SddmComponents/angle-down.png
+Sep 20 19:42:37.095667 omarchy sddm-greeter-qt6[183122]: qrc:/theme/Main.qml:41:5: QML Connections: Implicitly defined onFoo properties in Connections are deprecated. Use this syntax instead: function onFoo(<arguments>) { ... }
+Sep 20 19:42:37.095838 omarchy sddm-greeter-qt6[183122]: Adding view for "" QRect(0,0 800x800)
+Sep 20 19:42:51.933207 omarchy sddm-greeter-qt6[183122]: Signal received: SIGTERM
+Sep 20 19:42:51.935293 omarchy sddm-greeter-qt6[183122]: QObject::startTimer: current thread's event dispatcher has already been destroyed
+Sep 20 19:42:51.935299 omarchy sddm-greeter-qt6[183122]: QBasicTimer::start: current thread's event dispatcher has already been destroyed
+Sep 20 19:42:51.935364 omarchy sddm-greeter-qt6[183122]: QObject::startTimer: current thread's event dispatcher has already been destroyed

@@ -478,7 +478,10 @@ fn step_4_the_smoke_test_requires_the_greeter_to_stay_up_offscreen() {
         .into_iter()
         .find(|call| call.contains("--test-mode"))
         .expect("the greeter ran");
-    assert!(call.starts_with("QT_QPA_PLATFORM=offscreen "), "{call}");
+    assert!(
+        call.starts_with("QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen "),
+        "{call}"
+    );
     assert!(call.contains("--theme"), "{call}");
 }
 

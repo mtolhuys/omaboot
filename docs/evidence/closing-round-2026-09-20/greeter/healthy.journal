@@ -1,0 +1,14 @@
+Sep 20 19:42:51.958127 omarchy sddm-greeter-qt6[184181]: High-DPI autoscaling not Enabled
+Sep 20 19:42:51.989334 omarchy sddm-greeter-qt6[184181]: Reading from "/usr/local/share/wayland-sessions/omarchy.desktop"
+Sep 20 19:42:51.989499 omarchy sddm-greeter-qt6[184181]: Reading from "/usr/local/share/wayland-sessions/hyprland-uwsm.desktop"
+Sep 20 19:42:51.989503 omarchy sddm-greeter-qt6[184181]: Reading from "/usr/share/wayland-sessions/hyprland-uwsm.desktop"
+Sep 20 19:42:51.989586 omarchy sddm-greeter-qt6[184181]: Reading from "/usr/local/share/wayland-sessions/hyprland.desktop"
+Sep 20 19:42:51.989589 omarchy sddm-greeter-qt6[184181]: Reading from "/usr/share/wayland-sessions/hyprland.desktop"
+Sep 20 19:42:51.989721 omarchy sddm-greeter-qt6[184181]: Loading theme configuration from "/tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/healthy/theme.conf"
+Sep 20 19:42:51.990561 omarchy sddm-greeter-qt6[184181]: Socket error:  "QLocalSocket::connectToServer: Invalid name"
+Sep 20 19:42:51.991806 omarchy sddm-greeter-qt6[184181]: Loading file:///tmp/claude-1000/-home-mtolhuijs-Projects-omarchy-omaboot/1d2b3e8f-e7c9-4d4c-bd96-0db260f5b207/scratchpad/greeter/healthy/Main.qml...
+Sep 20 19:42:52.096874 omarchy sddm-greeter-qt6[184181]: Adding view for "" QRect(0,0 800x800)
+Sep 20 19:43:06.947920 omarchy sddm-greeter-qt6[184181]: Signal received: SIGTERM
+Sep 20 19:43:06.949753 omarchy sddm-greeter-qt6[184181]: QObject::startTimer: current thread's event dispatcher has already been destroyed
+Sep 20 19:43:06.949760 omarchy sddm-greeter-qt6[184181]: QBasicTimer::start: current thread's event dispatcher has already been destroyed
+Sep 20 19:43:06.949823 omarchy sddm-greeter-qt6[184181]: QObject::startTimer: current thread's event dispatcher has already been destroyed

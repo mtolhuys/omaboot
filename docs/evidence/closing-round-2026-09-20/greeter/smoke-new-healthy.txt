@@ -1,0 +1,41 @@
+omaboot: theme matte (performed)
+         theme hash dc6bfdb136a286f5
+
+- Validate theme
+    check    /home/mtolhuijs/.config/omaboot/themes/matte/theme.toml parses, every key is known
+    check    logo /home/mtolhuijs/.config/omaboot/themes/matte/omarchy-logo-tokyo-night.png is a regular file, not a symlink, within the size limit
+    check    colours background=#000000 foreground=#bebebe accent=#e68e0d error=#D35F5F
+- Generate assets
+    check    /usr/share/plymouth/themes/omaboot/omaboot.plymouth <- generated (300 bytes)
+    check    /usr/share/plymouth/themes/omaboot/omaboot.script <- generated (12207 bytes)
+    check    /usr/share/plymouth/themes/omaboot/logo.png <- copy of /home/mtolhuijs/.config/omaboot/themes/matte/omarchy-logo-tokyo-night.png (476426 bytes)
+    check    /usr/share/plymouth/themes/omaboot/logo-shutdown.png <- copy of /home/mtolhuijs/.config/omaboot/themes/matte/omarchy-logo-tokyo-night.png (476426 bytes)
+    check    /usr/share/plymouth/themes/omaboot/bullet.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/bullet.png recoloured to #bebebe (293 bytes)
+    check    /usr/share/plymouth/themes/omaboot/entry.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/entry.png recoloured to #bebebe (543 bytes)
+    check    /usr/share/plymouth/themes/omaboot/lock.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/lock.png recoloured to #bebebe (1527 bytes)
+    check    /usr/share/plymouth/themes/omaboot/progress_bar.png <- /home/mtolhuijs/Projects/omarchy/core/default/plymouth/progress_bar.png recoloured to #bebebe (204 bytes)
+    check    /usr/share/plymouth/themes/omaboot/progress_box.png <- copy of /home/mtolhuijs/Projects/omarchy/core/default/plymouth/progress_box.png (314 bytes)
+    check    /usr/share/sddm/themes/omaboot/Main.qml <- generated (4031 bytes)
+    check    /usr/share/sddm/themes/omaboot/theme.conf <- generated (22 bytes)
+    check    /usr/share/sddm/themes/omaboot/metadata.desktop <- generated (139 bytes)
+    check    /usr/share/sddm/themes/omaboot/logo.png <- copy of /home/mtolhuijs/.config/omaboot/themes/matte/omarchy-logo-tokyo-night.png (476426 bytes)
+    check    /usr/share/sddm/themes/omaboot/bullet.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/bullet.png recoloured to #bebebe (293 bytes)
+    check    /usr/share/sddm/themes/omaboot/entry.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/entry.png recoloured to #bebebe (543 bytes)
+    check    /usr/share/sddm/themes/omaboot/lock.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/lock.png recoloured to #bebebe (1527 bytes)
+    check    /usr/share/sddm/themes/omaboot/entry-failed.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/entry-failed.png recoloured to #d35f5f (543 bytes)
+    check    /usr/share/sddm/themes/omaboot/lock-failed.png <- /home/mtolhuijs/Projects/omarchy/core/default/sddm/omarchy/lock-failed.png recoloured to #d35f5f (1527 bytes)
+- Stage theme (not selected)
+- Smoke test greeter
+    run      QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen /usr/bin/sddm-greeter-qt6 --test-mode --theme /home/mtolhuijs/.local/state/omaboot/stage/sddm    # the greeter smoke test: it has to stay up for 10 seconds without complaining about the theme, then it is stopped
+- Authorise (not selected)
+- Install into the omaboot directories (not selected)
+- Record rollback point (not selected)
+- Switch (not selected)
+- Rebuild initramfs (not selected)
+- Verify (not selected)
+
+Reboot to see it. `omaboot revert` puts everything back.
+If a screen ever fails, recover from a TTY with:
+  sudo plymouth-set-default-theme omarchy
+  sudo rm /etc/sddm.conf.d/zz-omaboot.conf
+  sudo mkinitcpio -P

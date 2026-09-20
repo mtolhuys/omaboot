@@ -178,22 +178,30 @@ Other relevant pieces:
   same watcher fires for anything written into the linked `plugin/`
   directory, which is why the harness works in `.harness/` at the
   repository root.
-- **Read on 20 September 2026, not yet verified on the installed SDDM.**
-  `sddm-greeter --test-mode --theme <dir>` shows the theme in a window and
-  runs until that window is closed; under `QT_QPA_PLATFORM=offscreen` it
-  therefore never exits (seen on the reference machine: 30 seconds, then
-  killed, `docs/evidence/apply-round-2026-09-20.md`). What it does when
-  `Main.qml` fails to load is taken from SDDM's `GreeterApp.cpp` as read in
-  earlier releases and is what `crates/omaboot/src/greeter.rs` scans for:
-  the QML errors are logged as warnings naming the file, then the greeter
-  falls back to its embedded theme ("Fallback to embedded theme") and keeps
-  running. SDDM's greeter logs through its own handler, `(II)`, `(WW)`,
-  `(EE)`, `(FF)` per severity, prefixed `GREETER:`. To verify on the
-  installed version: `pacman -Q sddm`, then `QT_QPA_PLATFORM=offscreen
-  timeout 15 sddm-greeter-qt6 --test-mode --theme <a staged theme with a
-  syntax error in Main.qml>; echo $?` and read stderr for the fallback line
-  and the severity tags; the scan in `greeter.rs` is data and its tests
-  name the lines it expects.
+- Verified 20 September 2026 on the installed `sddm 0.21.0-7`
+  (`sddm-greeter-qt6`, Qt 6.11.2), with a staged omaboot theme and a copy
+  of it with a syntax error in `Main.qml`, both under `QT_QPA_PLATFORM=offscreen
+  timeout 15` (`docs/evidence/closing-round-2026-09-20.md`, B1).
+  `sddm-greeter-qt6 --test-mode --theme <dir>` shows the theme in a window
+  and runs until that window is closed; offscreen it therefore never exits,
+  healthy or broken (`timeout` returned 124 for both). A `Main.qml` that
+  fails to parse is reported as Qt's QML messages, `file://<file>:<line>:<column>:
+  <what>` with the offending source under it, then `Fallback to embedded
+  theme`, and the greeter stays up on its built-in theme (`qrc:/theme/Main.qml`).
+  A healthy theme produces `Loading file://<dir>/Main.qml...` and `Adding
+  view for "" QRect(...)`, nothing else about the theme. The greeter at this
+  version does not log through SDDM's own `(II)`/`(WW)`/`(EE)` handler at
+  all: every line goes through Qt's default handler, which sends it to
+  journald when stderr is not a console (`journalctl --user
+  _COMM=sddm-greeter-qt6`, fields `QT_CATEGORY`, `CODE_FILE`, `PRIORITY`)
+  and to stderr only under a pty or with `QT_FORCE_STDERR_LOGGING=1`. Run
+  from the engine the greeter's stderr was empty on both themes, so the
+  smoke test's scan as first written passed the broken theme. Both greeter
+  commands (`crates/omaboot/src/greeter.rs`) now set
+  `QT_FORCE_STDERR_LOGGING=1`, and the scan reads the positioned QML message
+  on a file under the theme directory and the fallback line, keeping the
+  older severity tags for older releases; its tests carry the lines the
+  installed version wrote.
 - Verified 20 September 2026 in the `core` checkout at `e5b0dc22`:
   `bin/omarchy-refresh-plymouth` copies `default/plymouth/.` over
   `/usr/share/plymouth/themes/omarchy/`, runs `plymouth-set-default-theme
