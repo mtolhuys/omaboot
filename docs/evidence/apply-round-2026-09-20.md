@@ -1,0 +1,56 @@
+# Apply round, 20 September 2026
+
+The first real `Apply to the system` from the window, on the reference
+machine, by the owner, theme `matte`. It stopped at step 4 and installed
+nothing: steps 1 to 3 write only under `~/.local/state/omaboot/stage`, and
+the smoke test is the gate before any privileged step. The gate held, but
+for the wrong reason. Screenshots in `docs/evidence/apply-round-2026-09-20/`.
+
+## Findings
+
+### A1. The greeter smoke test cannot pass: a healthy greeter runs until the timeout, and the timeout is a failure
+
+- What: `Apply to the system` on `matte`; step 4, "Smoke test greeter".
+- Saw: "Validate theme", "Generate assets" and "Stage theme" ticked at once;
+  "Smoke test greeter" spun for about thirty seconds
+  (`smoke-test-running.png`), then the step failed with
+  `QT_QPA_PLATFORM=offscreen /usr/bin/sddm-greeter-qt6 --test-mode --theme
+  /home/mtolhuijs/.local/state/omaboot/stage/sddm exited with a timeout: (no
+  output). Suggested next step: the greeter smoke test, which decides
+  whether this theme is ever shown at login did not succeed; read the
+  message above and fix the cause, then run the step again`
+  (`smoke-test-timeout.png`). Nothing was installed, no drop-in written, no
+  initramfs rebuilt.
+- Expected: the step passes for a theme the greeter renders, and fails for
+  one it refuses.
+- Cause: `sddm-greeter --test-mode` does not exit on its own. It shows the
+  theme in a window and runs until that window is closed, which under
+  `QT_QPA_PLATFORM=offscreen` is never. `crates/omaboot/src/preview.rs`
+  (`run_greeter`) knows this and waits "until the greeter window is closed";
+  `crates/omaboot/src/apply/mod.rs` (`step_smoke_test`) runs the same
+  command through `RealRunner` with `SMOKE_TEST_TIMEOUT` (30 s) and
+  `docs/DECISIONS.md` says "a timeout counts as a failure". So the only
+  greeter that passes the step is one that exits within 30 seconds, which is
+  a greeter that failed. The step had never run for real: the tests use a
+  scripted runner, and a `--root` prefix uses `SimulatedRunner`, which
+  answers success without running anything. Two smaller things in the same
+  path: `CommandOutput::timed_out()` drops whatever the greeter wrote, so the
+  sentence says "(no output)" whatever the greeter said; and the suggestion
+  tells the user to fix a cause the sentence does not name.
+- Reproduce: `QT_QPA_PLATFORM=offscreen sddm-greeter-qt6 --test-mode --theme
+  ~/.local/state/omaboot/stage/sddm; echo $?` in a terminal: it does not
+  return. `timeout 30` around it returns 124.
+
+### What the step has to become
+
+The greeter is alive after N seconds with no error on stderr, then killed,
+is the pass; an exit before N seconds, whatever the code, is the fail; the
+captured stderr travels with the verdict either way, and the suggestion
+names what the greeter said. What "an error on stderr" is, and whether the
+greeter exits at all when `Main.qml` fails to load or stays up with an empty
+window, must be read from SDDM's `GreeterApp.cpp` for the installed version
+and tried once against a deliberately broken staged theme, before the
+verdict is written: if a broken theme keeps the greeter alive, the stderr
+scan is the whole test and needs a known bad theme in the test suite. The
+preview's `run_greeter` and the smoke test should then share one function,
+so the two cannot disagree again.
