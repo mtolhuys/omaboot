@@ -334,3 +334,17 @@ your own logo.png` in the dialog. Fixed the same day: such a theme gets
 Omarchy's default logo and a note saying so; `status` marks each Omarchy
 theme with `has_logo`. The dialog does not yet show that mark (QML
 unchanged; a window pass is owed).
+
+Also after the round: the launcher no longer listed omaboot. On the
+machine, `~/.local/share/applications/omaboot.desktop` and the seven
+`hicolor/<size>/apps/omaboot.png` icons were gone (`mimeinfo.cache`
+rewritten 17:41, during the round). `theme-follow.sh` ran `omaboot app
+install` with `HOME` and `XDG_CONFIG_HOME` pointed at the fake home but
+without `XDG_DATA_HOME`, which a login session sets to the real
+`~/.local/share`, so the harness's entry and icons were the real ones, and
+whatever ran `app uninstall` afterwards took the real ones away. Put back
+by hand (the same files `app install` writes); the wrapper `render.py`
+writes and `theme-follow.sh` now export `XDG_DATA_HOME` into the fake home,
+and `exercise.sh`'s fingerprint covers the real desktop entry and icons.
+Not re-run on the machine since (the harness needs it); the change is
+three environment lines and a stat loop.

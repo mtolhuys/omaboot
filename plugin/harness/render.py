@@ -436,11 +436,15 @@ def build_world(work, omarchy, theme, engine_binary):
     # calls run. The engine prefers XDG_CONFIG_HOME and XDG_STATE_HOME over
     # HOME, and a login session exports both, so exporting HOME alone let the
     # engine read and write the real ~/.config/omaboot from inside a harness
-    # run. Every variable the engine's Layout reads is set here.
+    # run. Every variable the engine's Layout reads is set here, and
+    # XDG_DATA_HOME too: `app install` and `app uninstall` put the desktop
+    # entry and the icons where it points, and a login session points it at
+    # the real ~/.local/share.
     wrapper = home / ".local/bin/omaboot"
     wrapper.write_text(
         "#!/bin/sh\n"
         f"export HOME={home} XDG_CONFIG_HOME={home / '.config'} XDG_STATE_HOME={home / '.local/state'}\n"
+        f"export XDG_DATA_HOME={home / '.local/share'}\n"
         f"export XDG_RUNTIME_DIR={runtime} OMARCHY_PATH={omarchy}\n"
         f"exec {engine_binary} --root {prefix} \"$@\"\n"
     )

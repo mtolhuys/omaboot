@@ -66,7 +66,9 @@ accepted values of `plymouthd --mode` at runtime instead of trusting a document.
   app follows a theme switch. qmllint catches syntax; the harness catches
   layout and lost edits. The harness works in `.harness/` at the repository
   root, never in `plugin/` (the shell watches that directory) and never in
-  the real `~/.config/omaboot` (exercise.sh checks it is untouched).
+  the real `~/.config/omaboot` or `~/.local/share` (exercise.sh checks the
+  config directory and the launcher entry are untouched; the wrapper and
+  theme-follow.sh set every XDG variable, `XDG_DATA_HOME` included).
 
 ## Style
 

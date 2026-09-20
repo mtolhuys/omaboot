@@ -17,7 +17,11 @@ SHELL_DIR=${OMABOOT_SHELL:-${OMARCHY_PATH:?}/shell}
 python3 "$HERE/render.py" --work "$WORK" --out "$OUT/warmup.png" --select now ${RENDER_ARGS:-} >/dev/null 2>&1 || true
 mkdir -p "$HOME_DIR/.local/share/omarchy"
 ln -sfn "$SHELL_DIR" "$HOME_DIR/.local/share/omarchy/shell"
-HOME="$HOME_DIR" XDG_CONFIG_HOME="$HOME_DIR/.config" OMABOOT_PLUGIN_DIR="$REPO/plugin" \
+# Every directory the engine writes to points into the fake home: without
+# XDG_DATA_HOME the desktop entry and the icons land in the real
+# ~/.local/share, and a later `app uninstall` takes the real ones away.
+HOME="$HOME_DIR" XDG_CONFIG_HOME="$HOME_DIR/.config" XDG_STATE_HOME="$HOME_DIR/.local/state" \
+  XDG_DATA_HOME="$HOME_DIR/.local/share" OMABOOT_PLUGIN_DIR="$REPO/plugin" \
   "$REPO/target/release/omaboot" app install >/dev/null
 
 LINK="$HOME_DIR/.local/state/omarchy/current/theme"

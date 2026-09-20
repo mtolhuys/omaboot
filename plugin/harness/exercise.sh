@@ -27,8 +27,15 @@ reject() { grep -qF -- "$2" "$1" && { echo "FAIL: $1 has: $2"; sed -n 1,60p "$1"
 # not exist. This is the regression check for the wrapper that exported HOME
 # but not XDG_CONFIG_HOME, and so read and wrote the real ~/.config/omaboot.
 REAL_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/omaboot"
+# The desktop entry and the icons of `omaboot app install` live under the
+# data directory; a harness that reaches them installs or removes the real
+# launcher entry (it happened once, 20 September 2026).
+REAL_DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
 fingerprint() {
   if [ -e "$REAL_CONFIG" ]; then find "$REAL_CONFIG" -printf '%p %s %T@\n' | sort; else echo "absent"; fi
+  for f in "$REAL_DATA/applications/omaboot.desktop" "$REAL_DATA"/icons/hicolor/*/apps/omaboot.png; do
+    if [ -e "$f" ]; then stat -c '%n %s %Y' "$f"; else echo "$f absent"; fi
+  done
 }
 BEFORE=$(fingerprint)
 # Checked on the way out, so a leak is named even when it makes a flow fail
@@ -37,10 +44,10 @@ untouched() {
   local code=$?
   local after; after=$(fingerprint)
   if [ "$BEFORE" != "$after" ]; then
-    echo "FAIL: the harness reached $REAL_CONFIG"; diff <(echo "$BEFORE") <(echo "$after") || true; exit 1
+    echo "FAIL: the harness reached $REAL_CONFIG or the launcher entry under $REAL_DATA"; diff <(echo "$BEFORE") <(echo "$after") || true; exit 1
   fi
   case "$THEMES" in "$REAL_CONFIG"/*) echo "FAIL: the harness themes directory is inside $REAL_CONFIG"; exit 1;; esac
-  [ "$code" -eq 0 ] && echo "the real config directory $REAL_CONFIG is untouched"
+  [ "$code" -eq 0 ] && echo "the real config directory $REAL_CONFIG is untouched, and so is the launcher entry under $REAL_DATA"
   exit "$code"
 }
 trap untouched EXIT
