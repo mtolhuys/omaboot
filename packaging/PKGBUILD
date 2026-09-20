@@ -1,8 +1,11 @@
 # Maintainer: Maarten Tolhuijs <mtolhuys@gmail.com>
 #
-# A first draft for the AUR (docs/SPEC.md, "Distribution"). Not yet built
-# with makepkg on the reference machine; the paths follow what the engine
-# already looks for: the plugin at /usr/share/omaboot/plugin
+# A draft for the AUR (docs/SPEC.md, "Distribution"). Built with
+# `makepkg -f` on the reference machine on 20 September 2026 with the
+# source pointed at the local checkout (git+file://...), since the
+# repository is not on GitHub yet; the package was not installed there
+# (docs/evidence/closing-round-2026-09-20.md). The paths follow what the
+# engine already looks for: the plugin at /usr/share/omaboot/plugin
 # (api::plugin_source), both binaries on PATH (exec::Tools::detect finds
 # omaboot-apply there). `omaboot plugin install` then links the plugin into
 # ~/.config/omarchy/plugins and rescans the shell; its links into
