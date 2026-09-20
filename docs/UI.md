@@ -215,7 +215,10 @@ checks what landed in `theme.toml`; it ends by taking the engine away
 not-installed state and spawns nothing. `plugin/harness/theme-follow.sh` opens
 the generated app (`omaboot app`) the same way, repoints the current-theme
 link under it and expects the window's colours to change. It needs PySide6, a Nerd Font that fontconfig gives
-for `monospace`, `target/release/omaboot` and `OMARCHY_PATH`. Everything
+for `monospace`, `target/release/omaboot` and `OMARCHY_PATH`; when the
+`python3` on `PATH` has no PySide6 the scripts fail rather than leaving an
+earlier run's pictures in place under a green exit, and `shots.sh` names the
+missing module. Everything
 the harness makes (the fake home, the sandbox prefix, the runtime
 directory, the `qs` import links) lives in `.harness/` at the repository
 root, git-ignored and outside `plugin/`: the shell watches the linked
