@@ -11,6 +11,7 @@
 //! is published through a sibling temporary file plus an atomic rename, and
 //! the copy is compared with its source before the rename.
 
+mod protocol;
 mod publish;
 
 use std::path::PathBuf;
@@ -68,6 +69,9 @@ enum Command {
         #[command(flatten)]
         flags: Flags,
     },
+    /// Print the protocol number this build speaks, so omaboot can refuse a
+    /// helper built from older source before anything privileged runs
+    Protocol,
     /// Remove the omaboot theme directories and the drop-in
     Remove {
         #[command(flatten)]
@@ -98,21 +102,28 @@ enum PreviewAction {
 }
 
 impl Command {
-    fn flags(&self) -> &Flags {
+    fn flags(&self) -> Option<&Flags> {
         match self {
             Self::Install { flags, .. } | Self::Switch { flags, .. } | Self::Remove { flags } => {
-                flags
+                Some(flags)
             }
             Self::Preview { action } => match action {
-                PreviewAction::Install { flags, .. } | PreviewAction::Remove { flags } => flags,
+                PreviewAction::Install { flags, .. } | PreviewAction::Remove { flags } => {
+                    Some(flags)
+                }
             },
+            Self::Protocol => None,
         }
     }
 }
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
-    let flags = cli.command.flags().clone();
+    let Some(flags) = cli.command.flags().cloned() else {
+        // `protocol`: no privilege, no prefix, one number on stdout.
+        println!("{}", protocol::PROTOCOL);
+        return ExitCode::SUCCESS;
+    };
 
     let trust = match &flags.root {
         Some(_) => Trust::Prefixed,
@@ -139,6 +150,10 @@ fn main() -> ExitCode {
             Job::Switch { target }
         }
         Command::Remove { .. } => Job::Remove,
+        Command::Protocol => {
+            println!("{}", protocol::PROTOCOL);
+            return ExitCode::SUCCESS;
+        }
         Command::Preview { action } => match action {
             PreviewAction::Install { staged, .. } => Job::PreviewInstall { staged },
             PreviewAction::Remove { .. } => Job::PreviewRemove,

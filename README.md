@@ -14,11 +14,17 @@ is built and tested; the interface is a Quattro shell plugin. Nothing has been
 applied to real hardware yet.
 
 ```
-cargo build --release
+cargo build --release                   # both binaries: the engine and the privileged helper
 target/release/omaboot plugin install   # links the plugin into omarchy-shell and the binaries into ~/.local/bin
 omaboot                                 # opens the window
 cargo test --workspace                  # no root, no system calls, with or without OMARCHY_PATH set
 ```
+
+The engine and the helper are one build: before anything privileged runs,
+`omaboot` asks `omaboot-apply protocol` and refuses a helper that answers
+another number than it was built with (`crates/omaboot-apply/src/protocol.rs`,
+compiled into both). `plugin install` says so too when the helper next to the
+binary is from an older build.
 
 `omaboot plugin install` makes three links and two IPC calls: the repository's
 `plugin/` directory becomes `~/.config/omarchy/plugins/mtolhuys.omaboot`, the

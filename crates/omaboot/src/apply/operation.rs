@@ -51,6 +51,13 @@ pub enum Operation {
         spec: CommandSpec,
         theme_dir: PathBuf,
     },
+    /// Ask the helper which protocol it speaks, unprivileged, before the
+    /// first privileged step. A helper built from older source writes other
+    /// paths than this engine verifies; the first real apply found that out
+    /// at step 10 (A3). It is refused here instead.
+    CheckHelper {
+        helper: PathBuf,
+    },
     /// Set the default Plymouth theme. On a real system this runs
     /// `plymouth-set-default-theme`; under a prefix it rewrites the prefixed
     /// `plymouthd.conf`, because the real tool must never run in a test.
@@ -107,6 +114,7 @@ impl Operation {
             Self::Check { .. }
             | Self::Run { .. }
             | Self::SmokeTestGreeter { .. }
+            | Self::CheckHelper { .. }
             | Self::VerifyFile { .. }
             | Self::VerifySddmTheme { .. } => None,
         }
@@ -138,6 +146,12 @@ impl fmt::Display for Operation {
                 to.display()
             ),
             Self::Run { spec, purpose } => write!(f, "run      {spec}    # {purpose}"),
+            Self::CheckHelper { helper } => write!(
+                f,
+                "check    {} protocol    # must answer {}, the number this omaboot was built with",
+                helper.display(),
+                crate::helper_protocol::PROTOCOL
+            ),
             Self::SmokeTestGreeter { spec, .. } => write!(
                 f,
                 "run      {spec}    # the greeter smoke test: it has to stay up for {} seconds without complaining about the theme, then it is stopped",
@@ -241,6 +255,41 @@ impl<'a> Executor<'a> {
                         "{purpose} did not succeed; read the message above and fix the cause, then run the step again"
                     ),
                 })
+            }
+            Operation::CheckHelper { helper } => {
+                let want = crate::helper_protocol::PROTOCOL;
+                let spec = CommandSpec::new(helper.display().to_string()).arg("protocol");
+                let output = self.runner.run(&spec)?;
+                let answer = output.stdout.trim();
+                let suggestion = "the helper was built from older source than this omaboot; run `cargo build --release` in the omaboot checkout (it builds both binaries), then `omaboot plugin install`, and apply again".to_string();
+                if !output.is_success() {
+                    return Err(Error::Environment {
+                        what: format!(
+                            "the helper {} does not answer `protocol` ({}: {})",
+                            helper.display(),
+                            output.describe_code(),
+                            first_lines(&output.stderr, 2)
+                        ),
+                        suggestion,
+                    });
+                }
+                match answer.parse::<u32>() {
+                    Ok(got) if got == want => Ok(()),
+                    Ok(got) => Err(Error::Environment {
+                        what: format!(
+                            "the helper {} speaks protocol {got} and this omaboot needs {want}",
+                            helper.display()
+                        ),
+                        suggestion,
+                    }),
+                    Err(_) => Err(Error::Environment {
+                        what: format!(
+                            "the helper {} answered `protocol` with {answer:?} instead of a number",
+                            helper.display()
+                        ),
+                        suggestion,
+                    }),
+                }
             }
             Operation::SmokeTestGreeter { spec, theme_dir } => {
                 let output = self.runner.run(spec)?;

@@ -98,7 +98,11 @@ between any two steps.
    command, minus the offscreen platform, is the login preview
    (`crates/omaboot/src/greeter.rs` is the one place both come from).
 5. **Authorise.** One polkit prompt for the whole operation. Not one per file.
-6. **Install.** `omaboot-apply` copies into the omaboot-owned directories using
+6. **Install.** First, unprivileged, `omaboot-apply protocol` must answer the
+   number this engine was built with (`crates/omaboot-apply/src/protocol.rs`,
+   compiled into both binaries): a helper from an older build writes other
+   paths than the engine then verifies, and is refused here with the build
+   command to run. Then `omaboot-apply` copies into the omaboot-owned directories using
    root-owned staging plus atomic rename per file. Destination directories are
    validated as root-owned and not group or world writable, and symlinks are
    refused, mirroring the hardening upstream already applies in

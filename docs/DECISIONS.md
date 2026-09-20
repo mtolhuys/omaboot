@@ -592,6 +592,22 @@ nothing, per sudo(8). The engine now also asks `sudo -n -v` right after
 taking the ticket, so a sudoers policy that keeps no ticket is reported at
 the dialog rather than five steps later.
 
+**The helper carries a protocol number and the engine checks it before
+anything privileged.** The first real apply that reached step 10 (20
+September 2026, A3) failed its verify because the helper in `~/.local/bin`
+had been built two days earlier, when the drop-in was still called
+`90-omaboot.conf`; `cargo build --release` had never rebuilt it, because the
+workspace had `default-members = ["crates/omaboot"]`. Two things follow.
+`default-members` is gone, so `cargo build --release` builds both binaries
+(the interface is `cargo run -p omaboot`). And `crates/omaboot-apply/src/
+protocol.rs` holds one number that both binaries compile in (the engine by
+`#[path]`); the helper answers it to `omaboot-apply protocol`, unprivileged,
+and every plan that runs the helper (apply, revert, reset, login stock and
+release) asks first and refuses a helper that answers anything else, naming
+the build command. `plugin install` runs the same check and warns. The
+number is bumped with every change to the helper's verbs, manifests or
+paths.
+
 **Installation is three links, not a copy.** `omaboot plugin install` links
 `plugin/` into `~/.config/omarchy/plugins/mtolhuys.omaboot` and both
 binaries, `omaboot` and `omaboot-apply`, into `~/.local/bin`, then asks the

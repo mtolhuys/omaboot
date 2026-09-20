@@ -1,9 +1,10 @@
 [workspace]
 resolver = "3"
 members = ["crates/omaboot", "crates/omaboot-apply"]
-# `cargo run` at the workspace root starts the interface; the helper is
-# never something to run by hand.
-default-members = ["crates/omaboot"]
+# No default-members: `cargo build --release` must build both binaries, since
+# `omaboot plugin install` links both and the engine refuses a helper built
+# from older source (crates/omaboot-apply/src/protocol.rs). The interface is
+# `cargo run -p omaboot`; the helper is never something to run by hand.
 
 [workspace.package]
 version = "0.1.0"

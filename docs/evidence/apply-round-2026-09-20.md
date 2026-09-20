@@ -79,6 +79,49 @@ for the wrong reason. Screenshots in `docs/evidence/apply-round-2026-09-20/`.
   that keeps no ticket (`timestamp_timeout=0`) is reported at the password
   dialog with the setting to look at, instead of at step 5.
 
+### A3. Step 10, "Verify", fails on the drop-in the helper had just written; the automatic revert put the system back
+
+- What: the third real `Apply to the system` on `matte`, with A1 and A2
+  fixed. Steps 1 to 9 ticked: smoke test, authorise, install, rollback
+  point, switch, initramfs.
+- Saw: `step verify failed: /etc/sddm.conf.d/zz-omaboot.conf could not be
+  read: No such file or directory (os error 2) ... the recorded rollback
+  point was restored, so the system is back where it was`
+  (`verify-no-dropin.png`). Afterwards, on the machine: `plymouthd.conf`
+  says `Theme=omarchy`, `/etc/sddm.conf.d` holds only Omarchy's and the
+  on-screen keyboard's files, `~/.local/state/omaboot` holds only `stage`,
+  and the two omaboot theme directories are installed and inactive. The
+  sudo journal shows exactly omaboot's commands as root and nothing else:
+  at 18:47:33 `omaboot-apply install --staged ...`,
+  `plymouth-set-default-theme omaboot`, `omaboot-apply switch --on`,
+  `limine-mkinitcpio`; at 18:47:39 the revert: `plymouth-set-default-theme
+  omarchy`, `omaboot-apply switch --off`, `limine-mkinitcpio`.
+- Expected: `switch --on` writes `/etc/sddm.conf.d/zz-omaboot.conf` and
+  verify reads it back.
+- Cause: the helper on the machine was from an older build. `strings` on
+  `target/release/omaboot-apply` (18 September, 21:48) shows
+  `/etc/sddm.conf.d/90-omaboot.conf` and no `--stock`; the source has said
+  `zz-omaboot.conf` since the first commit (the rename after the on-screen
+  keyboard's `99-z-...conf` was found). `cargo build --release` never
+  rebuilt it: the workspace had `default-members = ["crates/omaboot"]`, so
+  the root build only built the engine, and `plugin install` kept the copy
+  in `~/.local/bin` because it was identical to the equally stale file in
+  `target/release`. So `switch --on` wrote `90-omaboot.conf` (which would
+  not even have won against `99-z-omarchy-onscreen-keyboard.conf`), verify
+  looked for `zz-omaboot.conf`, and the revert's `switch --off` removed the
+  `90-` file again, which is why nothing is left. Nothing outside omaboot
+  touched the directory; the on-screen keyboard plugin has no watcher
+  (read: its `bin/login-keyboard-lib.sh` only installs and uninstalls its
+  own drop-in), Omarchy's `bin/` has none, and no path unit watches
+  `/etc/sddm.conf.d`.
+- Reproduce: `grep -a -o '/etc/sddm.conf.d/[A-Za-z0-9._-]*'
+  ~/.local/bin/omaboot-apply` on a helper built before the rename.
+- Fixed: `default-members` removed, so `cargo build --release` builds both
+  binaries; `crates/omaboot-apply/src/protocol.rs` (PROTOCOL = 2) compiled
+  into both, `omaboot-apply protocol` answers it, and every plan that runs
+  the helper asks first (`Operation::CheckHelper`) and refuses a mismatch
+  with the build command; `plugin install` warns on a stale helper.
+
 ### What the A1 step had to become (written before the fix, followed by it)
 
 The greeter is alive after N seconds with no error on stderr, then killed,

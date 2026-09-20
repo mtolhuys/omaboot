@@ -328,6 +328,85 @@ fn step_4_a_greeter_that_fails_its_smoke_test_is_never_installed() {
 }
 
 #[test]
+fn a_helper_from_an_older_build_is_refused_before_anything_privileged_runs() {
+    let check = Operation::CheckHelper {
+        helper: PathBuf::from("/home/me/.local/bin/omaboot-apply"),
+    };
+
+    let older = RecordingRunner::new()
+        .fail_containing("omaboot-apply protocol", CommandOutput::saying("1\n"));
+    let error = Executor::new(&older, false)
+        .perform(&check)
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("speaks protocol 1"), "{error}");
+    assert!(error.contains("cargo build --release"), "{error}");
+    assert!(!older.ran_containing("sudo"), "{:?}", older.calls());
+
+    let unaware = RecordingRunner::new().fail_containing(
+        "omaboot-apply protocol",
+        CommandOutput::failure(2, "error: unrecognized subcommand 'protocol'"),
+    );
+    let error = Executor::new(&unaware, false)
+        .perform(&check)
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("does not answer `protocol`"), "{error}");
+    assert!(error.contains("unrecognized subcommand"), "{error}");
+
+    let fresh = RecordingRunner::new();
+    Executor::new(&fresh, false).perform(&check).unwrap();
+    assert_eq!(
+        fresh.calls(),
+        vec!["/home/me/.local/bin/omaboot-apply protocol".to_string()]
+    );
+}
+
+#[test]
+fn every_plan_that_runs_the_helper_asks_its_protocol_first() {
+    // A layout without a prefix is the only one that runs the helper; in a
+    // dry run nothing is performed, so the plans can be read on any machine.
+    let tmp = tempfile::tempdir().unwrap();
+    let layout = Layout::with_dirs(None, tmp.path().join("config"), tmp.path().join("state"));
+    fs::create_dir_all(layout.state_dir()).unwrap();
+    let runner = RecordingRunner::new();
+    let pipeline = Pipeline::new(&layout, &runner);
+    let first = |report: ApplyReport| {
+        let step = report.steps.into_iter().next().expect("one step");
+        step.operations.into_iter().next().expect("one operation")
+    };
+    let is_check = |operation: &Operation| matches!(operation, Operation::CheckHelper { .. });
+
+    assert!(is_check(&first(pipeline.reset(true).unwrap())));
+    assert!(is_check(&first(pipeline.login_stock(true).unwrap())));
+    assert!(is_check(&first(pipeline.login_release(true).unwrap())));
+
+    let point = crate::state::RollbackPoint {
+        version: crate::state::STATE_VERSION,
+        recorded_at_unix: 0,
+        previous_plymouth_theme: Some("omarchy".to_string()),
+        sddm_dropin_existed: false,
+        previous_sddm_dropin: None,
+        theme: "test".to_string(),
+        theme_hash: "x".to_string(),
+    };
+    fs::write(
+        layout.rollback_file(),
+        crate::state::serialize_rollback(&point),
+    )
+    .unwrap();
+    assert!(is_check(&first(pipeline.revert(true).unwrap())));
+
+    let install = pipeline.step_install(&[], true).unwrap();
+    assert!(is_check(&install.operations[0]), "{:?}", install.operations);
+    assert!(
+        install.operations[1].to_string().contains("sudo"),
+        "{}",
+        install.operations[1]
+    );
+}
+
+#[test]
 fn step_4_a_greeter_that_stays_up_but_complains_about_the_theme_is_never_installed() {
     let world = World::new();
     let runner = RecordingRunner::new().fail_containing(

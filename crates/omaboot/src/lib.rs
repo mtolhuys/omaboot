@@ -19,6 +19,10 @@ pub mod exec;
 pub mod generate;
 pub mod greeter;
 pub mod hash;
+/// The helper's protocol number, compiled from the helper's own source file
+/// so the two binaries cannot disagree about what it is.
+#[path = "../../omaboot-apply/src/protocol.rs"]
+pub mod helper_protocol;
 pub mod omarchy;
 pub mod paths;
 pub mod plugin;

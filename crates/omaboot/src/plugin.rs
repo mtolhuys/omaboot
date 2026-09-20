@@ -88,6 +88,39 @@ pub fn install(layout: &Layout, source: &Path, dry_run: bool, out: &mut dyn Writ
         writeln!(out, "{verb}     {} -> {}", dest.display(), binary.display()).ok();
     }
 
+    // The helper next to this binary must be from the same build: one built
+    // from older source writes other paths than this engine verifies, and
+    // the engine refuses it at apply time. Saying so here is earlier.
+    let helper = exe.with_file_name("omaboot-apply");
+    if helper.is_file() {
+        let want = crate::helper_protocol::PROTOCOL;
+        let answer = std::process::Command::new(&helper)
+            .arg("protocol")
+            .output()
+            .ok()
+            .filter(|output| output.status.success())
+            .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_string());
+        match answer {
+            Some(got) if got == want.to_string() => {
+                writeln!(out, "checked    omaboot-apply speaks protocol {want}").ok();
+            }
+            Some(got) => {
+                writeln!(
+                    out,
+                    "warning    omaboot-apply speaks protocol {got}, this omaboot needs {want}: it is from an older build; run cargo build --release (it builds both) and install again"
+                )
+                .ok();
+            }
+            None => {
+                writeln!(
+                    out,
+                    "warning    omaboot-apply does not answer `protocol`: it is from an older build; run cargo build --release (it builds both) and install again"
+                )
+                .ok();
+            }
+        }
+    }
+
     if dry_run || layout.is_prefixed() {
         writeln!(out, "would run  omarchy-shell shell rescanPlugins").ok();
         writeln!(

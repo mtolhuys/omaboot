@@ -436,12 +436,17 @@ impl<'a> Pipeline<'a> {
             None => return Err(self.tools.require_helper().unwrap_err()),
         };
 
-        let mut operations = vec![Operation::run(
-            CommandSpec::sudo(helper.display().to_string())
-                .arg("install")
-                .args(["--staged", &self.layout.stage_dir().display().to_string()]),
-            "the privileged helper, which publishes each file atomically",
-        )];
+        let mut operations = vec![
+            Operation::CheckHelper {
+                helper: helper.clone(),
+            },
+            Operation::run(
+                CommandSpec::sudo(helper.display().to_string())
+                    .arg("install")
+                    .args(["--staged", &self.layout.stage_dir().display().to_string()]),
+                "the privileged helper, which publishes each file atomically",
+            ),
+        ];
         for file in staged {
             operations.push(Operation::check(format!(
                 "the helper will publish {}",
@@ -556,7 +561,8 @@ impl<'a> Pipeline<'a> {
             .clone()
             .unwrap_or_else(|| STOCK_THEME_ID.to_string());
 
-        let mut operations = vec![self.set_default_theme(&previous, dry_run)?];
+        let mut operations = self.check_helper(dry_run)?;
+        operations.push(self.set_default_theme(&previous, dry_run)?);
         if point.sddm_dropin_existed {
             operations.push(self.write_dropin(dry_run)?);
         } else {
@@ -606,14 +612,13 @@ impl<'a> Pipeline<'a> {
                 ),
             )
         };
-        let operations = vec![
-            operation,
-            Operation::VerifySddmTheme {
-                conf: self.layout.sddm_conf(),
-                conf_dir: self.layout.sddm_conf_dir(),
-                expected: STOCK_THEME_ID.to_string(),
-            },
-        ];
+        let mut operations = self.check_helper(dry_run)?;
+        operations.push(operation);
+        operations.push(Operation::VerifySddmTheme {
+            conf: self.layout.sddm_conf(),
+            conf_dir: self.layout.sddm_conf_dir(),
+            expected: STOCK_THEME_ID.to_string(),
+        });
         for operation in &operations {
             executor.perform(operation)?;
         }
@@ -633,7 +638,8 @@ impl<'a> Pipeline<'a> {
         }
         let executor = Executor::new(self.runner, dry_run);
         let mut report = ApplyReport::new("(login screen released)", dry_run);
-        let operations = vec![self.remove_dropin(dry_run)?];
+        let mut operations = self.check_helper(dry_run)?;
+        operations.push(self.remove_dropin(dry_run)?);
         for operation in &operations {
             executor.perform(operation)?;
         }
@@ -646,10 +652,9 @@ impl<'a> Pipeline<'a> {
         let executor = Executor::new(self.runner, dry_run);
         let mut report = ApplyReport::new("(stock omarchy)", dry_run);
 
-        let mut operations = vec![
-            self.set_default_theme(STOCK_THEME_ID, dry_run)?,
-            self.remove_dropin(dry_run)?,
-        ];
+        let mut operations = self.check_helper(dry_run)?;
+        operations.push(self.set_default_theme(STOCK_THEME_ID, dry_run)?);
+        operations.push(self.remove_dropin(dry_run)?);
 
         if self.layout.is_prefixed() {
             operations.push(Operation::RemoveDirAll {
@@ -691,6 +696,17 @@ impl<'a> Pipeline<'a> {
             None if dry_run => Ok(PathBuf::from("omaboot-apply")),
             None => Err(self.tools.require_helper().unwrap_err()),
         }
+    }
+
+    /// The first operation of anything that runs the helper: ask it which
+    /// protocol it speaks. Empty under a prefix, where the helper never runs.
+    fn check_helper(&self, dry_run: bool) -> Result<Vec<Operation>> {
+        if self.layout.is_prefixed() {
+            return Ok(Vec::new());
+        }
+        Ok(vec![Operation::CheckHelper {
+            helper: self.helper_path(dry_run)?,
+        }])
     }
 
     fn set_default_theme(&self, theme: &str, dry_run: bool) -> Result<Operation> {

@@ -19,7 +19,10 @@ docs disagree, update the doc in the same commit rather than leaving the drift.
    VM. Ask before anything that touches real system state.
 3. **Privileged code lives only in the `omaboot-apply` binary.** It receives an
    already-staged, already-validated theme directory. It parses no user input and
-   never calls back into `omaboot`.
+   never calls back into `omaboot`. Any change to its verbs, its manifests or
+   the paths it writes bumps `PROTOCOL` in `crates/omaboot-apply/src/protocol.rs`,
+   which both binaries compile in and the engine checks before the first
+   privileged step.
 4. **No `unsafe`.** Both crates forbid it.
 5. **The greeter is smoke tested before it is ever activated.** No code path may
    skip step 4 of the apply pipeline.

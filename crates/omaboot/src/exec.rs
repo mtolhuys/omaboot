@@ -173,9 +173,21 @@ impl CommandOutput {
         }
     }
 
+    /// A command that exited 0 with this on stdout.
+    pub fn saying(stdout: impl Into<String>) -> Self {
+        Self {
+            stdout: stdout.into(),
+            ..Self::success()
+        }
+    }
+
     /// The answer a runner that runs nothing gives for a spec: what the
-    /// spec's verdict calls success.
+    /// spec's verdict calls success. A helper asked for its `protocol`
+    /// answers the number this build carries, as a fresh helper would.
     pub fn as_if_fine(spec: &CommandSpec) -> Self {
+        if spec.args.last().map(String::as_str) == Some("protocol") {
+            return Self::saying(format!("{}\n", crate::helper_protocol::PROTOCOL));
+        }
         match spec.verdict {
             Verdict::Exits => Self::success(),
             Verdict::StaysUp => Self::stays_up(),
