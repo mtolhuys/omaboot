@@ -178,6 +178,22 @@ Other relevant pieces:
   same watcher fires for anything written into the linked `plugin/`
   directory, which is why the harness works in `.harness/` at the
   repository root.
+- **Read on 20 September 2026, not yet verified on the installed SDDM.**
+  `sddm-greeter --test-mode --theme <dir>` shows the theme in a window and
+  runs until that window is closed; under `QT_QPA_PLATFORM=offscreen` it
+  therefore never exits (seen on the reference machine: 30 seconds, then
+  killed, `docs/evidence/apply-round-2026-09-20.md`). What it does when
+  `Main.qml` fails to load is taken from SDDM's `GreeterApp.cpp` as read in
+  earlier releases and is what `crates/omaboot/src/greeter.rs` scans for:
+  the QML errors are logged as warnings naming the file, then the greeter
+  falls back to its embedded theme ("Fallback to embedded theme") and keeps
+  running. SDDM's greeter logs through its own handler, `(II)`, `(WW)`,
+  `(EE)`, `(FF)` per severity, prefixed `GREETER:`. To verify on the
+  installed version: `pacman -Q sddm`, then `QT_QPA_PLATFORM=offscreen
+  timeout 15 sddm-greeter-qt6 --test-mode --theme <a staged theme with a
+  syntax error in Main.qml>; echo $?` and read stderr for the fallback line
+  and the severity tags; the scan in `greeter.rs` is data and its tests
+  name the lines it expects.
 - Quattro plugins are QML entry points (`bar`, `panel`, `overlay`, `menu`,
   `service`) loaded by the shell from `~/.config/omarchy/plugins/<id>/`. Boot and
   login happen before the shell exists, so **omaboot is not a shell plugin** and

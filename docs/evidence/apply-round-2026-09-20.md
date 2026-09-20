@@ -41,7 +41,17 @@ for the wrong reason. Screenshots in `docs/evidence/apply-round-2026-09-20/`.
   ~/.local/state/omaboot/stage/sddm; echo $?` in a terminal: it does not
   return. `timeout 30` around it returns 124.
 
-### What the step has to become
+- Fixed: see the commit "apply: the greeter smoke test passes a greeter that
+  stays up and fails one that exits or complains (A1)". The step now gives
+  the greeter `greeter::SETTLE` (10 s), requires it to be alive then, stops
+  it, and fails on an early exit or a complaint about the theme on stderr,
+  carrying the lines. The stderr scan is written from SDDM's behaviour as
+  read in its source, not yet against the installed version: see
+  `docs/UPSTREAM.md`, "Read on 20 September 2026". The next real apply is
+  the healthy-path verification; the broken-theme path needs the command in
+  that note once.
+
+### What the step had to become (written before the fix, followed by it)
 
 The greeter is alive after N seconds with no error on stderr, then killed,
 is the pass; an exit before N seconds, whatever the code, is the fail; the

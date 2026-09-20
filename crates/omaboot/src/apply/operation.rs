@@ -43,6 +43,14 @@ pub enum Operation {
         spec: CommandSpec,
         purpose: String,
     },
+    /// Run the staged SDDM theme through the greeter in test mode, offscreen,
+    /// and require it to stay up for the settling time without complaining
+    /// about the theme (`crate::greeter`). This is the gate before every
+    /// privileged step, and no plan may skip it.
+    SmokeTestGreeter {
+        spec: CommandSpec,
+        theme_dir: PathBuf,
+    },
     /// Set the default Plymouth theme. On a real system this runs
     /// `plymouth-set-default-theme`; under a prefix it rewrites the prefixed
     /// `plymouthd.conf`, because the real tool must never run in a test.
@@ -98,6 +106,7 @@ impl Operation {
             Self::SetPlymouthDefault { conf, .. } => Some(conf),
             Self::Check { .. }
             | Self::Run { .. }
+            | Self::SmokeTestGreeter { .. }
             | Self::VerifyFile { .. }
             | Self::VerifySddmTheme { .. } => None,
         }
@@ -129,6 +138,11 @@ impl fmt::Display for Operation {
                 to.display()
             ),
             Self::Run { spec, purpose } => write!(f, "run      {spec}    # {purpose}"),
+            Self::SmokeTestGreeter { spec, .. } => write!(
+                f,
+                "run      {spec}    # the greeter smoke test: it has to stay up for {} seconds without complaining about the theme, then it is stopped",
+                crate::greeter::SETTLE.as_secs()
+            ),
             Self::SetPlymouthDefault { theme, tool, conf } => match tool {
                 Some(tool) => write!(f, "run      sudo {} {theme}", tool.display()),
                 None => write!(f, "write    {} (Theme={theme})", conf.display()),
@@ -226,6 +240,17 @@ impl<'a> Executor<'a> {
                     suggestion: format!(
                         "{purpose} did not succeed; read the message above and fix the cause, then run the step again"
                     ),
+                })
+            }
+            Operation::SmokeTestGreeter { spec, theme_dir } => {
+                let output = self.runner.run(spec)?;
+                crate::greeter::judge(&output, theme_dir).map_err(|refusal| {
+                    Error::GreeterRefused {
+                        command: spec.to_string(),
+                        what: refusal.what,
+                        said: refusal.said,
+                        suggestion: "the greeter refused this theme, so it is not installed and login is untouched; fix what the greeter names, then run the step again".to_string(),
+                    }
                 })
             }
             Operation::SetPlymouthDefault { theme, tool, conf } => match tool {

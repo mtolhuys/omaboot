@@ -15,14 +15,14 @@
 use std::fs;
 use std::io::BufRead;
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command, Stdio};
+use std::process::{Command, Stdio};
 use std::sync::mpsc::{Receiver, channel};
 use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::apply::{ApplyRequest, Pipeline, StepId};
 use crate::error::{Error, Result};
-use crate::exec::Tools;
+use crate::exec::{Owned, Tools};
 use crate::generate::preview_theme_file;
 use crate::paths::{Layout, PREVIEW_THEME_ID};
 use crate::render::Screen;
@@ -259,11 +259,10 @@ fn run_greeter(
         greeter.name,
         staged.sddm.display()
     ));
-    let child = Command::new(&greeter.path)
-        .arg("--test-mode")
-        .arg("--theme")
-        .arg(&staged.sddm)
-        .stdin(Stdio::null())
+    // The same command the smoke test runs, minus the offscreen platform and
+    // the settling time: here it stays up until the window is closed.
+    let child = crate::greeter::test_mode(greeter, &staged.sddm)
+        .to_command()
         .stdout(Stdio::null())
         .stderr(Stdio::piped())
         .spawn()
@@ -288,13 +287,19 @@ fn run_greeter(
                     text
                 })
                 .unwrap_or_default();
+            let complaints = crate::greeter::complaints(&stderr, &staged.sddm);
+            let said = if complaints.is_empty() {
+                stderr.lines().rev().take(5).collect::<Vec<_>>().join(" / ")
+            } else {
+                complaints.join(" / ")
+            };
             return Err(Error::Command {
                 command: format!("{} --test-mode", greeter.name),
                 code: status
                     .code()
                     .map(|code| format!("exit code {code}"))
                     .unwrap_or_else(|| "a signal".to_string()),
-                stderr: stderr.lines().rev().take(5).collect::<Vec<_>>().join(" / "),
+                stderr: said,
                 suggestion: "the greeter refused this theme; fix what it names, this is exactly what the smoke test in apply would have stopped"
                     .to_string(),
             });
@@ -600,16 +605,6 @@ fn free_display_number() -> Option<u32> {
         !Path::new(&format!("/tmp/.X11-unix/X{number}")).exists()
             && !Path::new(&format!("/tmp/.X{number}-lock")).exists()
     })
-}
-
-/// A child that is killed when it goes out of scope.
-struct Owned(Child);
-
-impl Drop for Owned {
-    fn drop(&mut self) {
-        let _ = self.0.kill();
-        let _ = self.0.wait();
-    }
 }
 
 /// Takes the preview theme away again when the preview ends.

@@ -9,7 +9,6 @@ mod operation;
 mod plan;
 
 use std::path::PathBuf;
-use std::time::Duration;
 
 pub use operation::{Executor, Operation};
 pub use plan::{ApplyReport, StepReport};
@@ -22,9 +21,6 @@ use crate::state::{
     self, AppliedState, InstalledFile, RollbackPoint, STATE_VERSION, sddm_dropin_contents,
 };
 use crate::theme::{Theme, ValidTheme};
-
-/// How long the greeter gets to render before the smoke test gives up.
-pub const SMOKE_TEST_TIMEOUT: Duration = Duration::from_secs(30);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum StepId {
@@ -374,24 +370,17 @@ impl<'a> Pipeline<'a> {
     fn step_smoke_test(&self, dry_run: bool) -> Result<StepReport> {
         let staged_sddm = self.layout.stage_dir().join("sddm");
         match self.tools.greeter.as_ref() {
-            Some(greeter) => {
-                let spec = CommandSpec::new(greeter.path.display().to_string())
-                    .arg("--test-mode")
-                    .args(["--theme", &staged_sddm.display().to_string()])
-                    .env("QT_QPA_PLATFORM", "offscreen")
-                    .timeout(SMOKE_TEST_TIMEOUT);
-                Ok(StepReport::new(
-                    StepId::SmokeTest,
-                    vec![Operation::run(
-                        spec,
-                        "the greeter smoke test, which decides whether this theme is ever shown at login",
-                    )],
-                ))
-            }
+            Some(greeter) => Ok(StepReport::new(
+                StepId::SmokeTest,
+                vec![Operation::SmokeTestGreeter {
+                    spec: crate::greeter::smoke_test(greeter, &staged_sddm),
+                    theme_dir: staged_sddm,
+                }],
+            )),
             None if dry_run => Ok(StepReport::with_problem(
                 StepId::SmokeTest,
                 vec![Operation::check(
-                    "run the staged greeter under --test-mode with QT_QPA_PLATFORM=offscreen",
+                    "run the staged greeter under --test-mode with QT_QPA_PLATFORM=offscreen and require it to stay up",
                 )],
                 "neither sddm-greeter-qt6 nor sddm-greeter was found, so this step would fail",
             )),

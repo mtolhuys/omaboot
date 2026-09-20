@@ -410,9 +410,18 @@ at them they are inert, and keeping them makes a re-apply cheap. `omaboot
 reset` is the command that removes them, which matches what the two commands
 promise in `docs/SPEC.md`.
 
-**The greeter smoke test runs with `QT_QPA_PLATFORM=offscreen` and a 30 second
-timeout**, and a timeout counts as a failure. No code path skips it, as
-`CLAUDE.md` requires.
+**The greeter smoke test runs with `QT_QPA_PLATFORM=offscreen` and requires
+the greeter to stay up.** The first draft gave it a 30 second timeout and
+counted the timeout as a failure; the first real apply (20 September 2026,
+`docs/evidence/apply-round-2026-09-20.md`, A1) showed that the greeter in
+test mode never exits on its own, so that test could only pass a greeter
+that had failed. Now the greeter gets a settling time (`greeter::SETTLE`,
+10 seconds), has to be alive when it is up, is stopped there, and what it
+wrote is read: a complaint about the theme fails the step, silence passes
+it, and an exit before the time is up fails it whatever the exit code. The
+verdict travels with the lines that show it. No code path skips the step,
+as `CLAUDE.md` requires; the preview and the smoke test build their command
+in the same function so the two cannot disagree again.
 
 ## The privileged helper
 

@@ -113,6 +113,20 @@ pub enum Error {
         suggestion: String,
     },
 
+    /// The greeter smoke test did not pass: `what` is the clause after the
+    /// command ("exited with ... instead of staying up", "stayed up but
+    /// complained about the theme") and `said` the lines that show it.
+    #[error(
+        "{command} {what}: {said}. \
+         Suggested next step: {suggestion}"
+    )]
+    GreeterRefused {
+        command: String,
+        what: String,
+        said: String,
+        suggestion: String,
+    },
+
     #[error(
         "there is no recorded rollback point in {path}. \
          Suggested next step: run `omaboot reset` to return to stock Omarchy instead"

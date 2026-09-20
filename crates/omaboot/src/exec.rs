@@ -5,12 +5,29 @@
 //! a test can script a failure without a system to fail on.
 
 use std::fmt;
+use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, Stdio};
+use std::sync::{Arc, Mutex};
+use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::error::{Error, Result};
 use crate::paths::Layout;
+
+/// What a command has to do to count as having succeeded.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Verdict {
+    /// The usual: exit with code 0, before the timeout when there is one.
+    #[default]
+    Exits,
+    /// A program that has to keep running: alive when the timeout is reached
+    /// counts as success, and it is stopped there. An exit before that,
+    /// whatever the code, is a failure. The greeter under `--test-mode` is
+    /// one of these: it shows the theme until its window is closed, and
+    /// offscreen that is never.
+    StaysUp,
+}
 
 /// One command, described well enough to print it exactly as it would run.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -19,6 +36,7 @@ pub struct CommandSpec {
     pub args: Vec<String>,
     pub env: Vec<(String, String)>,
     pub timeout: Option<Duration>,
+    pub verdict: Verdict,
 }
 
 impl CommandSpec {
@@ -28,6 +46,7 @@ impl CommandSpec {
             args: Vec::new(),
             env: Vec::new(),
             timeout: None,
+            verdict: Verdict::Exits,
         }
     }
 
@@ -62,6 +81,23 @@ impl CommandSpec {
         self.timeout = Some(timeout);
         self
     }
+
+    /// The command must still be running after `settle`; it is stopped then.
+    pub fn stays_up(mut self, settle: Duration) -> Self {
+        self.timeout = Some(settle);
+        self.verdict = Verdict::StaysUp;
+        self
+    }
+
+    /// The `std::process::Command` this spec describes, with stdin closed.
+    pub fn to_command(&self) -> Command {
+        let mut command = Command::new(&self.program);
+        command.args(&self.args).stdin(Stdio::null());
+        for (key, value) in &self.env {
+            command.env(key, value);
+        }
+        command
+    }
 }
 
 impl fmt::Display for CommandSpec {
@@ -82,7 +118,12 @@ pub struct CommandOutput {
     pub code: Option<i32>,
     pub stdout: String,
     pub stderr: String,
+    /// A `Verdict::Exits` command that was still running at its timeout and
+    /// was stopped. What it wrote until then is kept.
     pub timed_out: bool,
+    /// A `Verdict::StaysUp` command that was still running when its settling
+    /// time was up and was stopped there, which is what it had to do.
+    pub stayed_up: bool,
 }
 
 impl CommandOutput {
@@ -92,6 +133,7 @@ impl CommandOutput {
             stdout: String::new(),
             stderr: String::new(),
             timed_out: false,
+            stayed_up: false,
         }
     }
 
@@ -101,6 +143,7 @@ impl CommandOutput {
             stdout: String::new(),
             stderr: stderr.into(),
             timed_out: false,
+            stayed_up: false,
         }
     }
 
@@ -110,6 +153,32 @@ impl CommandOutput {
             stdout: String::new(),
             stderr: String::new(),
             timed_out: true,
+            stayed_up: false,
+        }
+    }
+
+    /// A command that kept running, saying nothing.
+    pub fn stays_up() -> Self {
+        Self::stays_up_saying("")
+    }
+
+    /// A command that kept running, with this on its stderr.
+    pub fn stays_up_saying(stderr: impl Into<String>) -> Self {
+        Self {
+            code: None,
+            stdout: String::new(),
+            stderr: stderr.into(),
+            timed_out: false,
+            stayed_up: true,
+        }
+    }
+
+    /// The answer a runner that runs nothing gives for a spec: what the
+    /// spec's verdict calls success.
+    pub fn as_if_fine(spec: &CommandSpec) -> Self {
+        match spec.verdict {
+            Verdict::Exits => Self::success(),
+            Verdict::StaysUp => Self::stays_up(),
         }
     }
 
@@ -140,15 +209,8 @@ pub struct RealRunner;
 
 impl Runner for RealRunner {
     fn run(&self, spec: &CommandSpec) -> Result<CommandOutput> {
-        let mut command = Command::new(&spec.program);
-        command
-            .args(&spec.args)
-            .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
-        for (key, value) in &spec.env {
-            command.env(key, value);
-        }
+        let mut command = spec.to_command();
+        command.stdout(Stdio::piped()).stderr(Stdio::piped());
 
         let Some(timeout) = spec.timeout else {
             let output = command.output().map_err(|source| Error::Command {
@@ -162,6 +224,7 @@ impl Runner for RealRunner {
                 stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
                 stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
                 timed_out: false,
+                stayed_up: false,
             });
         };
 
@@ -171,20 +234,28 @@ impl Runner for RealRunner {
             stderr: source.to_string(),
             suggestion: "check that the command exists and is executable".to_string(),
         })?;
+        // Both pipes are drained as the command runs, so a talkative one
+        // cannot fill a pipe and block, and what it said is there whether it
+        // exited or was stopped at the timeout.
+        let stdout = Drain::new(child.stdout.take());
+        let stderr = Drain::new(child.stderr.take());
 
         let started = Instant::now();
-        loop {
+        let mut stopped = false;
+        let status = loop {
             match child.try_wait() {
-                Ok(Some(_status)) => break,
+                Ok(Some(status)) => break Some(status),
                 Ok(None) => {
                     if started.elapsed() >= timeout {
                         let _ = child.kill();
                         let _ = child.wait();
-                        return Ok(CommandOutput::timed_out());
+                        stopped = true;
+                        break None;
                     }
-                    std::thread::sleep(Duration::from_millis(50));
+                    thread::sleep(Duration::from_millis(50));
                 }
                 Err(source) => {
+                    let _ = child.kill();
                     return Err(Error::Command {
                         command: spec.to_string(),
                         code: "unknown".to_string(),
@@ -193,20 +264,77 @@ impl Runner for RealRunner {
                     });
                 }
             }
-        }
-
-        let output = child.wait_with_output().map_err(|source| Error::Command {
-            command: spec.to_string(),
-            code: "unknown".to_string(),
-            stderr: source.to_string(),
-            suggestion: "retry, and report this if it keeps happening".to_string(),
-        })?;
+        };
+        let stdout = stdout.finish();
+        let stderr = stderr.finish();
         Ok(CommandOutput {
-            code: output.status.code(),
-            stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-            timed_out: false,
+            code: status.and_then(|status| status.code()),
+            stdout,
+            stderr,
+            timed_out: stopped && spec.verdict == Verdict::Exits,
+            stayed_up: stopped && spec.verdict == Verdict::StaysUp,
         })
+    }
+}
+
+/// A child's pipe, read to the end on a thread of its own.
+struct Drain {
+    bytes: Arc<Mutex<Vec<u8>>>,
+    reader: Option<thread::JoinHandle<()>>,
+}
+
+impl Drain {
+    /// How long to wait for the pipe to close once the child is gone. A
+    /// grandchild that inherited the pipe (a shell's `sleep`, say) keeps it
+    /// open after the child was killed; what was read by then is enough.
+    const GRACE: Duration = Duration::from_millis(500);
+
+    fn new<R: Read + Send + 'static>(pipe: Option<R>) -> Self {
+        let bytes = Arc::new(Mutex::new(Vec::new()));
+        let reader = pipe.map(|mut pipe| {
+            let sink = Arc::clone(&bytes);
+            thread::spawn(move || {
+                let mut chunk = [0u8; 8192];
+                while let Ok(read) = pipe.read(&mut chunk) {
+                    if read == 0 {
+                        break;
+                    }
+                    if let Ok(mut sink) = sink.lock() {
+                        sink.extend_from_slice(&chunk[..read]);
+                    }
+                }
+            })
+        });
+        Self { bytes, reader }
+    }
+
+    /// Everything read so far, after giving the pipe `GRACE` to close.
+    fn finish(mut self) -> String {
+        if let Some(reader) = self.reader.take() {
+            let deadline = Instant::now() + Self::GRACE;
+            while !reader.is_finished() && Instant::now() < deadline {
+                thread::sleep(Duration::from_millis(10));
+            }
+            if reader.is_finished() {
+                let _ = reader.join();
+            }
+        }
+        let bytes = self
+            .bytes
+            .lock()
+            .map(|bytes| bytes.clone())
+            .unwrap_or_default();
+        String::from_utf8_lossy(&bytes).into_owned()
+    }
+}
+
+/// Keep a child alive exactly as long as its owner, and no longer.
+pub struct Owned(pub Child);
+
+impl Drop for Owned {
+    fn drop(&mut self) {
+        let _ = self.0.kill();
+        let _ = self.0.wait();
     }
 }
 
@@ -219,8 +347,8 @@ impl Runner for RealRunner {
 pub struct SimulatedRunner;
 
 impl Runner for SimulatedRunner {
-    fn run(&self, _spec: &CommandSpec) -> Result<CommandOutput> {
-        Ok(CommandOutput::success())
+    fn run(&self, spec: &CommandSpec) -> Result<CommandOutput> {
+        Ok(CommandOutput::as_if_fine(spec))
     }
 }
 
@@ -411,7 +539,7 @@ pub(crate) mod testing {
                     return Ok(answer.clone());
                 }
             }
-            Ok(CommandOutput::success())
+            Ok(CommandOutput::as_if_fine(spec))
         }
     }
 }
@@ -534,5 +662,75 @@ mod tests {
             .unwrap();
         assert!(output.timed_out);
         assert_eq!(output.describe_code(), "a timeout");
+    }
+
+    #[test]
+    fn what_a_stopped_command_wrote_is_kept() {
+        let output = RealRunner
+            .run(
+                &CommandSpec::new("sh")
+                    .args(["-c", "echo said so >&2; sleep 30"])
+                    .timeout(Duration::from_millis(300)),
+            )
+            .unwrap();
+        assert!(output.timed_out);
+        assert_eq!(output.stderr.trim(), "said so");
+    }
+
+    #[test]
+    fn a_command_that_has_to_stay_up_and_does_is_stopped_and_counts_as_up() {
+        let output = RealRunner
+            .run(
+                &CommandSpec::new("sh")
+                    .args(["-c", "echo loaded >&2; sleep 30"])
+                    .stays_up(Duration::from_millis(300)),
+            )
+            .unwrap();
+        assert!(output.stayed_up);
+        assert!(!output.timed_out);
+        assert_eq!(output.code, None);
+        assert_eq!(output.stderr.trim(), "loaded");
+    }
+
+    #[test]
+    fn a_command_that_has_to_stay_up_and_exits_is_reported_with_its_code_and_words() {
+        let output = RealRunner
+            .run(
+                &CommandSpec::new("sh")
+                    .args(["-c", "echo boom >&2; exit 3"])
+                    .stays_up(Duration::from_secs(5)),
+            )
+            .unwrap();
+        assert!(!output.stayed_up);
+        assert_eq!(output.code, Some(3));
+        assert_eq!(output.stderr.trim(), "boom");
+    }
+
+    #[test]
+    fn a_talkative_command_does_not_block_on_its_pipe() {
+        // More than a pipe holds, then exit: without a drain this never returns.
+        let output = RealRunner
+            .run(
+                &CommandSpec::new("sh")
+                    .args(["-c", "yes | head -c 200000; yes | head -c 200000 >&2"])
+                    .timeout(Duration::from_secs(10)),
+            )
+            .unwrap();
+        assert!(output.is_success());
+        assert_eq!(output.stdout.len(), 200_000);
+        assert_eq!(output.stderr.len(), 200_000);
+    }
+
+    #[test]
+    fn runners_that_run_nothing_answer_what_the_verdict_calls_success() {
+        let spec = CommandSpec::new("sddm-greeter").stays_up(Duration::from_secs(1));
+        assert!(SimulatedRunner.run(&spec).unwrap().stayed_up);
+        assert!(RecordingRunner::new().run(&spec).unwrap().stayed_up);
+        assert!(
+            SimulatedRunner
+                .run(&CommandSpec::new("mkinitcpio"))
+                .unwrap()
+                .is_success()
+        );
     }
 }

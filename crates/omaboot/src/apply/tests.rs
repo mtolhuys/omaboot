@@ -315,7 +315,8 @@ fn step_4_a_greeter_that_fails_its_smoke_test_is_never_installed() {
     let error = world.apply(&runner).unwrap_err().to_string();
 
     assert!(error.contains("Expected token"), "{error}");
-    assert!(error.contains("ever shown at login"), "{error}");
+    assert!(error.contains("instead of staying up"), "{error}");
+    assert!(error.contains("login is untouched"), "{error}");
     assert!(!world.installed("sddm/themes/omaboot").exists());
     assert!(world.dropin().is_none());
     assert_eq!(world.plymouth_theme().as_deref(), Some("omarchy"));
@@ -327,12 +328,47 @@ fn step_4_a_greeter_that_fails_its_smoke_test_is_never_installed() {
 }
 
 #[test]
-fn step_4_a_greeter_that_hangs_is_treated_as_a_failure() {
+fn step_4_a_greeter_that_stays_up_but_complains_about_the_theme_is_never_installed() {
     let world = World::new();
-    let runner = RecordingRunner::new().fail_containing("sddm-greeter", CommandOutput::timed_out());
+    let runner = RecordingRunner::new().fail_containing(
+        "sddm-greeter",
+        CommandOutput::stays_up_saying(
+            "[12:00:00.300] (WW) GREETER: file:///stage/sddm/Main.qml:12:5: Expected token `}`\n\
+             [12:00:00.301] (WW) GREETER: Fallback to embedded theme",
+        ),
+    );
     let error = world.apply(&runner).unwrap_err().to_string();
-    assert!(error.contains("a timeout"), "{error}");
+    assert!(error.contains("stayed up but complained"), "{error}");
+    assert!(error.contains("Fallback to embedded theme"), "{error}");
     assert!(!world.installed("sddm/themes/omaboot").exists());
+    assert!(world.dropin().is_none());
+}
+
+#[test]
+fn step_4_a_greeter_that_exits_cleanly_too_soon_is_still_a_failure() {
+    // The greeter in test mode only exits when its window is closed, which
+    // cannot happen offscreen; an early exit 0 is not a pass.
+    let world = World::new();
+    let runner =
+        RecordingRunner::new().fail_containing("sddm-greeter", CommandOutput::failure(0, ""));
+    let error = world.apply(&runner).unwrap_err().to_string();
+    assert!(error.contains("exit code 0"), "{error}");
+    assert!(error.contains("instead of staying up"), "{error}");
+    assert!(!world.installed("sddm/themes/omaboot").exists());
+}
+
+#[test]
+fn step_4_the_smoke_test_requires_the_greeter_to_stay_up_offscreen() {
+    let world = World::new();
+    let runner = RecordingRunner::new();
+    world.apply(&runner).unwrap();
+    let call = runner
+        .calls()
+        .into_iter()
+        .find(|call| call.contains("--test-mode"))
+        .expect("the greeter ran");
+    assert!(call.starts_with("QT_QPA_PLATFORM=offscreen "), "{call}");
+    assert!(call.contains("--theme"), "{call}");
 }
 
 #[test]

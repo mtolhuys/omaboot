@@ -85,10 +85,18 @@ between any two steps.
    the invoking user. Nothing partial is ever visible to the system.
 4. **Smoke test the greeter, before it can ever be shown at login.** Run the
    staged SDDM theme under `sddm-greeter --test-mode` headless (offscreen Qt
-   platform) with a timeout. If it exits non-zero or fails to render, abort here.
-   This is the single most valuable check in the pipeline: SDDM greeter crash
-   loops are a known Omarchy failure mode
-   ([#10302](https://github.com/omacom/omarchy/issues/10302)).
+   platform). The greeter in test mode never exits on its own, so the test
+   is inverted from a normal command: the greeter has to still be running
+   when the settling time is up (`greeter::SETTLE`, 10 seconds), it is then
+   stopped, and its stderr must carry no complaint about the theme (a QML
+   error naming a file under the staged directory, SDDM's fallback to its
+   embedded theme, or any `(EE)` line). An exit before the time is up,
+   whatever the code, or a complaint, aborts here with what the greeter
+   said. This is the single most valuable check in the pipeline: SDDM
+   greeter crash loops are a known Omarchy failure mode
+   ([#10302](https://github.com/omacom/omarchy/issues/10302)). The same
+   command, minus the offscreen platform, is the login preview
+   (`crates/omaboot/src/greeter.rs` is the one place both come from).
 5. **Authorise.** One polkit prompt for the whole operation. Not one per file.
 6. **Install.** `omaboot-apply` copies into the omaboot-owned directories using
    root-owned staging plus atomic rename per file. Destination directories are

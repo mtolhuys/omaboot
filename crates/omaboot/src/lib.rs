@@ -17,6 +17,7 @@ pub mod cli;
 pub mod error;
 pub mod exec;
 pub mod generate;
+pub mod greeter;
 pub mod hash;
 pub mod omarchy;
 pub mod paths;
