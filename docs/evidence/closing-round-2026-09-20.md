@@ -31,7 +31,7 @@ on the host).
 | 4 | `makepkg -f` on `packaging/PKGBUILD` | pass from a local clone; `namcap` not installed |
 | 5 | `shots.sh` success path, nine pictures plus three | pass |
 | 5 | `omaboot app` follows a theme switch | pass |
-| 5 | The F6 ten-second path | not provoked |
+| 5 | The F6 ten-second path | not provoked; the two-second resummon was, and opened the window |
 
 Definition of done (`docs/SPEC.md`): line 1 (own unlock, greeter and
 shutdown screen after a reboot) proven in the guest and on the reference
@@ -285,6 +285,15 @@ ISO's and there is no newer release to update to.
   pass and the three override pictures), exit 0.
 - `omaboot app` still opens and follows a theme switch: `theme-follow.sh`
   reports `#121212 -> #eff1f5`.
-- The F6 ten-second path: not provoked. A shell restart right before
-  `omaboot` was not attempted on the reference machine (it restarts the
-  owner's desktop) and the guest's shell was left running.
+- The F6 ten-second path: not provoked, in the guest, twice.
+  `omarchy-restart-shell; omaboot` opened the window in 1.2 s (the
+  restart script waits for the shell's ping before returning,
+  `vm/40-f6-after-restart-shell.txt`). Killing the shell with `quickshell
+  kill`, launching it through `hyprctl dispatch` and running `omaboot` at
+  once: the first summon hit the shell mid-load (`WARN qml: summon:
+  unknown plugin mtolhuys.omaboot` in its journal), the resummon after two
+  seconds opened the window, 2.2 s in all, exit 0
+  (`vm/41-f6-shell-mid-load.txt`, `vm/42-f6-window-after-shell-mid-load.png`).
+  The ten-second give-up needs a shell that stays unanswering for ten
+  seconds, which this guest's does not. Not attempted on the reference
+  machine, where it would restart the owner's desktop.
