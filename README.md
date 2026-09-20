@@ -13,10 +13,14 @@ The lock screen of a running session is not one of them: that one is the
 shell's (`omarchy.lock`, or Lock Screen Explorer when it is installed) and
 omaboot leaves it alone.
 
-Status: applied on real hardware for the first time on 20 September 2026,
-from the window, with all three screens seen after a reboot
-(`docs/evidence/apply-round-2026-09-20.md`). The engine is built and tested;
-the interface is a Quattro shell plugin.
+Status: M1 is done. Applied on real hardware on 20 September 2026, from
+the window, with all three screens seen after a reboot
+(`docs/evidence/apply-round-2026-09-20.md`); the same day, in a disposable
+Omarchy 4.0.3 guest, apply, reset and revert were proven, an apply killed
+during the initramfs rebuild left a machine that boots, the unlock prompt
+was seen against a real LUKS volume, and the package built with `makepkg`
+(`docs/evidence/closing-round-2026-09-20.md`). The engine is built and
+tested; the interface is a Quattro shell plugin.
 
 ```
 cargo build --release                   # both binaries: the engine and the privileged helper

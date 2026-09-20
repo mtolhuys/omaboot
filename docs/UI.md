@@ -11,7 +11,7 @@ Stack: a Quattro shell plugin (`plugin/`, QML, loaded by `omarchy-shell` as a
 binary, driven with argv only and read as JSON (`omaboot --json`). The plugin
 never opens a theme file and never runs a shell string.
 
-## What is built, as of 19 September 2026
+## What is built, as of 20 September 2026
 
 Built: the window with its three blocks (stacked by default, side by side on
 a toggle that is remembered), the system entry that opens first,
@@ -25,7 +25,10 @@ password dialog, the apply, dry run, revert and reset flows with their step
 list and full operation report, warnings in the footer, `Choose…` buttons
 next to every image field (a file dialog run outside the shell process),
 `Use Omarchy's login screen` and `Give the login screen back` on the system
-entry, and `omaboot plugin install`.
+entry, what would get in the way of a boot screen (Lock Screen Explorer's
+boot screen, SDDM's autologin) as facts and a warning, and `omaboot plugin
+install`. The plugin has run in a real shell on a disposable guest from
+the packaged copy (`docs/evidence/closing-round-2026-09-20.md`).
 
 Not yet, and each one is a note in `docs/DECISIONS.md`: streaming the
 initramfs output while it runs, undo,

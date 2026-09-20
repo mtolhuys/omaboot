@@ -137,7 +137,9 @@ section inherits the built-in default for it.
 
 - AUR package `omaboot` (`packaging/PKGBUILD`, a draft for `omaboot-git`
   that installs both binaries to `/usr/bin` and the plugin to
-  `/usr/share/omaboot/plugin`, where the engine already looks), plus static
+  `/usr/share/omaboot/plugin`, where the engine already looks; it builds
+  with `makepkg` and its package ran in the guest on 20 September 2026,
+  from a local clone since the repository is not public yet), plus static
   binaries on GitHub releases.
 - Menu integration through `~/.config/omarchy/extensions/omarchy-menu.jsonc`,
   which is the supported user overlay of the Omarchy menu. No upstream file is
@@ -149,22 +151,46 @@ section inherits the built-in default for it.
 
 **M1, the spine.** Theme format, validator, asset generator, apply pipeline,
 revert, reset. CLI only. Proven in a VM with a real LUKS volume.
+Status: done, 20 September 2026. Apply, reset, an apply killed during the
+initramfs rebuild, and revert ran in a disposable Omarchy 4.0.3 guest, and
+the unlock prompt was seen from the guest's own initramfs against a LUKS2
+volume (`docs/evidence/closing-round-2026-09-20.md`); the fourth real
+apply on the reference machine showed all three screens
+(`docs/evidence/apply-round-2026-09-20.md`).
 
 **M2, the preview.** Real `plymouthd` preview of all three modes, real greeter
 preview, and the in-terminal composited preview. This is the feature that sells
 the project, so it comes before the window is pretty.
+Status: built; the composite agrees with the real render to within a third
+of a percent (`docs/evidence`, `scripts/verify-render.sh`), and the real
+previews run from the window.
 
 **M3, the window.** A Quattro shell plugin, per `docs/UI.md`. Ships when a stranger can retheme their boot
 screen without reading documentation.
+Status: built and used for the real applies; the stranger test has not
+been run.
 
 **M4, the ecosystem.** Export, import, gallery, `follow`, doctor, AUR package.
+Status: the PKGBUILD builds and its package ran in the guest
+(20 September 2026); export, import, gallery, `follow` and doctor are not
+started.
 
 ## Definition of done for v1
 
 - A fresh Omarchy install, a theme applied, a reboot, and the user sees their own
   unlock screen, their own greeter, and their own shutdown screen.
+  Proven: the reference machine (20 September 2026) and the guest.
 - `omaboot reset` followed by a reboot is indistinguishable from never having
   installed omaboot.
+  Proven in the guest: the configuration, the theme directories and the
+  state are as on the base image, and the rebuilt UKI is byte for byte
+  the stock one.
 - `omarchy update` on a machine with omaboot applied changes nothing about what
   the user sees.
+  Read, not run: `omarchy-update` at `e5b0dc22` does not touch the boot
+  screen (`docs/UPSTREAM.md`); `omarchy-refresh-plymouth` does, and shows
+  as drift.
 - Killing omaboot at any point during apply leaves a bootable system.
+  Proven in the guest for a `kill -9` during the initramfs rebuild; the
+  other steps are covered by the pipeline's order (nothing is switched
+  before the rollback point is recorded) and not yet by a kill.
