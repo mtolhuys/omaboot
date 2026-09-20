@@ -72,6 +72,12 @@ Every button says what it touches:
   initramfs, with the steps and every operation on screen. **Revert** puts the
   recorded state back; **Remove omaboot from the system** goes back to
   Omarchy's own themes.
+- The system entry also says what would get in the way. When Lock Screen
+  Explorer has its own boot screen set (it layers its theme over the
+  initramfs at boot, so what `plymouthd.conf` names is not what is seen),
+  the unlock and shutdown facts say so and **Apply** is refused with the
+  way out, until it is set back to stock. When SDDM is configured to log a
+  user in automatically, the login facts name the user and the file.
 - **Use Omarchy's login screen** appears on the system entry when a
   third-party SDDM theme (Omarchy's on-screen keyboard login, for instance) is
   what logs you in. It writes omaboot's own drop-in with `Current=omarchy`, which
@@ -197,8 +203,13 @@ are left byte for byte untouched.
 
 This single decision solves three problems at once:
 
-- `omarchy update` and `omarchy-refresh-plymouth` restore the stock theme, which
-  is no longer the active one, so nothing is clobbered and nothing needs repairing.
+- `omarchy-refresh-plymouth` (run by `omarchy-reinstall-configs`, and by any
+  migration that chooses to) rewrites Omarchy's own theme directory, which
+  omaboot never touched, so nothing of yours is clobbered. It does also run
+  `plymouth-set-default-theme omarchy` and a rebuild, so after it your boot
+  screen is stock again while omaboot's files sit there intact: `omaboot
+  status` reports that as drift, the window shows it under "what boots now",
+  and applying again is one click. `omarchy update` itself does not do this.
 - Uninstalling is removing one drop-in file and running one command. The stock
   experience is still sitting there, intact.
 - If upstream extends `omarchy plymouth`, omaboot does not conflict with it. See

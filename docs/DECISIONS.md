@@ -592,6 +592,17 @@ nothing, per sudo(8). The engine now also asks `sudo -n -v` right after
 taking the ticket, so a sudoers policy that keeps no ticket is reported at
 the dialog rather than five steps later.
 
+**An apply that would never be seen is refused, not performed.** Lock
+Screen Explorer's boot screen, when set, puts its theme over the initramfs
+at boot, so an omaboot apply under it would succeed at every step and change
+nothing on screen. omaboot reads the plugin's own state file and refuses
+before staging, naming the setting and the way out; a dry run reports it as
+a problem and goes on. The alternative, applying and warning, leaves a user
+with a green run and the wrong boot screen. SDDM's autologin is reported as
+a fact (user and file) and nothing more: whether the greeter is skipped is
+SDDM's decision at boot, and on the reference machine it was shown with
+`autologin.conf` in place, so omaboot does not guess.
+
 **The helper carries a protocol number and the engine checks it before
 anything privileged.** The first real apply that reached step 10 (20
 September 2026, A3) failed its verify because the helper in `~/.local/bin`

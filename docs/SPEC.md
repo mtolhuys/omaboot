@@ -135,7 +135,10 @@ section inherits the built-in default for it.
 
 ## Distribution
 
-- AUR package `omaboot`, plus static binaries on GitHub releases.
+- AUR package `omaboot` (`packaging/PKGBUILD`, a draft for `omaboot-git`
+  that installs both binaries to `/usr/bin` and the plugin to
+  `/usr/share/omaboot/plugin`, where the engine already looks), plus static
+  binaries on GitHub releases.
 - Menu integration through `~/.config/omarchy/extensions/omarchy-menu.jsonc`,
   which is the supported user overlay of the Omarchy menu. No upstream file is
   edited to get an entry under Style.

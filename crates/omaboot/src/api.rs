@@ -99,6 +99,14 @@ pub fn inspect(layout: &Layout) -> Value {
             "background": snapshot.plymouth.background.map(|c| c.hex()),
             "foreground": snapshot.plymouth.foreground.map(|c| c.hex()),
             "logo": snapshot.plymouth.logo.as_ref().map(|logo| snapshot.show(logo)),
+            // Set when something else puts its theme over this one at boot
+            // (Lock Screen Explorer's boot screen); an apply is refused then.
+            "overridden_by": snapshot.plymouth.overridden_by.as_ref().map(|over| json!({
+                "plugin": over.plugin,
+                "setting": over.setting,
+                "state_file": snapshot.show(&over.state_file),
+                "way_out": over.way_out,
+            })),
         },
         "login": {
             "theme": snapshot.login.theme.as_ref().map(|theme| theme.name.clone()),
@@ -112,6 +120,12 @@ pub fn inspect(layout: &Layout) -> Value {
             // True when omaboot's own drop-in is the one deciding, whichever
             // theme it names: the login screen can then be given back.
             "by_omaboot": snapshot.login.theme.as_ref().is_some_and(|t| t.decided_by == layout.sddm_dropin()),
+            // SDDM's autologin as configured; whether the greeter is skipped
+            // at boot is SDDM's to decide.
+            "autologin": snapshot.login.autologin.as_ref().map(|auto| json!({
+                "user": auto.user,
+                "decided_by": snapshot.show(&auto.decided_by),
+            })),
         },
         "prefs": prefs(layout),
         "facts": facts,

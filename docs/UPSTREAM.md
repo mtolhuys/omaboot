@@ -194,6 +194,34 @@ Other relevant pieces:
   syntax error in Main.qml>; echo $?` and read stderr for the fallback line
   and the severity tags; the scan in `greeter.rs` is data and its tests
   name the lines it expects.
+- Verified 20 September 2026 in the `core` checkout at `e5b0dc22`:
+  `bin/omarchy-refresh-plymouth` copies `default/plymouth/.` over
+  `/usr/share/plymouth/themes/omarchy/`, runs `plymouth-set-default-theme
+  omarchy`, then `limine-mkinitcpio` (or `mkinitcpio -P`). It is called by
+  `bin/omarchy-reinstall-configs`; `bin/omarchy-update` does not call it,
+  and no migration in the tree at that commit does. So an update leaves an
+  applied omaboot theme alone, and a refresh flips the default back to
+  Omarchy's without touching omaboot's files: drift, which `status` reports.
+- Verified 20 September 2026 in `bin/omarchy-provision-owner` at
+  `e5b0dc22`: first-boot setup writes `/etc/sddm.conf.d/autologin.conf`
+  (`[Autologin] User=<owner> Session=omarchy.desktop`); encrypted installs
+  keep it ("the LUKS prompt is the auth boundary"), unencrypted ones remove
+  it after the first boot through a one-shot unit. On the reference machine
+  (encrypted, `autologin.conf` present) the SDDM greeter was nevertheless
+  shown at boot on 20 September 2026, so omaboot reports the configured
+  autologin as a fact and makes no claim about whether the greeter appears.
+- Read 20 September 2026 in the installed Lock Screen Explorer
+  (`io.github.sirjul1337.lock-explorer` 1.7.7, `plymouth/apply.sh`,
+  `README.md`): its experimental boot screen ships a Plymouth theme as a
+  systemd-stub initrd addon at
+  `/boot/EFI/Linux/omarchy_linux.efi.extra.d/omarchy-lock-explorer.addon.efi`
+  carrying its own `/etc/plymouth/plymouthd.conf` (`Theme=omarchy-boot`),
+  which the stub layers over the initramfs so its entries win; without the
+  UKI it falls back to `plymouth-set-default-theme` plus a rebuild. It records
+  what it applied in `~/.local/state/omarchy/lock-explorer-boot` (`stock`, a
+  design id, or `follow`); `stock` or no file means it has stood aside. It
+  does not touch SDDM. omaboot reads that file (`state::boot_override`) and
+  refuses an apply while it says anything but stock.
 - Quattro plugins are QML entry points (`bar`, `panel`, `overlay`, `menu`,
   `service`) loaded by the shell from `~/.config/omarchy/plugins/<id>/`. Boot and
   login happen before the shell exists, so **omaboot is not a shell plugin** and

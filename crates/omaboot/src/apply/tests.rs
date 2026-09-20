@@ -328,6 +328,38 @@ fn step_4_a_greeter_that_fails_its_smoke_test_is_never_installed() {
 }
 
 #[test]
+fn an_apply_that_lock_screen_explorer_would_hide_is_refused_before_staging() {
+    let world = World::new();
+    let state = world
+        .layout
+        .state_base()
+        .join(crate::state::LOCK_EXPLORER_BOOT_STATE);
+    fs::create_dir_all(state.parent().unwrap()).unwrap();
+    fs::write(&state, "terminal\n").unwrap();
+
+    let runner = RecordingRunner::new();
+    let error = world.apply(&runner).unwrap_err().to_string();
+    assert!(error.contains("Lock Screen Explorer"), "{error}");
+    assert!(error.contains("set to terminal"), "{error}");
+    assert!(error.contains("setBoot stock"), "{error}");
+    assert!(runner.calls().is_empty(), "{:?}", runner.calls());
+    assert!(!world.layout.stage_dir().join("sddm").exists());
+    assert!(!world.installed("sddm/themes/omaboot").exists());
+
+    // A dry run says the same as a problem on the validate step and goes on.
+    let report = dry("test", &world, &runner).unwrap();
+    let problems = report.problems();
+    assert!(
+        problems.iter().any(|p| p.contains("Lock Screen Explorer")),
+        "{problems:?}"
+    );
+
+    // Set back to stock, the same apply goes through.
+    fs::write(&state, "stock\n").unwrap();
+    world.apply(&runner).unwrap();
+}
+
+#[test]
 fn a_helper_from_an_older_build_is_refused_before_anything_privileged_runs() {
     let check = Operation::CheckHelper {
         helper: PathBuf::from("/home/me/.local/bin/omaboot-apply"),

@@ -196,7 +196,27 @@ impl<'a> Pipeline<'a> {
         // is described in terms of what they produce.
         observer.step_started(StepId::Validate);
         let theme = self.load_theme(&request.theme)?;
-        report.push(self.step_validate(&theme));
+        let mut validate = self.step_validate(&theme);
+        // An apply that would succeed and never be seen is refused before it
+        // stages a byte: Lock Screen Explorer's boot screen, when it is set,
+        // puts its own theme over the initramfs at boot.
+        if let Some(over) = state::boot_override(self.layout) {
+            let problem = format!(
+                "{} has its boot screen set to {} ({}); its theme is put over the initramfs at boot and would win over this one",
+                over.plugin,
+                over.setting,
+                over.state_file.display()
+            );
+            validate.problems.push(problem.clone());
+            if !request.dry_run {
+                report.push(validate);
+                return Err(Error::Environment {
+                    what: problem,
+                    suggestion: format!("{}, then apply again", over.way_out),
+                });
+            }
+        }
+        report.push(validate);
         observer.step_finished(StepId::Validate);
 
         observer.step_started(StepId::Generate);

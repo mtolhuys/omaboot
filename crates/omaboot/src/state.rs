@@ -260,19 +260,8 @@ pub fn effective_sddm_theme(layout: &Layout) -> Option<SddmTheme> {
 /// The same resolution for explicit paths, which is what an operation in the
 /// pipeline carries.
 pub fn resolve_sddm_theme(conf: &Path, conf_dir: &Path) -> Option<SddmTheme> {
-    let mut files = vec![conf.to_path_buf()];
-    if let Ok(entries) = fs::read_dir(conf_dir) {
-        let mut dropins: Vec<PathBuf> = entries
-            .filter_map(|entry| entry.ok())
-            .map(|entry| entry.path())
-            .filter(|path| path.is_file() && path.extension().is_some_and(|e| e == "conf"))
-            .collect();
-        dropins.sort();
-        files.extend(dropins);
-    }
-
     let mut winner = None;
-    for file in files {
+    for file in sddm_files(conf, conf_dir) {
         let Ok(text) = fs::read_to_string(&file) else {
             continue;
         };
@@ -286,30 +275,129 @@ pub fn resolve_sddm_theme(conf: &Path, conf_dir: &Path) -> Option<SddmTheme> {
     winner
 }
 
-/// `Current=` under `[Theme]`, or nothing.
+/// `Current=` under `[Theme]`, or nothing. An empty value counts as nothing.
 pub fn parse_sddm_current(text: &str) -> Option<String> {
-    let mut in_theme = false;
-    let mut current = None;
+    parse_sddm_key(text, "theme", "current").filter(|value| !value.is_empty())
+}
+
+/// The last `key=` under `[section]` in one SDDM configuration file, empty
+/// when the key is there with no value (which is how a later file turns an
+/// earlier one off), or nothing when the file does not mention it.
+pub fn parse_sddm_key(text: &str, section: &str, key: &str) -> Option<String> {
+    let mut in_section = false;
+    let mut found = None;
     for line in text.lines() {
         let line = line.trim();
         if line.starts_with('#') || line.starts_with(';') || line.is_empty() {
             continue;
         }
         if line.starts_with('[') {
-            in_theme = line.eq_ignore_ascii_case("[theme]");
+            in_section = line
+                .trim_start_matches('[')
+                .trim_end_matches(']')
+                .trim()
+                .eq_ignore_ascii_case(section);
             continue;
         }
-        if in_theme
-            && let Some((key, value)) = line.split_once('=')
-            && key.trim().eq_ignore_ascii_case("current")
+        if in_section
+            && let Some((name, value)) = line.split_once('=')
+            && name.trim().eq_ignore_ascii_case(key)
         {
-            let value = value.trim();
-            if !value.is_empty() {
-                current = Some(value.to_string());
-            }
+            found = Some(value.trim().to_string());
         }
     }
-    current
+    found
+}
+
+/// Who SDDM logs in without showing the greeter, and the file that says so.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SddmAutologin {
+    pub user: String,
+    pub decided_by: PathBuf,
+}
+
+/// The autologin SDDM ends up with, read the way it reads its configuration:
+/// `/etc/sddm.conf`, then every `*.conf` in the drop-in directory in name
+/// order, the last `[Autologin] User=` winning and an empty one turning it
+/// off. Omarchy writes `autologin.conf` at first boot (`docs/UPSTREAM.md`).
+pub fn effective_sddm_autologin(layout: &Layout) -> Option<SddmAutologin> {
+    resolve_sddm_autologin(&layout.sddm_conf(), &layout.sddm_conf_dir())
+}
+
+pub fn resolve_sddm_autologin(conf: &Path, conf_dir: &Path) -> Option<SddmAutologin> {
+    let mut winner = None;
+    for file in sddm_files(conf, conf_dir) {
+        let Ok(text) = fs::read_to_string(&file) else {
+            continue;
+        };
+        match parse_sddm_key(&text, "autologin", "user") {
+            Some(user) if user.is_empty() => winner = None,
+            Some(user) => {
+                winner = Some(SddmAutologin {
+                    user,
+                    decided_by: file,
+                })
+            }
+            None => {}
+        }
+    }
+    winner
+}
+
+/// `/etc/sddm.conf` followed by the drop-ins in the order SDDM reads them.
+fn sddm_files(conf: &Path, conf_dir: &Path) -> Vec<PathBuf> {
+    let mut files = vec![conf.to_path_buf()];
+    if let Ok(entries) = fs::read_dir(conf_dir) {
+        let mut dropins: Vec<PathBuf> = entries
+            .filter_map(|entry| entry.ok())
+            .map(|entry| entry.path())
+            .filter(|path| path.is_file() && path.extension().is_some_and(|e| e == "conf"))
+            .collect();
+        dropins.sort();
+        files.extend(dropins);
+    }
+    files
+}
+
+/// Where Lock Screen Explorer records the boot screen it has applied,
+/// relative to the state base (`~/.local/state`). `stock`, or no file, means
+/// it has left the boot screen alone (read in the plugin's `plymouth/apply.sh`
+/// at version 1.7.7, 20 September 2026; `docs/UPSTREAM.md`).
+pub const LOCK_EXPLORER_BOOT_STATE: &str = "omarchy/lock-explorer-boot";
+
+/// Something else that puts its own Plymouth theme over whatever
+/// `plymouthd.conf` names, so an omaboot theme would never be seen at boot.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BootOverride {
+    /// The thing, named for a user.
+    pub plugin: String,
+    /// What it is set to, in its own words.
+    pub setting: String,
+    /// Where that was read.
+    pub state_file: PathBuf,
+    /// How to make it stand aside, in one sentence.
+    pub way_out: String,
+}
+
+/// Lock Screen Explorer's boot screen, when it is set to anything but stock.
+/// On Omarchy's UKI boot it ships its theme as an initrd addon on the EFI
+/// partition with its own `plymouthd.conf`, layered over the initramfs by
+/// the boot stub, so it wins over the default omaboot sets; without the UKI
+/// it sets the default itself and rebuilds. Either way an omaboot apply
+/// would succeed and never be seen.
+pub fn boot_override(layout: &Layout) -> Option<BootOverride> {
+    let state_file = layout.state_base().join(LOCK_EXPLORER_BOOT_STATE);
+    let setting = fs::read_to_string(&state_file).ok()?;
+    let setting = setting.trim();
+    if setting.is_empty() || setting == "stock" {
+        return None;
+    }
+    Some(BootOverride {
+        plugin: "Lock Screen Explorer (io.github.sirjul1337.lock-explorer)".to_string(),
+        setting: setting.to_string(),
+        state_file,
+        way_out: "set its boot screen to stock (press B in the explorer and choose the stock boot screen, or run `omarchy-shell lock setBoot stock`)".to_string(),
+    })
 }
 
 pub fn state_paths(layout: &Layout) -> Vec<PathBuf> {
@@ -492,5 +580,54 @@ mod tests {
             .filter(|name| name.starts_with('.'))
             .collect();
         assert!(leftovers.is_empty(), "{leftovers:?}");
+    }
+
+    #[test]
+    fn autologin_is_the_last_word_and_an_empty_user_turns_it_off() {
+        let tmp = tempfile::tempdir().unwrap();
+        let conf = tmp.path().join("sddm.conf");
+        let dir = tmp.path().join("sddm.conf.d");
+        fs::create_dir_all(&dir).unwrap();
+        assert_eq!(resolve_sddm_autologin(&conf, &dir), None);
+
+        fs::write(
+            dir.join("autologin.conf"),
+            "[Autologin]\nUser=maarten\nSession=omarchy.desktop\n",
+        )
+        .unwrap();
+        let found = resolve_sddm_autologin(&conf, &dir).unwrap();
+        assert_eq!(found.user, "maarten");
+        assert!(found.decided_by.ends_with("autologin.conf"));
+
+        // A later file with an empty User= is how SDDM turns it off again;
+        // a file that mentions no autologin leaves the earlier answer alone.
+        fs::write(dir.join("zz-off.conf"), "[Autologin]\nUser=\n").unwrap();
+        fs::write(dir.join("zz-theme.conf"), "[Theme]\nCurrent=x\n").unwrap();
+        assert_eq!(resolve_sddm_autologin(&conf, &dir), None);
+
+        // Section and key names are matched without regard to case.
+        fs::write(dir.join("zz-off.conf"), "[autologin]\nuser = again\n").unwrap();
+        assert_eq!(resolve_sddm_autologin(&conf, &dir).unwrap().user, "again");
+    }
+
+    #[test]
+    fn the_lock_explorer_boot_screen_is_an_override_unless_it_is_stock() {
+        let tmp = tempfile::tempdir().unwrap();
+        let layout = layout(tmp.path());
+        let file = layout.state_base().join(LOCK_EXPLORER_BOOT_STATE);
+        assert_eq!(boot_override(&layout), None);
+
+        fs::create_dir_all(file.parent().unwrap()).unwrap();
+        fs::write(&file, "stock\n").unwrap();
+        assert_eq!(boot_override(&layout), None);
+        fs::write(&file, "").unwrap();
+        assert_eq!(boot_override(&layout), None);
+
+        fs::write(&file, "follow\n").unwrap();
+        let over = boot_override(&layout).unwrap();
+        assert_eq!(over.setting, "follow");
+        assert!(over.plugin.contains("Lock Screen Explorer"));
+        assert_eq!(over.state_file, file);
+        assert!(over.way_out.contains("setBoot stock"));
     }
 }

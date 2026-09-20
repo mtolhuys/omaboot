@@ -18,7 +18,7 @@ use crate::generate::{AssetSource, Content, GeneratedFile, GeneratedTheme, gener
 use crate::omarchy::{self, OmarchyThemes, Palette};
 use crate::paths::Layout;
 use crate::render::{self, Screen};
-use crate::state::{self, AppliedState, SddmTheme};
+use crate::state::{self, AppliedState, BootOverride, SddmAutologin, SddmTheme};
 use crate::theme::{
     Login, LoginBackground, LoginLayout, Manifest, Meta, Progress, Prompt, Rgb, Shutdown,
     ShutdownLogo, Theme, Unlock,
@@ -73,6 +73,9 @@ pub struct PlymouthNow {
     pub background: Option<Rgb>,
     pub foreground: Option<Rgb>,
     pub logo: Option<PathBuf>,
+    /// Something that puts its own theme over the one `plymouthd.conf`
+    /// names at boot, so what is set here is not what is seen.
+    pub overridden_by: Option<BootOverride>,
 }
 
 /// The login screen.
@@ -86,6 +89,10 @@ pub struct LoginNow {
     pub foreground: Option<Rgb>,
     pub accent: Option<Rgb>,
     pub error: Option<Rgb>,
+    /// Who SDDM is configured to log in without the greeter. Whether the
+    /// greeter is then skipped is SDDM's call at boot; this only reports
+    /// the configuration.
+    pub autologin: Option<SddmAutologin>,
 }
 
 /// One line of the read-only inspector.
@@ -186,6 +193,18 @@ impl Snapshot {
     /// What is wrong, if anything, said plainly.
     pub fn warnings(&self) -> Vec<String> {
         let mut out = Vec::new();
+        if let Some(over) = &self.plymouth.overridden_by {
+            out.push(format!(
+                "{} has its boot screen set to {}: what boots is its theme, not {}, until you {}",
+                over.plugin,
+                over.setting,
+                self.plymouth
+                    .theme
+                    .as_deref()
+                    .unwrap_or("the one plymouthd.conf names"),
+                over.way_out
+            ));
+        }
         if let Some(applied) = &self.applied {
             if self.plymouth.owner != Owner::Omaboot {
                 out.push(format!(
@@ -272,6 +291,17 @@ impl Snapshot {
                         .map(|logo| self.show(logo))
                         .unwrap_or_else(|| "none".to_string()),
                 ));
+                if let Some(over) = &now.overridden_by {
+                    facts.push(Fact::new(
+                        "overridden by",
+                        format!(
+                            "{}, boot screen set to {} ({}): its theme is put over the initramfs at boot and wins over this one",
+                            over.plugin,
+                            over.setting,
+                            self.show(&over.state_file)
+                        ),
+                    ));
+                }
             }
             Screen::Login => {
                 let now = &self.login;
@@ -294,6 +324,16 @@ impl Snapshot {
                 facts.push(Fact::new("text", hex(&now.foreground)));
                 facts.push(Fact::new("accent", hex(&now.accent)));
                 facts.push(Fact::new("error", hex(&now.error)));
+                if let Some(autologin) = &now.autologin {
+                    facts.push(Fact::new(
+                        "autologin",
+                        format!(
+                            "{}, per {}",
+                            autologin.user,
+                            self.show(&autologin.decided_by)
+                        ),
+                    ));
+                }
             }
         }
         if let Some(applied) = &self.applied {
@@ -558,6 +598,7 @@ fn read_plymouth(layout: &Layout) -> PlymouthNow {
         background,
         foreground,
         logo,
+        overridden_by: state::boot_override(layout),
     }
 }
 
@@ -596,6 +637,7 @@ fn read_login(layout: &Layout) -> LoginNow {
         foreground,
         accent: conf.accent,
         error: conf.error,
+        autologin: state::effective_sddm_autologin(layout),
     }
 }
 
@@ -866,6 +908,55 @@ mod tests {
         assert_eq!(manifest.colors.foreground, "#c0caf5");
         assert_eq!(manifest.shutdown.progress, Progress::None);
         assert!(!manifest.login.clock);
+    }
+
+    #[test]
+    fn autologin_and_a_boot_override_are_facts_and_the_override_is_a_warning() {
+        let (tmp, layout) = world();
+        let omarchy = fixture::omarchy_tree(&tmp.path().join("root/usr/share/omarchy"));
+        stock(&layout, &omarchy);
+        fs::write(
+            layout.sddm_conf_dir().join("autologin.conf"),
+            "[Autologin]\nUser=maarten\nSession=omarchy.desktop\n",
+        )
+        .unwrap();
+        let over = layout
+            .state_base()
+            .join(crate::state::LOCK_EXPLORER_BOOT_STATE);
+        fs::create_dir_all(over.parent().unwrap()).unwrap();
+        fs::write(&over, "follow\n").unwrap();
+
+        let snapshot = Snapshot::read(&layout);
+        assert_eq!(snapshot.login.autologin.as_ref().unwrap().user, "maarten");
+        let login: Vec<String> = snapshot
+            .facts(Screen::Login)
+            .into_iter()
+            .map(|f| format!("{}: {}", f.label, f.value))
+            .collect();
+        assert!(
+            login.iter().any(|f| f.starts_with("autologin: maarten, per ") && f.ends_with("autologin.conf")),
+            "{login:?}"
+        );
+        let unlock: Vec<String> = snapshot
+            .facts(Screen::Unlock)
+            .into_iter()
+            .map(|f| format!("{}: {}", f.label, f.value))
+            .collect();
+        assert!(
+            unlock
+                .iter()
+                .any(|f| f.starts_with("overridden by: Lock Screen Explorer")
+                    && f.contains("set to follow")),
+            "{unlock:?}"
+        );
+        let warnings = snapshot.warnings();
+        assert_eq!(warnings.len(), 1, "{warnings:?}");
+        assert!(
+            warnings[0].contains("what boots is its theme, not omarchy"),
+            "{}",
+            warnings[0]
+        );
+        assert!(warnings[0].contains("setBoot stock"), "{}", warnings[0]);
     }
 
     #[test]
