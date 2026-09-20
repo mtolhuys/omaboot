@@ -1,0 +1,39 @@
+what boots now
+  boot and shutdown (Plymouth)
+    theme       omaboot
+    set in      /etc/plymouth/plymouthd.conf
+    owner       installed by omaboot
+    files       /usr/share/plymouth/themes/omaboot
+    background  unknown
+    text        #bebebe
+    logo        /usr/share/plymouth/themes/omaboot/logo.png
+  login (SDDM)
+    theme       omaboot
+    decided by  /etc/sddm.conf.d/zz-omaboot.conf
+    owner       installed by omaboot
+    files       /usr/share/sddm/themes/omaboot
+    background  #000000
+    text        #bebebe
+    accent      unknown
+    error       unknown
+
+nothing is applied by omaboot; the system is on its own themes
+rollback target:  plymouth omarchy, drop-in removed (just now)
+tools:            greeter sddm-greeter-qt6, initramfs /usr/bin/limine-mkinitcpio
+[Daemon]
+Theme=omaboot
+/etc/sddm.conf.d:
+10-theme.conf
+10-wayland.conf
+99-omarchy-login.conf
+zz-omaboot.conf
+
+/home/omarchy/.local/state/omaboot:
+rollback.toml
+stage
+version = 1
+recorded_at_unix = 1789928396
+previous_plymouth_theme = "omarchy"
+sddm_dropin_existed = false
+theme = "matte"
+theme_hash = "dc6bfdb136a286f5dee4b98355eae2a245debb6c700ed0f2f23434c6b00e6e30"

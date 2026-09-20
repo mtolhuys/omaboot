@@ -1,0 +1,6 @@
+total 40624
+drwx------ 2 root root     4096 Sep 20 20:19 .
+drwx------ 5 root root     4096 Sep 10 21:29 ..
+-rwx------ 1 root root 41589248 Sep 20 20:19 omarchy_linux.efi
+39cb4675bf292bbb90e73e31c481f14a3687c04a0f0900847f7d181ee75203fd  /boot/EFI/Linux/omarchy_linux.efi
+1440
