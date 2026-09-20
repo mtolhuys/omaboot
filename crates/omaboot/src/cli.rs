@@ -387,8 +387,12 @@ pub fn run(cli: Cli, out: &mut dyn Write) -> Result<()> {
                 None => scaffold::Source::Blank,
             };
             if json && !dry_run {
-                scaffold::create(&layout, &name, &source)?;
-                return emit(out, &crate::api::show(&layout, name.trim())?);
+                let created = scaffold::create(&layout, &name, &source)?;
+                let mut shown = crate::api::show(&layout, name.trim())?;
+                if let Some(note) = created.logo_note {
+                    shown["note"] = serde_json::Value::String(note);
+                }
+                return emit(out, &shown);
             }
             new_theme(&layout, &name, &source, dry_run, out)
         }
@@ -864,14 +868,17 @@ fn new_theme(
                 }
             }
             scaffold::Source::OmarchyTheme(theme) => {
-                let unlock = OmarchyThemes::discover(layout).unlock_image(theme)?;
+                let logo = OmarchyThemes::discover(layout).logo_for(theme)?;
                 writeln!(
                     out,
                     "would copy {} to {}",
-                    unlock.display(),
+                    logo.path.display(),
                     dir.join("logo.png").display()
                 )
                 .ok();
+                if logo.origin == crate::omarchy::LogoOrigin::OmarchyDefault {
+                    writeln!(out, "note: {}", scaffold::logo_note_for(theme)).ok();
+                }
             }
             scaffold::Source::Blank => {
                 writeln!(
@@ -887,6 +894,9 @@ fn new_theme(
 
     let created = scaffold::create(layout, name, source)?;
     writeln!(out, "created {}", created.dir.display()).ok();
+    if let Some(note) = &created.logo_note {
+        writeln!(out, "note: {note}").ok();
+    }
     match created.logo_from {
         Some(unlock) => {
             writeln!(

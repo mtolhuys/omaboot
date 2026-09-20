@@ -325,3 +325,12 @@ test: `cli::tests::a_partial_apply_does_not_promise_a_new_boot_screen`,
 and the generated-script case in `system::tests` for `parse_background`.
 V1 is the lab's, not omaboot's, and stays as recorded. Not re-run since:
 the harness and qmllint (no QML changed), makepkg (see above).
+
+Also after the round, from the window on the reference machine: "New
+theme" from the Omarchy theme `catppuccin-dark` (a store theme) answered
+`the Omarchy theme catppuccin-dark has no unlock.png. Suggested next step:
+pick a theme that has one, or scaffold without --from-omarchy-theme and add
+your own logo.png` in the dialog. Fixed the same day: such a theme gets
+Omarchy's default logo and a note saying so; `status` marks each Omarchy
+theme with `has_logo`. The dialog does not yet show that mark (QML
+unchanged; a window pass is owed).

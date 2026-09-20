@@ -599,6 +599,18 @@ nothing, per sudo(8). The engine now also asks `sudo -n -v` right after
 taking the ticket, so a sudoers policy that keeps no ticket is reported at
 the dialog rather than five steps later.
 
+**A theme without an `unlock.png` gets Omarchy's logo, not a refusal.**
+The first "New theme" from the window on the reference machine picked the
+owner's store-installed `catppuccin-dark`, which has no `unlock.png`, and the
+dialog answered with an error and a command-line suggestion. Omarchy's own
+switcher shows such a theme with Omarchy's default logo, so omaboot does the
+same: the colours come from the theme, the logo from
+`default/plymouth/logo.png`, and `new` says so in one sentence (`note` in the
+JSON, a line on the command line). An `unlock.png` that is there but
+unusable (a symlink, an empty file) is still refused: that is a mistake the
+author should see. `status` marks each Omarchy theme with `has_logo` so the
+dialog can say it before the click.
+
 **An apply that would never be seen is refused, not performed.** Lock
 Screen Explorer's boot screen, when set, puts its theme over the initramfs
 at boot, so an omaboot apply under it would succeed at every step and change

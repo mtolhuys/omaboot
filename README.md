@@ -153,8 +153,11 @@ background (from its script), text colour (from its glyphs) and logo, plus
 the login theme's accent and error colours when its `theme.conf` has them;
 when omaboot's own theme is installed it copies the theme it came from
 instead. `new --from-omarchy-theme` takes the colours from that theme's
-`colors.toml` and its `unlock.png` as a starting logo. Either way the theme
-is complete and the dry run works straight away. Without a flag you get a
+`colors.toml` and its `unlock.png` as a starting logo; a theme without one
+(themes from the store often have none, Omarchy's bundled ones all do) gets
+Omarchy's own logo, which is what Omarchy's boot screen shows for such a
+theme too, and `new` says so. Either way the theme is complete and the dry
+run works straight away. Without a flag you get a
 manifest and add your own `logo.png`.
 
 `render` draws a screen to a PNG from the same bytes an apply would install,

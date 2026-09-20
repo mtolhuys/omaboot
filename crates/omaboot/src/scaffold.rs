@@ -6,7 +6,7 @@
 use std::path::PathBuf;
 
 use crate::error::{Error, Result};
-use crate::omarchy::{OmarchyThemes, Palette};
+use crate::omarchy::{LogoOrigin, OmarchyThemes, Palette};
 use crate::paths::Layout;
 use crate::state;
 use crate::system::{Derived, Snapshot};
@@ -31,6 +31,9 @@ pub struct Created {
     pub dir: PathBuf,
     /// The image copied in as logo.png, if one was.
     pub logo_from: Option<PathBuf>,
+    /// One sentence when the logo is not the source's own: the Omarchy
+    /// theme had no `unlock.png`, so Omarchy's default logo was copied in.
+    pub logo_note: Option<String>,
 }
 
 /// Check a name before anything is written.
@@ -71,6 +74,7 @@ pub fn check_name(layout: &Layout, name: &str) -> Result<()> {
 pub fn create(layout: &Layout, name: &str, source: &Source) -> Result<Created> {
     let name = name.trim();
     check_name(layout, name)?;
+    let mut logo_note = None;
 
     // Everything to write, resolved before the directory exists.
     let (manifest, files): (String, Vec<(PathBuf, String)>) = match source {
@@ -78,10 +82,13 @@ pub fn create(layout: &Layout, name: &str, source: &Source) -> Result<Created> {
         Source::OmarchyTheme(theme) => {
             let themes = OmarchyThemes::discover(layout);
             let palette = themes.palette(theme)?;
-            let unlock = themes.unlock_image(theme)?;
+            let logo = themes.logo_for(theme)?;
+            if logo.origin == LogoOrigin::OmarchyDefault {
+                logo_note = Some(logo_note_for(theme));
+            }
             (
                 manifest_text(name, Some(&palette)),
-                vec![(unlock, "logo.png".to_string())],
+                vec![(logo.path, "logo.png".to_string())],
             )
         }
         Source::Current => {
@@ -112,7 +119,18 @@ pub fn create(layout: &Layout, name: &str, source: &Source) -> Result<Created> {
         }
     }
 
-    Ok(Created { dir, logo_from })
+    Ok(Created {
+        dir,
+        logo_from,
+        logo_note,
+    })
+}
+
+/// The sentence for a theme that got Omarchy's logo instead of its own.
+pub fn logo_note_for(theme: &str) -> String {
+    format!(
+        "the Omarchy theme {theme} has no unlock.png, so the logo is Omarchy's own, the way Omarchy's boot screen shows that theme; drop a PNG or SVG on the picture to replace it"
+    )
 }
 
 /// What the current screens would give a new theme, without writing it.
@@ -196,6 +214,40 @@ mod tests {
         let theme = Theme::load(&created.dir).expect("it must validate unaided");
         assert_eq!(theme.manifest().colors.background, "#2e3440");
         assert_eq!(std::fs::read(theme.logo()).unwrap(), b"nord unlock image");
+    }
+
+    #[test]
+    fn a_theme_from_an_omarchy_theme_without_a_logo_gets_omarchys_and_says_so() {
+        let (tmp, layout) = world();
+        let root = tmp.path().join("root");
+        let store = root.join("usr/share/omarchy/themes/store");
+        std::fs::create_dir_all(&store).unwrap();
+        std::fs::copy(
+            root.join("usr/share/omarchy/themes/nord/colors.toml"),
+            store.join("colors.toml"),
+        )
+        .unwrap();
+        let default = root.join("usr/share/omarchy/default/plymouth");
+        std::fs::create_dir_all(&default).unwrap();
+        std::fs::write(default.join("logo.png"), b"omarchy logo").unwrap();
+
+        let created = create(&layout, "mine", &Source::OmarchyTheme("store".to_string())).unwrap();
+        assert!(
+            created
+                .logo_from
+                .unwrap()
+                .ends_with("default/plymouth/logo.png")
+        );
+        let note = created.logo_note.unwrap();
+        assert!(
+            note.starts_with("the Omarchy theme store has no unlock.png"),
+            "{note}"
+        );
+        let theme = Theme::load(&created.dir).expect("complete on its own");
+        assert_eq!(std::fs::read(theme.logo()).unwrap(), b"omarchy logo");
+
+        let own = create(&layout, "own", &Source::OmarchyTheme("nord".to_string())).unwrap();
+        assert!(own.logo_note.is_none());
     }
 
     #[test]

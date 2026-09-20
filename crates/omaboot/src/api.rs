@@ -76,6 +76,9 @@ pub fn inspect(layout: &Layout) -> Value {
             let palette = omarchy.palette(&name).ok();
             json!({
                 "name": name,
+                // False for a theme without unlock.png: a theme made from it
+                // starts with Omarchy's default logo, and `new` says so.
+                "has_logo": omarchy.has_unlock_image(&name),
                 "palette": palette.map(|p| json!({
                     "background": p.background,
                     "foreground": p.foreground,

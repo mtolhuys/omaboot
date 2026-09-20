@@ -72,17 +72,72 @@ impl Palette {
 pub struct OmarchyThemes {
     user: PathBuf,
     packaged: PathBuf,
+    /// Omarchy's own boot logo (`default/plymouth/logo.png`), the one its
+    /// Plymouth switcher offers as "default" and what a theme without an
+    /// `unlock.png` gets from omaboot.
+    default_logo: PathBuf,
     /// How the packaged location was chosen, for the sentence that says no
     /// theme was found there.
     prefixed: bool,
 }
 
+/// Where a scaffolded theme's logo came from.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LogoOrigin {
+    /// The theme's own `unlock.png`.
+    Theme,
+    /// Omarchy's default logo, because the theme has no `unlock.png`. This
+    /// is what Omarchy's own switcher shows for such a theme too.
+    OmarchyDefault,
+}
+
+/// The image a scaffolded theme starts with, and where it came from.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Logo {
+    pub path: PathBuf,
+    pub origin: LogoOrigin,
+}
+
 impl OmarchyThemes {
     pub fn discover(layout: &Layout) -> Self {
+        let omarchy = omarchy_path(layout);
         Self {
             user: layout.config_base().join("omarchy/themes"),
-            packaged: omarchy_path(layout).join("themes"),
+            packaged: omarchy.join("themes"),
+            default_logo: omarchy.join("default/plymouth/logo.png"),
             prefixed: layout.is_prefixed(),
+        }
+    }
+
+    /// Whether the theme carries an `unlock.png` of its own. Themes from the
+    /// theme store often do not; Omarchy's bundled ones all do.
+    pub fn has_unlock_image(&self, name: &str) -> bool {
+        self.dir(name)
+            .map(|dir| dir.join(UNLOCK))
+            .is_ok_and(|path| path.is_file())
+    }
+
+    /// The image to start a logo from: the theme's own `unlock.png`, or,
+    /// when the theme has none, Omarchy's default logo. A theme's image that
+    /// is there but unusable (a symlink, empty) is still an error: that is
+    /// the author's mistake to see, not to paper over.
+    pub fn logo_for(&self, name: &str) -> Result<Logo> {
+        match self.unlock_image(name) {
+            Ok(path) => Ok(Logo {
+                path,
+                origin: LogoOrigin::Theme,
+            }),
+            Err(error) => {
+                let missing = !self.dir(name)?.join(UNLOCK).exists();
+                if missing && self.default_logo.is_file() {
+                    Ok(Logo {
+                        path: self.default_logo.clone(),
+                        origin: LogoOrigin::OmarchyDefault,
+                    })
+                } else {
+                    Err(error)
+                }
+            }
         }
     }
 
@@ -143,7 +198,10 @@ impl OmarchyThemes {
         let metadata = fs::symlink_metadata(&path).map_err(|source| {
             if source.kind() == std::io::ErrorKind::NotFound {
                 Error::Environment {
-                    what: format!("the Omarchy theme {name} has no {UNLOCK}"),
+                    what: format!(
+                        "the Omarchy theme {name} has no {UNLOCK}, and Omarchy's default logo is not at {}",
+                        self.default_logo.display()
+                    ),
                     suggestion:
                         "pick a theme that has one, or scaffold without --from-omarchy-theme and add your own logo.png"
                             .to_string(),
@@ -401,6 +459,38 @@ bright_magenta = "#f5c2e7"
             .unwrap_err()
             .to_string();
         assert!(error.contains("unlock.png"), "{error}");
+    }
+
+    #[test]
+    fn a_theme_without_an_unlock_image_starts_with_omarchys_default_logo() {
+        let (tmp, layout) = world();
+        let root = tmp.path().join("root");
+        let dir = packaged_theme(&root, "store", CATPPUCCIN);
+        fs::remove_file(dir.join(UNLOCK)).unwrap();
+        let default = root.join("usr/share/omarchy/default/plymouth");
+        fs::create_dir_all(&default).unwrap();
+        fs::write(default.join("logo.png"), b"omarchy logo").unwrap();
+
+        let themes = OmarchyThemes::discover(&layout);
+        assert!(!themes.has_unlock_image("store"));
+        let logo = themes.logo_for("store").unwrap();
+        assert_eq!(logo.origin, LogoOrigin::OmarchyDefault);
+        assert_eq!(fs::read(&logo.path).unwrap(), b"omarchy logo");
+
+        // A theme with its own image keeps it.
+        packaged_theme(&root, "own", CATPPUCCIN);
+        let own = themes.logo_for("own").unwrap();
+        assert_eq!(own.origin, LogoOrigin::Theme);
+        assert!(themes.has_unlock_image("own"));
+
+        // Without the default logo either, the old sentence, naming both.
+        fs::remove_file(default.join("logo.png")).unwrap();
+        let error = OmarchyThemes::discover(&layout)
+            .logo_for("store")
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("has no unlock.png"), "{error}");
+        assert!(error.contains("default logo is not at"), "{error}");
     }
 
     #[test]

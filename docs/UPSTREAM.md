@@ -230,6 +230,16 @@ Other relevant pieces:
   design id, or `follow`); `stock` or no file means it has stood aside. It
   does not touch SDDM. omaboot reads that file (`state::boot_override`) and
   refuses an apply while it says anything but stock.
+- Verified 20 September 2026 in the `core` checkout at `e5b0dc22`: every
+  bundled theme under `themes/` carries `unlock.png` and `preview-unlock.png`;
+  a theme installed from the store into `~/.config/omarchy/themes` need not
+  (the owner's `catppuccin-dark` has neither). `bin/omarchy-plymouth-list`
+  offers only themes with a `preview-unlock.png`, and the switcher adds
+  Omarchy's own `default/plymouth/preview-unlock.png` as "default";
+  `bin/omarchy-plymouth-set-by-theme` passes `<theme>/unlock.png` straight
+  to `omarchy-plymouth-set`, which fails on a missing file. omaboot's `new
+  --from-omarchy-theme` falls back to `default/plymouth/logo.png` for such a
+  theme and says so, rather than refusing.
 - Quattro plugins are QML entry points (`bar`, `panel`, `overlay`, `menu`,
   `service`) loaded by the shell from `~/.config/omarchy/plugins/<id>/`. Boot and
   login happen before the shell exists, so **omaboot is not a shell plugin** and
