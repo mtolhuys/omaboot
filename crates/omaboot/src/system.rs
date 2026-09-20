@@ -292,15 +292,17 @@ impl Snapshot {
                         .unwrap_or_else(|| "none".to_string()),
                 ));
                 if let Some(over) = &now.overridden_by {
+                    // The sentence and the path are two facts: a path fact
+                    // keeps its start and its file name in the window, and
+                    // a sentence wraps at words; one string cannot do both.
                     facts.push(Fact::new(
                         "overridden by",
                         format!(
-                            "{}, boot screen set to {} ({}): its theme is put over the initramfs at boot and wins over this one",
-                            over.plugin,
-                            over.setting,
-                            self.show(&over.state_file)
+                            "{}, boot screen set to {}: its theme is put over the initramfs at boot and wins over this one",
+                            over.plugin, over.setting
                         ),
                     ));
+                    facts.push(Fact::new("its state file", self.show(&over.state_file)));
                 }
             }
             Screen::Login => {
@@ -946,7 +948,13 @@ mod tests {
             unlock
                 .iter()
                 .any(|f| f.starts_with("overridden by: Lock Screen Explorer")
-                    && f.contains("set to follow")),
+                    && f.contains("set to follow")
+                    && !f.contains("lock-explorer-boot")),
+            "{unlock:?}"
+        );
+        assert!(
+            unlock.iter().any(|f| f.starts_with("its state file: /")
+                && f.ends_with("/omarchy/lock-explorer-boot")),
             "{unlock:?}"
         );
         let warnings = snapshot.warnings();

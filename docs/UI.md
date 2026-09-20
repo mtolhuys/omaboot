@@ -185,7 +185,11 @@ since the picture there is sized by the height, the hint goes first, then
 the rest of the sentence, and the whole of it is in the line's tooltip. It
 is never cut mid-sentence. A path in the facts keeps its start and its file
 name and loses its middle, with the full path in its tooltip; nothing
-there wraps mid-word.
+there wraps mid-word. A fact that is a sentence (what overrides the boot
+screen, say) is never a column: in the stacked layout it spans the row and
+wraps wide, so the inspector does not grow taller than its share and push
+the footer off the window. The engine keeps a path out of such a sentence
+and gives it a fact of its own, so each gets its treatment.
 
 ## Anti-patterns, explicitly banned
 
@@ -206,7 +210,9 @@ a sandbox prefix with a fake home, and grabs the window offscreen. The
 widgets, tokens, font and engine are the real ones; only Hyprland's rounding
 and gaps are missing. `plugin/harness/shots.sh <dir>` renders the set a
 design pass looks at (wide and narrow, system and theme, the three screens,
-the dry run, the dialogs), and `plugin/harness/exercise.sh` drives the
+the dry run, the dialogs, and the system entry and a dry run with Lock
+Screen Explorer's boot screen set, seeded through its state file in the
+fake home), and `plugin/harness/exercise.sh` drives the
 editing flows through the window (a burst of edits, a per-screen logo width,
 the file dialog's directory before and after a pick, an
 image drop, a wallpaper, a rename, a new theme, a delete, a dry run) and

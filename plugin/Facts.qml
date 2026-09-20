@@ -45,8 +45,14 @@ GridLayout {
 
     ColumnLayout {
       required property var modelData
+      // A sentence (the override, say) is not a column's worth of text: in
+      // the stacked layout it takes the whole row and wraps wide, instead of
+      // standing as a tall narrow column that pushes the footer off the
+      // window. Values that fit a column keep their column.
+      readonly property bool prose: String(modelData.value).length > 60 && String(modelData.value).indexOf("/") !== 0
       Layout.fillWidth: true
-      Layout.maximumWidth: root.columns > 1 ? 300 : -1
+      Layout.columnSpan: prose ? root.columns : 1
+      Layout.maximumWidth: root.columns > 1 && !prose ? 300 : -1
       Layout.alignment: Qt.AlignTop | Qt.AlignLeft
       Layout.topMargin: Style.spacing.xs
       spacing: 0
