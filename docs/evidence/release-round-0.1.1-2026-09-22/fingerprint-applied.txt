@@ -1,0 +1,57 @@
+== plymouthd.conf
+[Daemon]
+Theme=omaboot
+== sddm.conf.d
+10-theme.conf
+10-wayland.conf
+99-omarchy-login.conf
+zz-omaboot.conf
+== drop-in
+[Theme]
+Current=omaboot
+== plymouth themes
+bgrt
+details
+fade-in
+glow
+omaboot
+omarchy
+script
+solar
+spinfinity
+spinner
+text
+tribar
+== sddm themes
+elarun
+maldives
+maya
+omaboot
+omarchy
+== omaboot dirs
+/home/omarchy/.local/state/omaboot
+/usr/share/plymouth/themes/omaboot
+/usr/share/sddm/themes/omaboot
+== omarchy theme untouched
+ea8246843796c4255d33d4b5a50889ab3fa60f5bbc0b00021e2020440bddf89f  -
+30459331c5152004a3c0d0b0394f22b556722d300e6d194ea3d87d58afea7a52  -
+== initramfs
+etc/plymouth/plymouthd.conf
+usr/share/plymouth/themes/
+usr/share/plymouth/themes/details/
+usr/share/plymouth/themes/details/details.plymouth
+usr/share/plymouth/themes/omaboot/
+usr/share/plymouth/themes/omaboot/bullet.png
+usr/share/plymouth/themes/omaboot/entry.png
+usr/share/plymouth/themes/omaboot/lock.png
+usr/share/plymouth/themes/omaboot/logo-shutdown.png
+usr/share/plymouth/themes/omaboot/logo.png
+usr/share/plymouth/themes/omaboot/omaboot.plymouth
+usr/share/plymouth/themes/omaboot/omaboot.script
+usr/share/plymouth/themes/omaboot/progress_bar.png
+usr/share/plymouth/themes/omaboot/progress_box.png
+usr/share/plymouth/themes/text/
+usr/share/plymouth/themes/text/text.plymouth
+== plymouthd.conf in the initramfs
+[Daemon]
+Theme=omaboot

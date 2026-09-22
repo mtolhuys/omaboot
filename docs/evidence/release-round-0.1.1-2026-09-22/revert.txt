@@ -1,0 +1,10 @@
+omaboot: theme matte (performed)
+         theme hash dc6bfdb136a286f5
+
+- revert
+    check    /usr/bin/omaboot-apply protocol    # must answer 2, the number this omaboot was built with
+    run      sudo /usr/bin/plymouth-set-default-theme omarchy
+    run      sudo -n /usr/bin/omaboot-apply switch --off    # removing /etc/sddm.conf.d/zz-omaboot.conf
+    run      sudo -n /usr/bin/limine-mkinitcpio    # rebuilding the initramfs after the revert
+    rm       /home/omarchy/.local/state/omaboot/applied.toml
+    rm       /home/omarchy/.local/state/omaboot/rollback.toml

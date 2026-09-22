@@ -11,7 +11,9 @@ with its output.
 
 Two defects came out of the evening, one in the round's own script and one in
 the engine. Neither is in the apply pipeline, and nothing the round proved had
-to be redone because of them.
+to be redone because of them. The round was then run a second time against the
+`omaboot 0.1.1-1` package, which carries the engine fix; that run is at the
+foot of this file.
 
 ## What passed
 
@@ -110,11 +112,39 @@ where the kill landed.
   two steps added after it: `shellcheck`, and a qmllint that now fails on the
   categories the shell's absent modules cannot explain (`.qmllint.ini`).
 
+## The same round again, on v0.1.1
+
+The whole round was then run a second time, in a fresh guest, against the
+`omaboot 0.1.1-1` package built from the v0.1.1 tarball — the one an AUR
+upload would carry. Evidence in
+`docs/evidence/release-round-0.1.1-2026-09-22/`.
+
+Every row of the table above passed again: the same stock UKI hash
+(`39cb4675…`) back after both reset and revert, the same two Omarchy theme
+directory hashes with omaboot applied, after reset and after revert, the three
+screens after the reboot (`03-applied-reboot-08.png` shutdown,
+`-87.png` boot, `-90.png` login), and the unlock prompt against the LUKS
+volume.
+
+And R2, in the state it was found in. `after-kill.txt` from this round, under
+facts that say `theme omaboot`, `owner installed by omaboot`,
+`decided by /etc/sddm.conf.d/zz-omaboot.conf`:
+
+```
+no apply finished: the last one was interrupted, and what boots now is what it left
+warning: an apply of matte was interrupted after the switch (just now): the rollback point
+is recorded but nothing was verified; omaboot revert puts plymouth omarchy back, or apply
+again to finish
+```
+
+The sentence the first round caught is gone, and what is left agrees with the
+facts above it and with what the machine then did: booted Omarchy's own
+splash, because the initramfs was never rebuilt (`07-killed-reboot-87.png`),
+into omaboot's login screen (`-90.png`).
+
 ## Not proven here
 
 - The stranger test M3 asks for: someone who has not read the documentation
   rethemeing their boot screen. Still owed.
 - The F6 ten-second path, for the same reason as on 20 September: the guest's
   shell answers too quickly to provoke it.
-- v0.1.1 itself has not had a round. It is v0.1.0 plus R2's one-line fix and
-  its test, and it touches no step of the pipeline.

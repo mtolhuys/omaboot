@@ -28,7 +28,9 @@ against a real LUKS volume, reset, an apply killed during the initramfs
 rebuild, revert — with the stock UKI byte for byte back after both reset and
 revert, and Omarchy's own theme directories unchanged throughout
 (`docs/evidence/release-round-2026-09-22.md`). It found one wrong sentence in
-`status` after an interrupted apply, which v0.1.1 fixes. Every push runs the
+`status` after an interrupted apply; v0.1.1 fixes it, and the same round ran
+again on the v0.1.1 package with the same result and the corrected sentence in
+the guest. Every push runs the
 suite, that same apply round against a temporary prefix, shellcheck, qmllint
 and `makepkg` on the PKGBUILD (`.github/workflows/ci.yml`).
 

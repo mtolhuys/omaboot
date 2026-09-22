@@ -1,0 +1,9 @@
+omaboot: theme (stock omarchy) (performed)
+
+- reset
+    check    /usr/bin/omaboot-apply protocol    # must answer 2, the number this omaboot was built with
+    run      sudo /usr/bin/plymouth-set-default-theme omarchy
+    run      sudo -n /usr/bin/omaboot-apply switch --off    # removing /etc/sddm.conf.d/zz-omaboot.conf
+    run      sudo -n /usr/bin/omaboot-apply remove    # removing the omaboot theme directories
+    run      sudo -n /usr/bin/limine-mkinitcpio    # rebuilding the initramfs after returning to stock
+    rm -r    /home/omarchy/.local/state/omaboot
