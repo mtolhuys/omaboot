@@ -179,7 +179,9 @@ Item {
   function set(theme, assignments, onDone) { call(["set", theme].concat(assignments), onDone) }
   function rename(theme, name, onDone) { call(["rename", theme, name], onDone) }
   function addImage(theme, file, role, onDone) { call(["add-image", theme, file, "--as", role], onDone) }
-  function palette(file, onDone) { call(["palette", file], onDone) }
+  // Not `palette`: that is a property of every Item, and a function of the
+  // same name shadows it.
+  function imagePalette(file, onDone) { call(["palette", file], onDone) }
   function newTheme(name, source, onDone) {
     var args = ["new", name]
     if (source === "current") args.push("--from-current")

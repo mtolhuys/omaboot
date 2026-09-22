@@ -1,3 +1,8 @@
+// The delegate below reads `root` from outside it, which QML resolves at
+// creation under this pragma; every property it takes from the model is
+// declared required, which is the same rule stated the other way round.
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 

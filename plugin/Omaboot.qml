@@ -265,7 +265,7 @@ Item {
           revision += 1
           say("added " + path.split("/").pop() + " as the " + (role === "background" ? "login wallpaper" : role.replace("-", " ")))
           if (role === "background") {
-            engine.palette(path, function(okP, pal) {
+            engine.imagePalette(path, function(okP, pal) {
               if (okP) wallpaperPalette = pal.colours
             })
           }

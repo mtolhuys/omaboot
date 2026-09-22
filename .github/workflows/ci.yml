@@ -76,11 +76,15 @@ jobs:
           fetch-depth: 0
 
       - name: Lint the plugin QML
+        # qt6-declarative puts qmllint at /usr/lib/qt6/bin, not on PATH, and a
+        # /usr/bin/qmllint elsewhere is Qt 5's. The syntax check is what this
+        # asks of it; .qmllint.ini says why the rest cannot be judged without
+        # the shell's own modules.
         run: |
           shopt -s nullglob
           for qml in plugin/*.qml plugin/harness/*.qml; do
             echo "== $qml"
-            qmllint "$qml"
+            /usr/lib/qt6/bin/qmllint "$qml"
           done
 
       - name: Build the package from this commit
