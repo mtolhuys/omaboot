@@ -732,4 +732,25 @@ mod tests {
                 .contains("ran        omarchy-shell shell rescanPlugins  (ok)")
         );
     }
+
+    /// The manifest the shell reads and the crate are one release. `plugin
+    /// install` links the QML and the binaries together, the engine refuses a
+    /// helper from another build, and the package takes its version from the
+    /// crate, so a manifest that says something else is a lie the shell
+    /// repeats.
+    #[test]
+    fn the_manifest_carries_the_crate_version_and_the_plugin_id() {
+        let manifest: serde_json::Value =
+            serde_json::from_str(include_str!("../../../plugin/manifest.json")).unwrap();
+        assert_eq!(
+            manifest["version"].as_str(),
+            Some(env!("CARGO_PKG_VERSION")),
+            "plugin/manifest.json and Cargo.toml disagree about the version"
+        );
+        assert_eq!(
+            manifest["id"].as_str(),
+            Some(PLUGIN_ID),
+            "plugin/manifest.json and api::PLUGIN_ID disagree about the id"
+        );
+    }
 }

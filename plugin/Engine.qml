@@ -32,7 +32,8 @@ Item {
   // then fails at once with `missingMessage` and spawns nothing.
   readonly property bool missing: probed && binary === ""
   readonly property string missingMessage: "omaboot is not installed: nothing at " + linked
-    + " and no omaboot on PATH. Build it (cargo build --release) and run target/release/omaboot plugin install."
+    + " and no omaboot on PATH. Install the omaboot package, or build it from a checkout:"
+    + " cargo build --release, then target/release/omaboot plugin install."
   property int probing: 0
   property var queued: []
 
