@@ -53,7 +53,12 @@ accepted values of `plymouthd --mode` at runtime instead of trusting a document.
   and requires no root and no system calls. `cargo test --workspace` must pass
   with and without `OMARCHY_PATH` set: a `--root` prefix reads the Omarchy
   tree at `<prefix>/usr/share/omarchy` and never at the variable.
-- The apply pipeline is tested against a temporary root prefix in CI.
+- The apply pipeline is tested against a temporary root prefix in CI:
+  `scripts/ci-pipeline.sh` runs the whole round (scaffold, dry run, apply,
+  drift, revert, reset) with `--root` and a temporary home, and fails if a
+  file Omarchy owns changed. `.github/workflows/ci.yml` runs it, the unit
+  tests with and without `OMARCHY_PATH`, qmllint, and `makepkg` on the
+  PKGBUILD. Releases follow `docs/RELEASING.md`.
 - Anything that can only be proven by booting is proven in the VM, with a
   screenshot committed to the test evidence directory.
 - A change to the apply pipeline without a test that exercises its failure path is

@@ -22,12 +22,20 @@ was seen against a real LUKS volume, and the package built with `makepkg`
 (`docs/evidence/closing-round-2026-09-20.md`). The engine is built and
 tested; the interface is a Quattro shell plugin.
 
+From a checkout, which is the only way today:
+
 ```
 cargo build --release                   # both binaries: the engine and the privileged helper
 target/release/omaboot plugin install   # links the plugin into omarchy-shell and the binaries into ~/.local/bin
 omaboot                                 # opens the window
 cargo test --workspace                  # no root, no system calls, with or without OMARCHY_PATH set
+scripts/ci-pipeline.sh                  # the apply pipeline end to end, in a temporary prefix
 ```
+
+The package is built and tested on every push (`packaging/`,
+`.github/workflows/ci.yml`) but is not on the AUR yet. When it is, it is
+`omarchy pkg aur add omaboot` and then `omaboot plugin install`, and
+`docs/RELEASING.md` is what stands between a tag and that line being true.
 
 The engine and the helper are one build: before anything privileged runs,
 `omaboot` asks `omaboot-apply protocol` and refuses a helper that answers
@@ -243,3 +251,4 @@ This single decision solves three problems at once:
 | `docs/ARCHITECTURE.md` | How it applies changes without breaking anyone's boot |
 | `docs/UPSTREAM.md` | Verified facts about Omarchy internals, and the upstream risk strategy |
 | `docs/DECISIONS.md` | Every choice the specifications did not pin down, and why |
+| `docs/RELEASING.md` | What a release has to prove, in the order the proofs depend on each other |

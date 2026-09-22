@@ -1,0 +1,88 @@
+# Maintainer: Maarten Tolhuijs <mtolhuys@gmail.com>
+#
+# The package for a tagged release, built from the GitHub source tarball.
+# `packaging/PKGBUILD` beside it is the same package from the tip of the
+# default branch (`omaboot-git`); this one is what the AUR carries as
+# `omaboot`, and the two conflict with each other on purpose.
+#
+#   cd packaging && makepkg -p PKGBUILD-release
+#
+# At release time, after the tag is pushed, `updpkgsums -p PKGBUILD-release`
+# replaces the checksum below with the tarball's own. A release is never
+# published with SKIP here.
+#
+# The paths follow what the engine already looks for: the plugin at
+# /usr/share/omaboot/plugin (api::plugin_source), both binaries on PATH
+# (exec::Tools::detect finds omaboot-apply there). `omaboot plugin install`
+# then links the plugin into ~/.config/omarchy/plugins and rescans the shell;
+# its links into ~/.local/bin are harmless duplicates of /usr/bin when
+# installed this way.
+#
+# Omarchy itself is a checkout under /usr/share/omarchy, not a pacman
+# package, so it is not a dependency here; the engine reads it at runtime
+# and says so when it is missing.
+
+pkgname=omaboot
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Design the unlock, login and shutdown screens Omarchy shows around a session, in a window that is part of the desktop"
+arch=('x86_64')
+url="https://github.com/mtolhuys/omaboot"
+license=('MIT')
+depends=('plymouth' 'sddm' 'sudo' 'fontconfig')
+optdepends=(
+  'zenity: the file dialog for logos and wallpapers'
+  'limine-mkinitcpio-hook: rebuild the initramfs the way Omarchy does on Limine'
+  'mkinitcpio: rebuild the initramfs when limine-mkinitcpio is absent'
+  'xorg-xwayland: the real Plymouth preview in a window'
+)
+makedepends=('cargo')
+provides=('omaboot')
+# The release profile strips the binaries itself (Cargo.toml), so makepkg's
+# debug package would be empty.
+options=('!debug')
+conflicts=('omaboot-git')
+source=("$pkgname-$pkgver.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  # The workspace has no default-members on purpose: this builds the engine
+  # and the privileged helper from the same source, which the engine checks
+  # at run time (crates/omaboot-apply/src/protocol.rs).
+  cargo build --release --frozen --workspace
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  # Hermetic: no root, no system calls, passes with or without OMARCHY_PATH.
+  cargo test --release --frozen --workspace
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -Dm755 target/release/omaboot "$pkgdir/usr/bin/omaboot"
+  install -Dm755 target/release/omaboot-apply "$pkgdir/usr/bin/omaboot-apply"
+
+  # The shell plugin, minus the development harness.
+  install -d "$pkgdir/usr/share/omaboot/plugin"
+  cp -r plugin/. "$pkgdir/usr/share/omaboot/plugin/"
+  rm -rf "$pkgdir/usr/share/omaboot/plugin/harness"
+
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+  for doc in docs/*.md; do
+    install -Dm644 "$doc" "$pkgdir/usr/share/doc/$pkgname/$(basename "$doc")"
+  done
+  install -Dm644 brand/icon-128.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/omaboot.png"
+}

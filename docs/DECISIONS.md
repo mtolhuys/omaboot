@@ -790,3 +790,54 @@ greeter that fails and a greeter that hangs, a symlinked destination, a
 transient initramfs failure that reverts cleanly, a permanent one that cannot,
 and a verify mismatch. One test walks every operation in a plan and asserts
 that none of them names a directory Omarchy owns.
+
+## The package is the product, the marketplace is not the channel
+
+omaboot is two compiled binaries and a QML window that does nothing without
+them: `Engine.qml` probes for `omaboot` before it spawns anything and says so
+when there is none. So the unit that can be installed is a pacman package, and
+the AUR is where it goes: `omaboot` from the tagged tarball
+(`packaging/PKGBUILD-release`) and `omaboot-git` from the tip
+(`packaging/PKGBUILD`). Both put the plugin at `/usr/share/omaboot/plugin`,
+which `api::plugin_source` already looks for, so `omaboot plugin install`
+works the same whether the files came from a package or a checkout.
+
+The Quattro plugin marketplace would take it: it lists companion plugins for
+separately installed apps, `org.omacalendar.widget` ("Requires the separately
+installed OmaCalendar app") and `akitaonrails.ai-usagebar` ("Needs the
+ai-usagebar binary as well as this plugin") among them. Two things argue
+against it now. A submission needs `manifest.json` at the root of the
+repository it names, and this one is a Rust workspace whose plugin is a
+subdirectory, so listing it means a second, generated repository to keep in
+step. And the marketplace installs by cloning into
+`~/.config/omarchy/plugins/<id>`, which is exactly where the package's own
+link lives: a person who did both would have two copies of the same window
+under two ids. The package installs the plugin already. If it is listed later,
+it wants a generated plugin-only repository and a `plugin install` that
+recognises a marketplace clone and says so instead of adding a second entry.
+
+Static binaries on a release page were in the specification and are dropped.
+The audience runs Arch and has `makepkg`; a tarball of binaries is a second
+artefact to keep current, with no one asking for it.
+
+## Continuous integration, and what it cannot prove
+
+`.github/workflows/ci.yml` runs two jobs. The first is hermetic: formatting,
+clippy as an error, the unit tests with and without `OMARCHY_PATH`, and
+`scripts/ci-pipeline.sh`, which drives the real binary through a whole round
+(scaffold, edit, the failure paths, dry run, apply, drift, revert, apply,
+reset, render) against a `--root` prefix and a temporary home. It ends by
+comparing a sha256 fingerprint of the two directories Omarchy owns, taken
+before the round, with the same fingerprint after it: the one rule, checked
+rather than promised. The second job is Arch: qmllint over the plugin, then
+`makepkg` on the PKGBUILD with its source pointed at the commit under test,
+which also runs the suite inside `check()`, and the built package is kept as
+an artefact.
+
+What CI cannot prove is what a machine boots. A prefixed run never executes
+the greeter smoke test or the privileged helper (`apply/mod.rs`,
+`step_install` and `step_smoke_test` return early under a prefix), so those
+failure paths stay unit tests with a recording runner, and the boot itself
+stays `scripts/vm-round.sh` in a disposable guest, with its pictures committed
+under `docs/evidence`. `docs/RELEASING.md` puts that round between a tag and
+the AUR.

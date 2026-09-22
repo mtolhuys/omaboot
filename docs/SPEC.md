@@ -135,12 +135,37 @@ section inherits the built-in default for it.
 
 ## Distribution
 
-- AUR package `omaboot` (`packaging/PKGBUILD`, a draft for `omaboot-git`
-  that installs both binaries to `/usr/bin` and the plugin to
-  `/usr/share/omaboot/plugin`, where the engine already looks; it builds
-  with `makepkg` and its package ran in the guest on 20 September 2026,
-  from a local clone since the repository is not public yet), plus static
-  binaries on GitHub releases.
+**The AUR is the channel.** omaboot is two compiled binaries plus a QML plugin
+that is inert without them, so the package is the product and everything else
+is a way of finding it. Two PKGBUILDs, which conflict with each other:
+
+- `packaging/PKGBUILD-release` is `omaboot`, built from the tagged GitHub
+  source tarball. `docs/RELEASING.md` is the checklist.
+- `packaging/PKGBUILD` is `omaboot-git`, the same package from the tip of the
+  default branch.
+
+Both install the binaries to `/usr/bin` and the plugin to
+`/usr/share/omaboot/plugin`, where the engine already looks, and leave the
+development harness out. CI builds the `-git` one with `makepkg` on every push
+and keeps the package as an artefact, so what the AUR would build is known to
+build.
+
+**Not static binaries on GitHub releases.** The audience runs Arch; a tarball
+of binaries would be a second thing to keep current for nobody. The release
+page carries the tag and the notes, and the package is the download.
+
+**Not the Quattro plugin marketplace, for now.** The marketplace lists
+companion plugins for separately installed apps (`org.omacalendar.widget`,
+`akitaonrails.ai-usagebar`), so omaboot would be allowed there, but it would
+need a repository of its own with `manifest.json` at its root
+(`scripts/submission-feedback.mjs` in the marketplace: "New submissions require
+one plugin with `manifest.json` in the repository root"), and it would give a
+person a second way to install the same QML: the marketplace's clone under its
+own id beside the package's link at `mtolhuys.omaboot`, two entries, two
+windows. The package installs the plugin already. Revisit when someone asks for
+it, with a generated plugin-only repository and `plugin install` taught to
+recognise a marketplace clone.
+
 - Menu integration through `~/.config/omarchy/extensions/omarchy-menu.jsonc`,
   which is the supported user overlay of the Omarchy menu. No upstream file is
   edited to get an entry under Style.
@@ -171,9 +196,12 @@ Status: built and used for the real applies; the stranger test has not
 been run.
 
 **M4, the ecosystem.** Export, import, gallery, `follow`, doctor, AUR package.
-Status: the PKGBUILD builds and its package ran in the guest
-(20 September 2026); export, import, gallery, `follow` and doctor are not
-started.
+Status: the packaging is ready and proven by machine. Both PKGBUILDs are in
+`packaging/`, CI builds the `-git` one with `makepkg` on every push and keeps
+the package as an artefact, and its package ran in the guest
+(20 September 2026); `docs/RELEASING.md` is the path from a tag to the AUR,
+which nothing has walked yet. Export, import, gallery, `follow` and doctor are
+not started.
 
 ## Definition of done for v1
 

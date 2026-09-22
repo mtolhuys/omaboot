@@ -1,0 +1,118 @@
+# What must be true of every push.
+#
+# The engine job is the hermetic half: formatting, lints, the unit tests with
+# and without OMARCHY_PATH set (CLAUDE.md, "Testing"), and the apply pipeline
+# end to end against a temporary prefix. It needs no Arch, no Omarchy, no root
+# and no display.
+#
+# The package job is the Arch half: the plugin QML through qmllint, and the
+# PKGBUILD built with makepkg from this very commit, which also runs the test
+# suite inside check(). It proves that what the AUR would build, builds.
+#
+# What CI cannot prove is what a machine boots. That is scripts/vm-round.sh in
+# a disposable guest, with its evidence under docs/evidence.
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The toolchain the workspace asks for
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
+          rustc --version && cargo --version
+
+      - name: Formatting
+        run: cargo fmt --all --check
+
+      - name: Lints
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Tests, without OMARCHY_PATH
+        run: cargo test --workspace
+
+      - name: Tests, with OMARCHY_PATH set
+        # A --root prefix reads the Omarchy tree at <prefix>/usr/share/omarchy
+        # and never at the variable, so a set variable must change nothing.
+        env:
+          OMARCHY_PATH: /nonexistent/omarchy
+        run: cargo test --workspace
+
+      - name: Build both binaries
+        run: cargo build --release --workspace
+
+      - name: The apply pipeline, against a temporary prefix
+        run: scripts/ci-pipeline.sh target/release/omaboot
+
+  package:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Arch, and what the build needs
+        run: |
+          pacman -Syu --noconfirm --needed git rust qt6-declarative python
+          # makepkg refuses to run as root.
+          useradd -m builder
+
+      - uses: actions/checkout@v4
+        with:
+          # makepkg clones the source; pkgver() counts the revisions.
+          fetch-depth: 0
+
+      - name: Lint the plugin QML
+        run: |
+          shopt -s nullglob
+          for qml in plugin/*.qml plugin/harness/*.qml; do
+            echo "== $qml"
+            qmllint "$qml"
+          done
+
+      - name: Build the package from this commit
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          # The PKGBUILD's source is the public repository; in CI the source is
+          # this checkout, at this commit, under a ref makepkg can ask for.
+          git branch -f ci-package HEAD
+          install -d -o builder /build
+          install -o builder packaging/PKGBUILD /build/PKGBUILD
+          sed -i "s|^source=.*|source=(\"git+file://$GITHUB_WORKSPACE#branch=ci-package\")|" /build/PKGBUILD
+          chown -R builder "$GITHUB_WORKSPACE"
+          # --nodeps: plymouth, sddm and the initramfs hooks are runtime
+          # dependencies of the package, not of building it, and this container
+          # is not a desktop. check() runs the test suite either way.
+          su builder -c 'cd /build && makepkg -f --noconfirm --nodeps'
+          ls -l /build/*.pkg.tar.*
+
+      - name: What the package would install
+        run: |
+          su builder -c 'cd /build && bsdtar -tf omaboot-git-*.pkg.tar.* | sort' | tee /tmp/contents
+          for path in usr/bin/omaboot usr/bin/omaboot-apply usr/share/omaboot/plugin/manifest.json; do
+            grep -qx "$path" /tmp/contents || { echo "missing from the package: $path" >&2; exit 1; }
+          done
+          # The development harness is not something a user installs.
+          if grep -q 'usr/share/omaboot/plugin/harness' /tmp/contents; then
+            echo "the harness leaked into the package" >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: /build/*.pkg.tar.*
+          if-no-files-found: error
