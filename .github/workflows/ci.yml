@@ -44,6 +44,16 @@ jobs:
       - name: Lints
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      - name: Shell scripts
+        # The round, the harness and the VM script are how the pipeline and
+        # the window get proven, so a defect in them costs a whole run. This
+        # caught SC2318 in vm-round.sh, which bash 5.3 turned into an unbound
+        # variable half an hour into a VM round. Notes are left as notes: the
+        # harness passes ${RENDER_ARGS:-} unquoted on purpose.
+        run: |
+          shellcheck --version >/dev/null 2>&1 || sudo apt-get install -y shellcheck
+          shellcheck -S warning scripts/*.sh plugin/harness/*.sh
+
       - name: Tests, without OMARCHY_PATH
         run: cargo test --workspace
 

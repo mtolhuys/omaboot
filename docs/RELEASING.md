@@ -15,12 +15,19 @@ All four must pass, from a clean worktree:
 cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace                      # and once more with OMARCHY_PATH set
 cargo build --release && scripts/ci-pipeline.sh
-plugin/harness/shots.sh .harness/release && plugin/harness/exercise.sh && plugin/harness/theme-follow.sh
+shellcheck -S warning scripts/*.sh plugin/harness/*.sh
+/usr/lib/qt6/bin/qmllint plugin/*.qml plugin/harness/*.qml
+env -u XDG_CONFIG_HOME -u XDG_STATE_HOME OMARCHY_PATH=/usr/share/omarchy \
+  PATH=$PWD/.harness/venv/bin:$PATH bash plugin/harness/shots.sh .harness/release
+# and the same wrapper for exercise.sh and theme-follow.sh
 ```
 
-The first three are what CI runs (`.github/workflows/ci.yml`). The harness is
-not: it needs a shell and a display, so a release is the moment to run it by
-hand and look at the pictures (`docs/UI.md`, "Seeing it without a shell").
+Everything above the harness is what CI runs (`.github/workflows/ci.yml`). The
+harness is not: it renders the window with the real shell widgets, which needs
+PySide6 (the git-ignored venv at `.harness/venv`) and an Omarchy tree. A
+release is the moment to run it and **look at the pictures**
+(`docs/UI.md`, "Seeing it without a shell"); a green exit only means nothing
+crashed and the edits landed.
 
 ## 2. The version, in the three places that carry it
 

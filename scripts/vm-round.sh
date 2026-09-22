@@ -34,6 +34,7 @@ OVMF_CODE=/usr/share/edk2/x64/OVMF_CODE.4m.fd
 PKG=${1:-}
 THEME_DIR=${2:-}
 OUT=${3:-}
+PKGNAME=$([[ -f ${PKG:-} ]] && pacman -Qp "$PKG" 2>/dev/null | awk '{print $1}' || true)
 WORK=${VM_WORK:-${OUT:-/tmp/omaboot-vm}/work}
 QMP_SOCK=${QMP_SOCK:-/tmp/omaboot-vm-qmp.sock}
 PIDFILE="$WORK/qemu.pid"
@@ -172,7 +173,9 @@ phase_install() {
   log "install the package and the theme in the guest"
   scp_guest "$PKG" "$GUEST_USER@127.0.0.1:/tmp/omaboot.pkg.tar.zst"
   guest "echo '$GUEST_PASSWORD' | sudo -S -p '' pacman -U --noconfirm /tmp/omaboot.pkg.tar.zst"
-  guest "pacman -Q omaboot-git; ls -la /usr/bin/omaboot /usr/bin/omaboot-apply /usr/share/omaboot/plugin; omaboot --version 2>&1 || true; omaboot-apply protocol"
+  # The package is omaboot or omaboot-git, depending on which PKGBUILD built
+  # it (packaging/), so the name is read from the file rather than assumed.
+  guest "pacman -Q $PKGNAME; ls -la /usr/bin/omaboot /usr/bin/omaboot-apply /usr/share/omaboot/plugin; omaboot --version 2>&1 || true; omaboot-apply protocol"
   guest "mkdir -p ~/.config/omaboot/themes"
   scp_guest -r "$THEME_DIR" "$GUEST_USER@127.0.0.1:.config/omaboot/themes/matte"
   guest "cat ~/.config/omaboot/themes/matte/theme.toml"
@@ -199,7 +202,12 @@ phase_apply() {
 # misses the splash. Sample the screen as fast as QMP answers for a while,
 # then keep one PNG per distinct frame, numbered in order.
 sample() {
-  local name="$1" seconds="$2" dir="$WORK/sample-$name" i=0 last="" sum ppm
+  # Two `local`s on purpose: bash 5.3 declares every name in one `local`
+  # before assigning any of them, so `dir=...$name` in the same statement is
+  # an unbound variable under `set -u` (shellcheck SC2318, and the reason CI
+  # runs shellcheck over every script).
+  local name="$1" seconds="$2"
+  local dir="$WORK/sample-$name" i=0 last="" sum ppm
   rm -rf "$dir"; mkdir -p "$dir"
   local end=$((SECONDS + seconds))
   while ((SECONDS < end)); do

@@ -68,8 +68,10 @@ accepted values of `plymouthd --mode` at runtime instead of trusting a document.
   widgets and engine (`docs/UI.md`, "Seeing it without a shell"),
   `plugin/harness/exercise.sh` drives the editing flows and checks the
   theme file, and `plugin/harness/theme-follow.sh` proves the standalone
-  app follows a theme switch. qmllint catches syntax; the harness catches
-  layout and lost edits. The harness works in `.harness/` at the repository
+  app follows a theme switch. qmllint (the Qt 6 one, `/usr/lib/qt6/bin/qmllint`; `/usr/bin/qmllint` is
+  Qt 5's and reads the tree as if it were fine) catches syntax and the
+  findings that do not need the shell's types, which `.qmllint.ini` lists as
+  errors; the harness catches layout and lost edits. The harness works in `.harness/` at the repository
   root, never in `plugin/` (the shell watches that directory) and never in
   the real `~/.config/omaboot` or `~/.local/share` (exercise.sh checks the
   config directory and the launcher entry are untouched; the wrapper and
