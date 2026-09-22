@@ -7,9 +7,10 @@
 #
 #   cd packaging && makepkg -p PKGBUILD-release
 #
-# At release time, after the tag is pushed, `updpkgsums -p PKGBUILD-release`
-# replaces the checksum below with the tarball's own. A release is never
-# published with SKIP here.
+# The checksum below is v0.1.0's own tarball, and the package was built from
+# it here on 22 September 2026 (`makepkg -p PKGBUILD-release`, omaboot 0.1.0-1).
+# At the next release, after the tag is pushed, `updpkgsums -p PKGBUILD-release`
+# replaces it. A release is never published with SKIP here.
 #
 # The paths follow what the engine already looks for: the plugin at
 # /usr/share/omaboot/plugin (api::plugin_source), both binaries on PATH
@@ -43,7 +44,7 @@ provides=('omaboot')
 options=('!debug')
 conflicts=('omaboot-git')
 source=("$pkgname-$pkgver.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('cc7ee8e7874f4ad0925fc314873f2889009346512edc03c907453bfa32a5e97a')
 
 prepare() {
   cd "$pkgname-$pkgver"
