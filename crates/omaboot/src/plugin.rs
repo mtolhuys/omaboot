@@ -22,9 +22,9 @@ pub fn install_dir(layout: &Layout) -> PathBuf {
 }
 
 fn home(layout: &Layout) -> PathBuf {
-    std::env::var_os("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| layout.config_base().join(".."))
+    // From the layout, which resolved it once, so a test with a temporary
+    // layout cannot link or unlink anything in the real ~/.local/bin.
+    layout.home().to_path_buf()
 }
 
 fn bin_dir(layout: &Layout) -> PathBuf {

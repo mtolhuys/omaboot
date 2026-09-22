@@ -93,13 +93,13 @@ pub fn app_dir(layout: &Layout) -> PathBuf {
     layout.config_dir().join("app")
 }
 
-/// `~/.local/share`, where desktop entries and icons go.
+/// `~/.local/share`, where desktop entries and icons go. The layout resolved
+/// it once from the environment (`paths::Layout`); reading `XDG_DATA_HOME` or
+/// `$HOME` here instead would reach past a caller that gave a directory of
+/// its own, which is how the suite used to delete the launcher entry of the
+/// machine it ran on.
 pub fn data_base(layout: &Layout) -> PathBuf {
-    std::env::var_os("XDG_DATA_HOME")
-        .map(PathBuf::from)
-        .filter(|p| p.is_absolute())
-        .or_else(|| std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".local/share")))
-        .unwrap_or_else(|| layout.config_base().join("../.local/share"))
+    layout.data_dir().to_path_buf()
 }
 
 pub fn desktop_entry(layout: &Layout) -> PathBuf {
@@ -395,29 +395,76 @@ mod tests {
     #[test]
     fn icons_and_entry_land_under_the_data_directory_and_leave_with_uninstall() {
         let (tmp, layout, shell, plugin) = world();
-        // The data directory follows XDG_DATA_HOME; this test owns its own.
+        // The whole round happens under the layout's own data directory.
+        // install writes the entry and the icons, uninstall takes the same
+        // paths away, and both read them from the layout.
         let data = tmp.path().join("data");
+        let layout = layout.with_data_dir(data.clone());
+        let entry = data.join("applications").join(format!("{APP_ID}.desktop"));
         let icon = data
             .join("icons/hicolor/64x64/apps")
             .join(format!("{APP_ID}.png"));
-        let entry = data.join("applications").join(format!("{APP_ID}.desktop"));
-        // write_file and the paths are exercised directly, since the
-        // environment is process-wide and not this test's to change.
+
+        // install() itself needs a real Omarchy tree through shell_dir(), which
+        // is the environment's to give; what it writes is written here from
+        // the same layout-derived paths.
         let dir = prepare(&layout, &plugin, &shell, false).unwrap();
         for (size, bytes) in ICONS {
-            let path = data
-                .join("icons/hicolor")
-                .join(format!("{size}x{size}"))
-                .join("apps")
-                .join(format!("{APP_ID}.png"));
-            write_file(&path, bytes, false).unwrap();
+            write_file(&icon_path(&layout, *size), bytes, false).unwrap();
         }
-        write_file(&entry, desktop_entry_text().as_bytes(), false).unwrap();
-        assert!(icon.is_file());
+        write_file(
+            &desktop_entry(&layout),
+            desktop_entry_text().as_bytes(),
+            false,
+        )
+        .unwrap();
+        assert_eq!(desktop_entry(&layout), entry);
+        assert!(entry.is_file(), "the desktop entry is written");
+        assert!(icon.is_file(), "the icons are written");
         assert!(fs::read(&icon).unwrap().starts_with(b"\x89PNG"));
-        assert!(entry.is_file());
+        assert!(
+            fs::read_to_string(&entry)
+                .unwrap()
+                .contains("Exec=omaboot app"),
+            "the entry is omaboot's"
+        );
         assert!(dir.join("shell.qml").is_file());
-        let _ = uninstall(&layout, false, &mut Vec::new());
+
+        uninstall(&layout, false, &mut Vec::new()).unwrap();
+        assert!(!entry.exists(), "the desktop entry is gone");
+        assert!(!icon.exists(), "the icons are gone");
         assert!(!dir.exists(), "the generated directory is gone");
+    }
+
+    /// The suite removed the launcher entry of the machine it ran on, twice:
+    /// once through the harness (20 September 2026) and once through this
+    /// module's own test, which built a temporary layout while `uninstall`
+    /// read `$HOME` for itself (22 September 2026). Every path the
+    /// application installs now comes from the layout, so a layout that
+    /// points at a temporary tree cannot name anything outside it.
+    #[test]
+    fn every_installed_path_stays_inside_the_layout() {
+        let tmp = tempfile::tempdir().unwrap();
+        let layout = Layout::with_dirs(
+            None,
+            tmp.path().join("config/omaboot"),
+            tmp.path().join("state/omaboot"),
+        );
+        for path in [
+            desktop_entry(&layout),
+            icon_path(&layout, 64),
+            data_base(&layout),
+            app_dir(&layout),
+        ] {
+            assert!(
+                path.starts_with(tmp.path()),
+                "{} escaped the layout",
+                path.display()
+            );
+        }
+        // And with a data directory of its own, the entry follows it.
+        let elsewhere = tmp.path().join("elsewhere");
+        let moved = layout.with_data_dir(elsewhere.clone());
+        assert!(desktop_entry(&moved).starts_with(&elsewhere));
     }
 }

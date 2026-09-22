@@ -9,9 +9,10 @@ original). Pictures, logs and hashes in
 `docs/evidence/release-round-2026-09-22/`; `commands.log` has every command
 with its output.
 
-Two defects came out of the evening, one in the round's own script and one in
-the engine. Neither is in the apply pipeline, and nothing the round proved had
-to be redone because of them. The round was then run a second time against the
+Three defects came out of the evening: one in the round's own script, one in
+the engine, and one in the suite itself, found by the owner when omaboot
+vanished from the app launcher again (R3). None of them is in the apply
+pipeline, and nothing the round proved had to be redone because of them. The round was then run a second time against the
 `omaboot 0.1.1-1` package, which carries the engine fix; that run is at the
 foot of this file.
 
@@ -75,6 +76,43 @@ across a whole round, on a real machine image.
   which fails on the old text and also checks that a system with no rollback
   point still gets the plain sentence. This is what v0.1.1 carries.
 - Not a pipeline change: the apply, revert and reset paths are untouched.
+
+### R3. The suite deletes the launcher entry of the machine it runs on
+
+- What: noticed by the owner after the evening's runs — omaboot gone from the
+  app launcher, for the second time in three days.
+- Saw: no `~/.local/share/applications/omaboot.desktop` and none of the seven
+  `hicolor/<size>/apps/omaboot.png`, with the directory's mtime at the minute
+  `cargo test --workspace` last ran.
+- Cause: `app::tests::icons_and_entry_land_under_the_data_directory_and_leave_with_uninstall`
+  built a temporary `Layout` and then called the real `uninstall`, while
+  `app::data_base` read `XDG_DATA_HOME` and `$HOME` for itself. So the paths
+  the test wrote were its own and the paths `uninstall` removed were the
+  caller's. Every `cargo test --workspace` on a machine with omaboot in its
+  launcher took the entry and the icons away, silently: the test discarded
+  the result (`let _ = uninstall(...)`).
+  The same class had been blamed on the harness on 20 September and fixed
+  there (`XDG_DATA_HOME` in the fake home); this second source was not found
+  then because the harness was the only suspect.
+- Reproduce, before the fix: put a `omaboot.desktop` and an
+  `icons/hicolor/64x64/apps/omaboot.png` in a directory, run
+  `XDG_DATA_HOME=<that directory> cargo test -p omaboot icons_and_entry_land`,
+  and both are gone.
+- Fix: `Layout` carries the home and the data directory, resolved once in
+  `Layout::discover`; `app::data_base` and `plugin::home` read them from the
+  layout and no longer touch the environment, so a layout that points at a
+  temporary tree cannot name anything outside it. `Layout::with_dirs` gives
+  tests a home under their own temporary directory, and `with_data_dir` says
+  one explicitly.
+- Tests: the rewritten app test now writes through the layout's own paths and
+  asserts `uninstall` removes exactly those, and
+  `app::tests::every_installed_path_stays_inside_the_layout` asserts every
+  installed path starts inside the layout. The reproduction above was run
+  again after the fix, with the whole suite: the entry and the icon are still
+  there.
+- Not a release: `Layout::discover` resolves the same paths as before, so a
+  released binary behaves identically. The entry on the reference machine was
+  put back with `omaboot app install`.
 
 ## What a kill during the initramfs step actually leaves
 

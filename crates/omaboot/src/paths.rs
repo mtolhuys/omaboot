@@ -53,8 +53,14 @@ pub const STOCK_THEME_ID: &str = "omarchy";
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Layout {
     root: Option<PathBuf>,
+    /// The home everything user-owned hangs off: the `~/.local/bin` links
+    /// and, through `data_dir`, the desktop entry and the icons. Resolved
+    /// once, here, because code that reads `$HOME` deep in a call stack
+    /// reaches the home of whoever is running it — including a test.
+    home: PathBuf,
     config_dir: PathBuf,
     state_dir: PathBuf,
+    data_dir: PathBuf,
 }
 
 impl Layout {
@@ -85,20 +91,59 @@ impl Layout {
             });
         }
 
+        let data_dir = env::var_os("XDG_DATA_HOME")
+            .map(PathBuf::from)
+            .filter(|p| p.is_absolute())
+            .unwrap_or_else(|| home.join(".local/share"));
+
         Ok(Self {
             root,
+            home,
             config_dir: config_base.join("omaboot"),
             state_dir: state_base.join("omaboot"),
+            data_dir,
         })
     }
 
     /// A layout for tests and for `--root` runs, with all three roots given.
+    ///
+    /// The home is the configuration directory's parent, so everything
+    /// derived from it — `~/.local/bin`, the desktop entry, the icons — lands
+    /// in the caller's temporary tree. It must never be the home of whoever
+    /// is running the suite: `app::tests` used to call `uninstall` with a
+    /// temporary layout while `uninstall` read `$HOME` itself, and so removed
+    /// the real launcher entry of the machine it ran on, every time the
+    /// suite ran.
     pub fn with_dirs(root: Option<PathBuf>, config_dir: PathBuf, state_dir: PathBuf) -> Self {
+        let home = config_dir
+            .parent()
+            .map(Path::to_path_buf)
+            .unwrap_or_else(|| config_dir.clone());
+        let data_dir = home.join(".local/share");
         Self {
             root,
+            home,
             config_dir,
             state_dir,
+            data_dir,
         }
+    }
+
+    /// The same, with the data directory said explicitly: the desktop entry
+    /// and the icons go under it.
+    pub fn with_data_dir(mut self, data_dir: PathBuf) -> Self {
+        self.data_dir = data_dir;
+        self
+    }
+
+    /// The home the user-owned paths hang off.
+    pub fn home(&self) -> &Path {
+        &self.home
+    }
+
+    /// `~/.local/share`: the desktop entry and the icons.
+    pub fn data_dir(&self) -> &Path {
+        &self.data_dir
     }
 
     /// True when system paths are redirected under a prefix. A prefixed run
