@@ -22,10 +22,18 @@ was seen against a real LUKS volume, and the package built with `makepkg`
 (`docs/evidence/closing-round-2026-09-20.md`). The engine is built and
 tested; the interface is a Quattro shell plugin.
 
-v0.1.0 is tagged. Every push runs the suite, the apply round against a
-temporary prefix and `makepkg` on the PKGBUILD (`.github/workflows/ci.yml`).
-What is left before the AUR carries it is a VM round of the tagged tree and a
-stranger who rethemes their boot screen without reading any of this
+The v0.1.0 package ran the whole round in a disposable Omarchy 4.0.3 guest on
+22 September 2026: install, apply, reboot, the three screens, the unlock prompt
+against a real LUKS volume, reset, an apply killed during the initramfs
+rebuild, revert — with the stock UKI byte for byte back after both reset and
+revert, and Omarchy's own theme directories unchanged throughout
+(`docs/evidence/release-round-2026-09-22.md`). It found one wrong sentence in
+`status` after an interrupted apply, which v0.1.1 fixes. Every push runs the
+suite, that same apply round against a temporary prefix, shellcheck, qmllint
+and `makepkg` on the PKGBUILD (`.github/workflows/ci.yml`).
+
+What is left before the AUR carries it is the upload itself, and the stranger
+who rethemes their boot screen without reading any of this
 (`docs/RELEASING.md`, `docs/SPEC.md`).
 
 From a checkout, which is the only way today:

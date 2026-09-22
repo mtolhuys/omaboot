@@ -219,6 +219,10 @@ not started.
   screen (`docs/UPSTREAM.md`); `omarchy-refresh-plymouth` does, and shows
   as drift.
 - Killing omaboot at any point during apply leaves a bootable system.
-  Proven in the guest for a `kill -9` during the initramfs rebuild; the
-  other steps are covered by the pipeline's order (nothing is switched
-  before the rollback point is recorded) and not yet by a kill.
+  Proven in the guest for a `kill -9` during the initramfs rebuild, twice
+  (20 and 22 September 2026); the other steps are covered by the pipeline's
+  order (nothing is switched before the rollback point is recorded) and not
+  yet by a kill. What such a kill leaves is written down in
+  `docs/evidence/release-round-2026-09-22.md`: a machine that boots, with the
+  boot screen still Omarchy's and the shutdown and login screens already
+  omaboot's, until a revert or a second apply.

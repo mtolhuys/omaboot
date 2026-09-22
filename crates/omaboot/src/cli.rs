@@ -759,6 +759,17 @@ fn status(layout: &Layout, out: &mut dyn Write) -> Result<()> {
 
     writeln!(out).ok();
     match &snapshot.applied {
+        // An apply that was killed after the switch leaves a rollback point
+        // and no applied record, and the system is on omaboot's theme all the
+        // same: the switch already happened. Saying it is on its own themes
+        // would contradict the facts printed above and the warning below.
+        None if snapshot.rollback.is_some() => {
+            writeln!(
+                out,
+                "no apply finished: the last one was interrupted, and what boots now is what it left"
+            )
+            .ok();
+        }
         None => {
             writeln!(
                 out,
@@ -1178,5 +1189,54 @@ mod tests {
         let mut out = Vec::new();
         list(&layout, &mut out).unwrap();
         assert!(String::from_utf8(out).unwrap().contains("omaboot new"));
+    }
+
+    /// Seen in the guest during the release round of 22 September 2026: after
+    /// `kill -9` during the initramfs step, `status` printed both "nothing is
+    /// applied by omaboot; the system is on its own themes" and the facts
+    /// showing omaboot's theme installed and named by plymouthd.conf. The
+    /// switch had happened; only the record had not been written.
+    #[test]
+    fn status_after_an_interrupted_apply_does_not_claim_the_system_is_on_its_own_themes() {
+        let tmp = tempfile::tempdir().unwrap();
+        let layout = Layout::with_dirs(
+            Some(tmp.path().join("root")),
+            tmp.path().join("config/omaboot"),
+            tmp.path().join("state/omaboot"),
+        );
+        std::fs::create_dir_all(layout.state_dir()).unwrap();
+        let point = state::RollbackPoint {
+            version: state::STATE_VERSION,
+            recorded_at_unix: state::now_unix(),
+            previous_plymouth_theme: Some("omarchy".to_string()),
+            sddm_dropin_existed: false,
+            previous_sddm_dropin: None,
+            theme: "matte".to_string(),
+            theme_hash: "x".to_string(),
+        };
+        std::fs::write(layout.rollback_file(), state::serialize_rollback(&point)).unwrap();
+
+        let mut out = Vec::new();
+        status(&layout, &mut out).unwrap();
+        let text = String::from_utf8(out).unwrap();
+        assert!(
+            !text.contains("the system is on its own themes"),
+            "an interrupted apply is not an untouched system:\n{text}"
+        );
+        assert!(
+            text.contains("no apply finished: the last one was interrupted"),
+            "{text}"
+        );
+        assert!(
+            text.contains("an apply of matte was interrupted after the switch"),
+            "the warning still says which theme and the way out:\n{text}"
+        );
+
+        // Without the rollback point it is the plain sentence again.
+        std::fs::remove_file(layout.rollback_file()).unwrap();
+        let mut out = Vec::new();
+        status(&layout, &mut out).unwrap();
+        let text = String::from_utf8(out).unwrap();
+        assert!(text.contains("nothing is applied by omaboot"), "{text}");
     }
 }

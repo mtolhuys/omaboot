@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "mtolhuys.omaboot",
   "name": "omaboot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Maarten Tolhuijs",
   "description": "Design the Plymouth unlock, SDDM login and Plymouth shutdown screens: see what boots now, make it yours, apply it with one click, undo it with another",
   "kinds": [
